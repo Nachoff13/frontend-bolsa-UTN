@@ -58,20 +58,6 @@ frontend-bolsa-UTN/
    ```bash
    cp .env.example .env.local
    ```
-   
-   Editar `.env.local` con tus credenciales:
-   ```env
-   # Auth0 Configuration
-   AUTH0_SECRET='use [openssl rand -hex 32] to generate a 32 bytes value'
-   AUTH0_BASE_URL='http://localhost:3000'
-   AUTH0_ISSUER_BASE_URL='https://your-tenant.auth0.com'
-   AUTH0_CLIENT_ID='your-client-id'
-   AUTH0_CLIENT_SECRET='your-client-secret'
-
-   # API Configuration
-   NEXT_PUBLIC_API_BASE_URL='https://localhost:7001/api'
-   API_TIMEOUT=10000
-   ```
 
 4. **Ejecutar en desarrollo**
    ```bash
@@ -116,29 +102,6 @@ colors: {
 }
 ```
 
-### Componentes
-Los componentes base están en `components/ui/` y pueden ser extendidos según necesidades específicas.
-
-## 📱 Roles de Usuario
-
-### Estudiante
-- Ver ofertas de trabajo
-- Postularse a ofertas
-- Gestionar perfil y CV
-- Ver historial de postulaciones
-
-### Empresa
-- Publicar ofertas de trabajo
-- Gestionar ofertas existentes
-- Ver postulaciones recibidas
-- Gestionar perfil de empresa
-
-### Administrador
-- Dashboard con métricas
-- Gestión de usuarios
-- Moderación de ofertas
-- Reportes y estadísticas
-
 ## 🔧 Desarrollo
 
 ### Convenciones de Código
@@ -170,24 +133,6 @@ export const Component: React.FC<ComponentProps> = ({ title, onAction }) => {
 - **Estado del servidor**: `useFetch`, `useMutation`
 - **Estado global**: Context API o React Query
 
-## 🚀 Despliegue
-
-### Vercel (Recomendado)
-1. Conectar repositorio a Vercel
-2. Configurar variables de entorno
-3. Desplegar automáticamente
-
-### Otros Proveedores
-- **Netlify**: Configurar build command `npm run build`
-- **AWS Amplify**: Configurar build settings
-- **Docker**: Usar Dockerfile incluido
-
-## 📊 Monitoreo y Analytics
-
-- **Error Tracking**: Integrar Sentry
-- **Analytics**: Google Analytics o Plausible
-- **Performance**: Next.js Analytics
-
 ## 🤝 Contribución
 
 1. Fork el proyecto
@@ -195,10 +140,6 @@ export const Component: React.FC<ComponentProps> = ({ title, onAction }) => {
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
 ## 🆘 Soporte
 
