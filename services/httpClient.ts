@@ -1,4 +1,6 @@
-// Cliente HTTP básico
+// services/httpClient.ts
+import { api } from "./api"
+
 export class HttpClient {
   private baseURL: string
 
@@ -6,23 +8,26 @@ export class HttpClient {
     this.baseURL = baseURL
   }
 
-  async get<T>(url: string): Promise<T> {
-    // Implementar GET
-    throw new Error('Not implemented')
+  async get<T>(url: string, params?: Record<string, any>): Promise<T> {
+    const res = await api.get<T>(url, { params })
+    return res.data
   }
 
-  async post<T>(url: string, data: any): Promise<T> {
-    // Implementar POST
-    throw new Error('Not implemented')
+  async post<T>(url: string, data?: any): Promise<T> {
+    const res = await api.post<T>(url, data)
+    return res.data
   }
 
-  async put<T>(url: string, data: any): Promise<T> {
-    // Implementar PUT
-    throw new Error('Not implemented')
+  async put<T>(url: string, data?: any): Promise<T> {
+    const res = await api.put<T>(url, data)
+    return res.data
   }
 
   async delete<T>(url: string): Promise<T> {
-    // Implementar DELETE
-    throw new Error('Not implemented')
+    const res = await api.delete<T>(url)
+    return res.data
   }
-} 
+}
+
+// Instancia lista para usar
+export const http = new HttpClient(process.env.NEXT_PUBLIC_API_URL || "")

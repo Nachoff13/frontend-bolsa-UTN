@@ -1,18 +1,13 @@
-// Configuración básica de la API
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+import axios from "axios"
 
-// Cliente HTTP básico
-export const apiClient = {
-  get: async (url: string) => {
-    // Implementar lógica de GET
+// Base URL desde .env.local
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL 
+
+// Instancia sin token
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
   },
-  post: async (url: string, data: any) => {
-    // Implementar lógica de POST
-  },
-  put: async (url: string, data: any) => {
-    // Implementar lógica de PUT
-  },
-  delete: async (url: string) => {
-    // Implementar lógica de DELETE
-  }
-} 
+})
