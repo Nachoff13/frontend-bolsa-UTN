@@ -1,22 +1,17 @@
-// import { UserProvider } from '@auth0/nextjs-auth0/client'
-import type { Metadata } from 'next'
-import '@/styles/globals.css'
-
+import type { Metadata } from "next"
+import "@/styles/globals.css"
+import { MuiThemeProvider } from "@/components/providers/mui"  
 export const metadata: Metadata = {
-  title: 'Bolsa de Trabajo UTN',
-  description: 'Sistema de bolsa de trabajo para estudiantes y empresas',
+  title: "Bolsa de Trabajo UTN",
+  description: "UTN FRLP",
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
       <body>
-        {children}
+        <MuiThemeProvider>{children}</MuiThemeProvider>
       </body>
     </html>
   )
-} 
+}
