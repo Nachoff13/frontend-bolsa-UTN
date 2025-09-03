@@ -1,46 +1,22 @@
-import React from 'react'
-import { clsx } from 'clsx'
+import * as React from "react"
 
-interface InputProps {
-  label?: string
-  type?: string
-  placeholder?: string
-  value?: string
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
-  error?: string
-  disabled?: boolean
-  required?: boolean
-  className?: string
-}
+import { cn } from "@/lib/utils"
 
-export default function Input({
-  label,
-  type = 'text',
-  placeholder,
-  value,
-  onChange,
-  error,
-  disabled = false,
-  required = false,
-  className = ''
-}: InputProps) {
-  return (
-    <div className={className}>
-      {label && (
-        <label>
-          {label}
-          {required && <span>*</span>}
-        </label>
-      )}
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
+  ({ className, type, ...props }, ref) => {
+    return (
       <input
         type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        required={required}
+        className={cn(
+          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          className
+        )}
+        ref={ref}
+        {...props}
       />
-      {error && <span>{error}</span>}
-    </div>
-  )
-} 
+    )
+  }
+)
+Input.displayName = "Input"
+
+export { Input }
