@@ -1,9 +1,9 @@
-import { http } from "@/services/httpClient";
-import { ENDPOINTS } from "@/services/endpoints";
+import { http } from "@/services/Generics/httpClient";
+import { ENDPOINTS } from "@/services/Generics/endpoints";
 import type { ApiResponse } from "@/types/apiResponse";
 import type { OfertaDTO } from "@/types/ofertaDTO";
 
-export async function listarOfertas() {
+export async function getPublicacionesEmpleo() {
   const res = await http.get<ApiResponse<OfertaDTO[]>>(ENDPOINTS.PRUEBA.GET_ALL);
   return res.result.data; // por el wrapper de AutoWrapper
 }

@@ -1,7 +1,12 @@
 // Tipos de oferta
 export interface OfertaDTO {
-  titulo: string
-  descripcion: string
-  nombreLocalidad: string
+  id: number;
+  titulo: string;
+  descripcion: string;
+  nombreLocalidad: string;
+  modalidad: string;
+  tipoContrato: string;
+  fechaInicio: string;
+  fechaFin: string;
+  nombreEmpresa: string;
 }
-
