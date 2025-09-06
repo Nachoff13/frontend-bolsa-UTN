@@ -1,4 +1,3 @@
-// components/ofertas/CardOfertaLaboral.tsx
 
 import { Card, CardContent, Typography, Chip, Button, Stack, Box, Divider } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -45,7 +44,6 @@ export default function CardOfertaLaboral({
             )}
           </Box>
 
-          {/* Chips */}
           <Stack direction="row" spacing={1} flexWrap="wrap">
             {carrera && <Chip label={carrera} color="success" size="small" />}
             {modalidad && <Chip label={modalidad} color="secondary" size="small" />}
@@ -53,7 +51,6 @@ export default function CardOfertaLaboral({
           </Stack>
         </Stack>
 
-        {/* Info adicional: ubicación y fechas */}
         <Stack
           direction="row"
           spacing={3}
