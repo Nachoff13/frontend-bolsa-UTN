@@ -2,7 +2,7 @@
 
 // Controllers en un solo lugar
 export const CONTROLLERS = {
-  PRUEBA: "/prueba",
+  PUBLICACION: "/publicacion",
   OFERTAS: "/ofertas",
   POSTULACIONES: "/postulaciones",
   USUARIOS: "/usuarios",
@@ -10,9 +10,9 @@ export const CONTROLLERS = {
 
 export const ENDPOINTS = {
 
-  PRUEBA: {
-    GET_ALL: `${CONTROLLERS.PRUEBA}`,
-    BY_CRITERIA: "/get_by_criteria_prueba",
-    ADD: "/add_prueba",
+  PUBLICACION: {
+    GET_ALL: `${CONTROLLERS.PUBLICACION}`,
+    BY_CRITERIA: "/get_by_criteria",
+    ADD: "",
   },
 } as const;

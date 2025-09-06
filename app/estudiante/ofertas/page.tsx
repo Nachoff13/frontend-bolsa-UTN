@@ -31,7 +31,7 @@ return (
             key={oferta.id}
             titulo={oferta.titulo}
             empresa={oferta.nombreEmpresa}
-            descripcionCorta={oferta.descripcion}
+            descripcion={oferta.descripcion}
             modalidad={oferta.modalidad}
             tipoContrato={oferta.tipoContrato}
             ubicacion={oferta.nombreLocalidad}

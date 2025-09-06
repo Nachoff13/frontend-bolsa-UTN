@@ -1,12 +1,13 @@
 interface CardPublicacionProps {
   titulo?: string;
   empresa?: string;
-  descripcionCorta?: string;
+  descripcion?: string;
   modalidad?: string;
   tipoContrato?: string;
+  carrera?: string;
   ubicacion?: string;
   fechaPublicacion?: string;
-  carrera: string;
+  fechaCierre?: string;            
   onVerDetalle?: () => void;
   onPostularme?: () => void;
 }
