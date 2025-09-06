@@ -35,7 +35,11 @@ const drawerWidth = 280;
 
 const navItems = [
   { href: "/", label: "Menú Principal", icon: <HomeIcon /> },
-  { href: "/estudiante/ofertas", label: "Ofertas Laborales", icon: <WorkIcon /> },
+  {
+    href: "/estudiante/ofertas",
+    label: "Ofertas Laborales",
+    icon: <WorkIcon />,
+  },
   {
     href: "/postulaciones",
     label: "Mis Postulaciones",
@@ -203,13 +207,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         component="main"
         sx={{
           flexGrow: 1,
+          mt:2,
+          p:1,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          p: 3,
+        
         }}
       >
         {/* separador para que el contenido no quede debajo del AppBar */}
         <Toolbar />
-        <Box sx={{ maxWidth: 1200, mx: "auto" }}>{children}</Box>
+        <Box sx={{ px: { xs: 2, sm: 4 }, py: 2 }}>{children}</Box>
       </Box>
     </Box>
   );
