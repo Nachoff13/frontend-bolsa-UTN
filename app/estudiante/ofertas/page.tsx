@@ -1,5 +1,6 @@
 "use client";
 
+//#region IMPORTACIOENS REACT
 import { useEffect, useState } from "react";
 import { Box, Card, Divider, Typography } from "@mui/material";
 import {
@@ -8,13 +9,19 @@ import {
   Event as EventIcon,
 } from "@mui/icons-material";
 
-//Importacion de componentes propios
+//#endregion
+
+//#region IMPORTACIONES COMPONENTES PROPIOS
 import Titulo from "@/components/shared/Titulo";
 import FilterSearch from "@/components/shared/FilterSearch";
 import CardGenerica from "@/components/shared/CardGenerica";
 import { useSnackbar } from "@/components/providers/snackbar";
 import LoadingModal from "@/components/shared/LoadingModal";
+import EmptyState from "@/components/shared/EmptyState";
 
+//#endregion
+
+//#region IMPORTACIONES SERVICIOS Y TIPOS
 //Servicio para llamadas a la API
 import { empresaService } from "@/services/empresa.service";
 
@@ -30,19 +37,25 @@ import {
 } from "@/types/enums/snackbar";
 import { GrupoFiltroID } from "@/types/constants";
 
+//#endregion
+
 //LOGICA DE LA PAGINA
 export default function EstudianteOfertasPage() {
-  //Para el modal de carga
+  //#region SNACKBAR Y MODAL CARGA
   const [loading, setLoading] = useState(true);
+  const { showMessage } = useSnackbar();
+  //#endregion
 
+  //#region DATOS DE LA API EN VARIABLES
   // Busqueda de datos desde la API
   const [ofertas, setOfertas] = useState<OfertaDTO[]>([]);
   const [tipoContratos, setTipoContratos] = useState<OpcionFiltro[]>([]);
   const [modalidades, setModalidades] = useState<OpcionFiltro[]>([]);
   const [carreras, setCarreras] = useState<OpcionFiltro[]>([]);
-  const { showMessage } = useSnackbar();
 
-  //VALORES PARA FILTROS Y BUSQUEDA
+  //#endregion
+
+  //#region VARIABLES CARD FILTRO
   const [busquedaInputFiltro, setBusquedaInputFiltro] = useState("");
   const [mostrarBotonAccion, setMostrarBotonAccion] = useState(false);
 
@@ -57,7 +70,9 @@ export default function EstudianteOfertasPage() {
     string[]
   >([]);
 
-  //DATOS DE LOS FILTROS
+  //#endregion
+
+  //#region ASIGNACION DE VALORES A GRUPOS DE FILTROS
   const filtrosAPI = [
     {
       //le pongo id porque necesito identificar el grupo y para que no rompa
@@ -108,7 +123,9 @@ export default function EstudianteOfertasPage() {
     };
   });
 
-  //El useEffect para cargar los datos de la API al iniciar la pagina
+  //#endregion
+
+  //#region CARGA INICIAL DE LA PAGINA (useEffect)
   useEffect(() => {
     const cargarDatos = async () => {
       try {
@@ -138,16 +155,20 @@ export default function EstudianteOfertasPage() {
     };
     cargarDatos();
   }, []);
+  //#endregion
 
+//#region Renderizado de carga hasta obtener datos
   if (loading) return <LoadingModal open={loading} />;
+  
   if (!ofertas.length)
-    return <Typography>No hay ofertas disponibles</Typography>;
+    return <EmptyState mensaje="No hay ofertas disponibles" />; 
+//#endregion
 
+  //#region EVENTO CAMBIO DE FILTROS
   const handleBuscar = () => {
     console.log("Buscar ofertas con:", busquedaInputFiltro);
   };
 
-  //funcion que se activa cuando cambia la seleccion de un filtro
   const handleSeleccionFiltro = (idGrupo: string, nuevos: string[]) => {
     switch (idGrupo) {
       case GrupoFiltroID.Modalidad:
@@ -163,9 +184,9 @@ export default function EstudianteOfertasPage() {
 
     console.log("Filtrar por", { idGrupo, nuevos });
   };
-  
+  //#endregion
 
-  // Componentes que se renderizan en la pagina
+  //#region RENDERIZADO DE LA PAGINA
   return (
     <>
       <Titulo
@@ -236,4 +257,5 @@ export default function EstudianteOfertasPage() {
       </Box>
     </>
   );
+  //#endregion
 }
