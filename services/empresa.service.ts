@@ -7,7 +7,6 @@ import { GenericService } from "./generic.service";
 class EmpresaService extends GenericService {
   async getPublicacionesEmpleo() {
     try {
-      debugger;
       const res = await http.get<OfertaDTO[]>(ENDPOINTS.PUBLICACION.GET_ALL);
       return res;
     } catch (error) {

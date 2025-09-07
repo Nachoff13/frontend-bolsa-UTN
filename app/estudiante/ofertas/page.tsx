@@ -16,6 +16,8 @@ import { GrupoFiltro } from "@/types/dto/filter/grupoFiltroDTO";
 import CardFiltros from "@/components/shared/CardFiltro";
 import { ResponseError } from "@/types/Generics/responseError";
 import { useSnackbar } from "@/components/providers/snackbar";
+import LoadingModal from "@/components/shared/LoadingModal";
+
 import {
   SnackbarPosition,
   SnackbarSize,
@@ -119,7 +121,6 @@ export default function EstudianteOfertasPage() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        debugger;
         const [ofertas, tipos, modos, carreras] = await Promise.all([
           empresaService.getPublicacionesEmpleo(),
           empresaService.getTipoContrato(),
@@ -145,7 +146,7 @@ export default function EstudianteOfertasPage() {
     cargarDatos();
   }, []);
 
-  if (loading) return <Typography>Cargando…</Typography>;
+  if (loading) return <LoadingModal open={loading} />;
   if (!ofertas.length)
     return <Typography>No hay ofertas disponibles</Typography>;
 
