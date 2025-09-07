@@ -1,8 +1,9 @@
-// app/layout.tsx  (Server Component)
+// app/layout.tsx
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { MuiThemeProvider } from "@/components/providers/mui";
 import AppLayout from "@/components/layout/AppLayout";
+import { SnackbarProvider } from "@/components/providers/snackbar"; 
 
 export const metadata: Metadata = {
   title: "Bolsa de Trabajo UTN",
@@ -14,7 +15,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body>
         <MuiThemeProvider>
-          <AppLayout>{children}</AppLayout>
+          <SnackbarProvider> {/* 👈 envolvés toda tu app */}
+            <AppLayout>{children}</AppLayout>
+          </SnackbarProvider>
         </MuiThemeProvider>
       </body>
     </html>

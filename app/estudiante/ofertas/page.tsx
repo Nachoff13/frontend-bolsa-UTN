@@ -15,6 +15,12 @@ import CardGenerica from "@/components/shared/CardGenerica";
 import { GrupoFiltro } from "@/types/dto/filter/grupoFiltroDTO";
 import CardFiltros from "@/components/shared/CardFiltro";
 import { ResponseError } from "@/types/Generics/responseError";
+import { useSnackbar } from "@/components/providers/snackbar";
+import {
+  SnackbarPosition,
+  SnackbarSize,
+  SnackbarType,
+} from "@/types/enums/snackbar";
 
 export default function EstudianteOfertasPage() {
   //Para el modal de carga
@@ -25,6 +31,7 @@ export default function EstudianteOfertasPage() {
   const [tipoContratos, setTipoContratos] = useState<OpcionFiltro[]>([]);
   const [modalidades, setModalidades] = useState<OpcionFiltro[]>([]);
   const [carreras, setCarreras] = useState<OpcionFiltro[]>([]);
+  const { showMessage } = useSnackbar();
 
   //VALORES PARA FILTROS Y BUSQUEDA
   const [busquedaInputFiltro, setBusquedaInputFiltro] = useState("");
@@ -124,10 +131,12 @@ export default function EstudianteOfertasPage() {
         setTipoContratos(tipos);
         setModalidades(modos);
         setCarreras(carreras);
-      } 
-      catch (e)  {
+      } catch (e) {
         const err = e as ResponseError;
-        console.error(err.message, err);
+        showMessage(err.message, SnackbarType.Error, {
+          size: SnackbarSize.Medium,
+          position: SnackbarPosition.BottomCenter,
+        });
       } finally {
         setLoading(false);
       }
