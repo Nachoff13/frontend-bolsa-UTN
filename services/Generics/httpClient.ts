@@ -1,4 +1,5 @@
 // services/httpClient.ts
+import { ApiResponse } from "@/types/Generics/apiResponse"
 import { api } from "./api"
 
 export class HttpClient {
@@ -9,25 +10,30 @@ export class HttpClient {
   }
 
   async get<T>(url: string, params?: Record<string, any>): Promise<T> {
-    const res = await api.get<T>(url, { params })
-    return res.data
+    const res = await api.get<ApiResponse<T>>(url, { params })
+    return res.data.result.data
+  }
+
+  async getById<T>(id: string | number): Promise<T> {
+    const res = await http.get<ApiResponse<T>>(`${this.baseURL}/${id}`);
+    return res.result.data;
   }
 
   async post<T>(url: string, data?: any): Promise<T> {
-    const res = await api.post<T>(url, data)
-    return res.data
+    const res = await api.post<ApiResponse<T>>(url, data)
+    return res.data.result.data
   }
 
-  async put<T>(url: string, data?: any): Promise<T> {
-    const res = await api.put<T>(url, data)
-    return res.data
+  async put<T>(url: string, data?: T): Promise<T> {
+    const res = await api.put<ApiResponse<T>>(url, data)
+    return res.data.result.data
   }
 
   async delete<T>(url: string): Promise<T> {
-    const res = await api.delete<T>(url)
-    return res.data
+    const res = await api.delete<ApiResponse<T>>(url)
+    return res.data.result.data
   }
 }
 
-// Instancia lista para usar
+// Instancio el cliente HTTP con la URL base de la API
 export const http = new HttpClient(process.env.NEXT_PUBLIC_API_URL || "")

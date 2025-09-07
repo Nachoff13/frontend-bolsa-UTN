@@ -16,8 +16,10 @@ export default function FilterSearch({
   placeholder,
   valor,
   onChange,
-  onBuscar,
-  onAbrirFiltros,
+  onAccion1,
+  tituloBoton1 ="Buscar",
+  tituloBoton2 = "Filtros",
+  onAccion2,
   mostrarBotonFiltros = true,
 }: FilterSearchProps) {
   return (
@@ -62,19 +64,19 @@ export default function FilterSearch({
         <Button
           variant="contained"
           startIcon={<SearchIcon />}
-          onClick={onBuscar}
+          onClick={onAccion1}
           sx={{ minWidth: 120 }}
         >
-          Buscar
+          {tituloBoton1}
         </Button>
 
         {mostrarBotonFiltros && (
           <Button
             variant="outlined"
             startIcon={<FilterListIcon />}
-            onClick={onAbrirFiltros}
+            onClick={onAccion2}
           >
-            Filtros
+            {tituloBoton2}
           </Button>
         )}
       </Stack>

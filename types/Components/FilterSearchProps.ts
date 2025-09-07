@@ -4,7 +4,11 @@ interface FilterSearchProps {
   placeholder?: string;
   valor: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBuscar: () => void;
-  onAbrirFiltros?: () => void;
+  onAccion1: () => void;
+  tituloBoton1?: string;
+
+  onAccion2?: () => void;
+  tituloBoton2?: string;
+
   mostrarBotonFiltros?: boolean;
 }

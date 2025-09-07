@@ -1,5 +1,0 @@
-export interface Prueba {
-  titulo: string
-  descripcion: string
-  nombreLocalidad: string
-}

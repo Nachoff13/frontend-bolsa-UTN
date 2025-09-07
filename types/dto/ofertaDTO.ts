@@ -1,4 +1,3 @@
-// Tipos de oferta
 export interface OfertaDTO {
   id: number;
   titulo: string;
