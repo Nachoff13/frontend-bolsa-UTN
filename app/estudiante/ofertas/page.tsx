@@ -121,6 +121,8 @@ export default function EstudianteOfertasPage() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+        setLoading(true);
+
         const [ofertas, tipos, modos, carreras] = await Promise.all([
           empresaService.getPublicacionesEmpleo(),
           empresaService.getTipoContrato(),

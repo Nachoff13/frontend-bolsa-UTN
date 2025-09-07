@@ -35,7 +35,7 @@ export default function CardFiltros({
                       const nuevos = e.target.checked
                         ? [...grupo.valoresSeleccionados, opcion.codigo]
                         : grupo.valoresSeleccionados.filter((v) => v !== opcion.codigo);
-                      onSeleccionCambio(opcion.codigo, nuevos);
+                      onSeleccionCambio(grupo.id, nuevos);
                     }}
                   />
                 }
