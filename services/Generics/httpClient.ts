@@ -19,36 +19,61 @@ export class HttpClient {
       }
       return res.data.result.data;
     } catch (err) {
-      throw ParseError(err); 
+      throw ParseError(err);
     }
   }
 
   async getById<T>(id: string | number): Promise<T> {
-    const res = await http.get<ApiResponse<T>>(`${this.baseURL}/${id}`);
-    return res.result.data;
+    try {
+      const res = await api.get<ApiResponse<T>>(`${this.baseURL}/${id}`);
+      if (res.data?.isError) {
+        throw ParseError({ response: { data: res.data } } as any);
+      }
+      return res.data.result.data;
+    } catch (err) {
+      throw ParseError(err);
+    }
   }
 
   async post<T>(url: string, data?: any): Promise<T> {
-    const res = await api.post<ApiResponse<T>>(url, data);
-    return res.data.result.data;
+    try {
+      const res = await api.post<ApiResponse<T>>(url, data);
+      if (res.data?.isError) {
+        throw ParseError({ response: { data: res.data } } as any);
+      }
+      return res.data.result.data;
+    } catch (err) {
+      throw ParseError(err);
+    }
   }
 
   async put<T>(url: string, data?: T): Promise<T> {
-    const res = await api.put<ApiResponse<T>>(url, data);
-    return res.data.result.data;
+    try {
+      const res = await api.put<ApiResponse<T>>(url, data);
+      if (res.data?.isError) {
+        throw ParseError({ response: { data: res.data } } as any);
+      }
+      return res.data.result.data;
+    } catch (err) {
+      throw ParseError(err);
+    }
   }
 
   async delete<T>(url: string): Promise<T> {
-    const res = await api.delete<ApiResponse<T>>(url);
-    return res.data.result.data;
+    try {
+      const res = await api.delete<ApiResponse<T>>(url);
+      if (res.data?.isError) {
+        throw ParseError({ response: { data: res.data } } as any);
+      }
+      return res.data.result.data;
+    } catch (err) {
+      throw ParseError(err);
+    }
   }
 }
 
 // Instancio el cliente HTTP con la URL base de la API
 export const http = new HttpClient(process.env.NEXT_PUBLIC_API_URL || "");
-
-
-
 
 export function ParseError(err: unknown): ResponseError {
   const ax = err as AxiosError<ApiResponse<any>>;
