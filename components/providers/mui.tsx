@@ -12,20 +12,20 @@ const theme = createTheme({
       contrastText: "#ffffff",
     },
     secondary: {
-      main: "#c2185b", // Híbrido
+      main: "#c2185b", 
     },
     info: {
-      main: "#00bcd4", // Part Time
+      main: "#00bcd4", 
     },
     warning: {
-      main: "#ffa726", // Presencial
+      main: "#ffa726", 
     },
     error: {
-      main: "#ef5350", // Full Time
+      main: "#ef5350",
     },
     background: {
-      default: "#f9fafa", // Fondo general
-      paper: "#f0f8f9", // Fondos secundarios
+      default: "#f9fafa", 
+      paper: "#f0f8f9", 
     },
     text: {
       primary: "#222",

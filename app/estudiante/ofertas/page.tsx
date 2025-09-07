@@ -7,17 +7,22 @@ import {
   CalendarToday as CalendarTodayIcon,
   Event as EventIcon,
 } from "@mui/icons-material";
-import { empresaService } from "@/services/empresa.service";
-import { OfertaDTO } from "@/types/dto/ofertaDTO";
+
+//Importacion de componentes propios
 import Titulo from "@/components/shared/Titulo";
 import FilterSearch from "@/components/shared/FilterSearch";
 import CardGenerica from "@/components/shared/CardGenerica";
-import { GrupoFiltro } from "@/types/dto/filter/grupoFiltroDTO";
-import CardFiltros from "@/components/shared/CardFiltro";
-import { ResponseError } from "@/types/Generics/responseError";
 import { useSnackbar } from "@/components/providers/snackbar";
 import LoadingModal from "@/components/shared/LoadingModal";
 
+//Servicio para llamadas a la API
+import { empresaService } from "@/services/empresa.service";
+
+//Tipos y constantes
+import { OfertaDTO } from "@/types/dto/ofertaDTO";
+import { GrupoFiltro } from "@/types/dto/filter/grupoFiltroDTO";
+import CardFiltros from "@/components/shared/CardFiltro";
+import { ResponseError } from "@/types/Generics/responseError";
 import {
   SnackbarPosition,
   SnackbarSize,
@@ -25,6 +30,7 @@ import {
 } from "@/types/enums/snackbar";
 import { GrupoFiltroID } from "@/types/constants";
 
+//LOGICA DE LA PAGINA
 export default function EstudianteOfertasPage() {
   //Para el modal de carga
   const [loading, setLoading] = useState(true);
@@ -102,23 +108,7 @@ export default function EstudianteOfertasPage() {
     };
   });
 
-  //funcion que se activa cuando cambia la seleccion de un filtro
-  const handleSeleccionFiltro = (idGrupo: string, nuevos: string[]) => {
-    switch (idGrupo) {
-      case GrupoFiltroID.Modalidad:
-        setModalidadesSeleccionadas(nuevos);
-        break;
-      case GrupoFiltroID.Carrera:
-        setCarrerasSeleccionadas(nuevos);
-        break;
-      case GrupoFiltroID.TipoContrato:
-        setTiposContratoSeleccionados(nuevos);
-        break;
-    }
-
-    console.log("Filtrar por", { idGrupo, nuevos });
-  };
-
+  //El useEffect para cargar los datos de la API al iniciar la pagina
   useEffect(() => {
     const cargarDatos = async () => {
       try {
@@ -136,6 +126,7 @@ export default function EstudianteOfertasPage() {
         setModalidades(modos);
         setCarreras(carreras);
       } catch (e) {
+        //Manejo de errores que trae la API
         const err = e as ResponseError;
         showMessage(err.message, SnackbarType.Error, {
           size: SnackbarSize.Medium,
@@ -145,7 +136,6 @@ export default function EstudianteOfertasPage() {
         setLoading(false);
       }
     };
-
     cargarDatos();
   }, []);
 
@@ -157,6 +147,25 @@ export default function EstudianteOfertasPage() {
     console.log("Buscar ofertas con:", busquedaInputFiltro);
   };
 
+  //funcion que se activa cuando cambia la seleccion de un filtro
+  const handleSeleccionFiltro = (idGrupo: string, nuevos: string[]) => {
+    switch (idGrupo) {
+      case GrupoFiltroID.Modalidad:
+        setModalidadesSeleccionadas(nuevos);
+        break;
+      case GrupoFiltroID.Carrera:
+        setCarrerasSeleccionadas(nuevos);
+        break;
+      case GrupoFiltroID.TipoContrato:
+        setTiposContratoSeleccionados(nuevos);
+        break;
+    }
+
+    console.log("Filtrar por", { idGrupo, nuevos });
+  };
+  
+
+  // Componentes que se renderizan en la pagina
   return (
     <>
       <Titulo
