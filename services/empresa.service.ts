@@ -5,17 +5,15 @@ import type { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { GenericService } from "./generic.service";
 
 class EmpresaService extends GenericService {
-
-    async getPublicacionesEmpleo() {
+  async getPublicacionesEmpleo() {
     try {
+      debugger;
       const res = await http.get<OfertaDTO[]>(ENDPOINTS.PUBLICACION.GET_ALL);
       return res;
     } catch (error) {
-      console.error("Error fetching job postings:", error);
       throw error;
     }
   }
-
 }
 
 export const empresaService = new EmpresaService();

@@ -14,6 +14,7 @@ import FilterSearch from "@/components/shared/FilterSearch";
 import CardGenerica from "@/components/shared/CardGenerica";
 import { GrupoFiltro } from "@/types/dto/filter/grupoFiltroDTO";
 import CardFiltros from "@/components/shared/CardFiltro";
+import { ResponseError } from "@/types/Generics/responseError";
 
 export default function EstudianteOfertasPage() {
   //Para el modal de carga
@@ -39,8 +40,6 @@ export default function EstudianteOfertasPage() {
   const [tiposContratoSeleccionados, setTiposContratoSeleccionados] = useState<
     string[]
   >([]);
-
-
 
   //DATOS DE LOS FILTROS
   const filtrosAPI = [
@@ -113,6 +112,7 @@ export default function EstudianteOfertasPage() {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+        debugger;
         const [ofertas, tipos, modos, carreras] = await Promise.all([
           empresaService.getPublicacionesEmpleo(),
           empresaService.getTipoContrato(),
@@ -124,8 +124,10 @@ export default function EstudianteOfertasPage() {
         setTipoContratos(tipos);
         setModalidades(modos);
         setCarreras(carreras);
-      } catch (error) {
-        console.error("Error cargando datos", error);
+      } 
+      catch (e)  {
+        const err = e as ResponseError;
+        console.error(err.message, err);
       } finally {
         setLoading(false);
       }
