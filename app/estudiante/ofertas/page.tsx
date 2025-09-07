@@ -1,4 +1,5 @@
 "use client";
+//use client para que se renderice en el cliente y no en el servidor, esto se usa cuando se usan hooks o estados
 
 //#region IMPORTACIOENS REACT
 import { useEffect, useState } from "react";
@@ -39,7 +40,7 @@ import { GrupoFiltroID } from "@/types/constants";
 
 //#endregion
 
-//LOGICA DE LA PAGINA
+//#region LOGICA DE LA PAGINA
 export default function EstudianteOfertasPage() {
   //#region SNACKBAR Y MODAL CARGA
   const [loading, setLoading] = useState(true);
@@ -159,7 +160,7 @@ export default function EstudianteOfertasPage() {
 
 //#region Renderizado de carga hasta obtener datos
   if (loading) return <LoadingModal open={loading} />;
-  
+
   if (!ofertas.length)
     return <EmptyState mensaje="No hay ofertas disponibles" />; 
 //#endregion
@@ -259,3 +260,5 @@ export default function EstudianteOfertasPage() {
   );
   //#endregion
 }
+
+//#endregion
