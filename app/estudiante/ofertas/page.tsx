@@ -23,6 +23,7 @@ import {
   SnackbarSize,
   SnackbarType,
 } from "@/types/enums/snackbar";
+import { GrupoFiltroID } from "@/types/constants";
 
 export default function EstudianteOfertasPage() {
   //Para el modal de carga
@@ -54,7 +55,7 @@ export default function EstudianteOfertasPage() {
   const filtrosAPI = [
     {
       //le pongo id porque necesito identificar el grupo y para que no rompa
-      id: "modalidad",
+      id: GrupoFiltroID.Modalidad,
       titulo: "Modalidad",
       opciones: modalidades.map((mod) => ({
         codigo: mod.codigo,
@@ -62,7 +63,7 @@ export default function EstudianteOfertasPage() {
       })),
     },
     {
-      id: "carrera",
+      id: GrupoFiltroID.Carrera,
       titulo: "Carrera",
       opciones: carreras.map((carrera) => ({
         codigo: carrera.codigo,
@@ -70,7 +71,7 @@ export default function EstudianteOfertasPage() {
       })),
     },
     {
-      id: "tipoContrato",
+      id: GrupoFiltroID.TipoContrato,
       titulo: "Tipo de Contrato",
       opciones: tipoContratos.map((tipoContrato) => ({
         codigo: tipoContrato.codigo,
@@ -84,13 +85,13 @@ export default function EstudianteOfertasPage() {
     let valoresSeleccionados: string[] = [];
 
     switch (grupo.id) {
-      case "modalidad":
+      case GrupoFiltroID.Modalidad:
         valoresSeleccionados = modalidadesSeleccionadas;
         break;
-      case "carrera":
+      case GrupoFiltroID.Carrera:
         valoresSeleccionados = carrerasSeleccionadas;
         break;
-      case "tipoContrato":
+      case GrupoFiltroID.TipoContrato:
         valoresSeleccionados = tiposContratoSeleccionados;
         break;
     }
@@ -104,13 +105,13 @@ export default function EstudianteOfertasPage() {
   //funcion que se activa cuando cambia la seleccion de un filtro
   const handleSeleccionFiltro = (idGrupo: string, nuevos: string[]) => {
     switch (idGrupo) {
-      case "modalidad":
+      case GrupoFiltroID.Modalidad:
         setModalidadesSeleccionadas(nuevos);
         break;
-      case "carrera":
+      case GrupoFiltroID.Carrera:
         setCarrerasSeleccionadas(nuevos);
         break;
-      case "tipoContrato":
+      case GrupoFiltroID.TipoContrato:
         setTiposContratoSeleccionados(nuevos);
         break;
     }
