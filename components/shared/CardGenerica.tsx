@@ -30,7 +30,6 @@ export default function CardGenerica({
       }}
     >
       <CardContent sx={{ p: 2 }}>
-        {/* Título y subtítulo */}
         <Stack direction="row" justifyContent="space-between">
           <Box>
             <Typography variant="h6" color="primary" fontWeight={600}>
@@ -62,7 +61,6 @@ export default function CardGenerica({
           )}
         </Stack>
 
-        {/* Info extra (iconos + textos) */}
         {infoExtra.length > 0 && (
           <Stack
             direction="row"

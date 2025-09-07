@@ -1,4 +1,3 @@
-// components/shared/Titulo.tsx
 
 import { TituloProps } from "@/types/Components/TituloProps";
 import { Typography, Stack } from "@mui/material";
