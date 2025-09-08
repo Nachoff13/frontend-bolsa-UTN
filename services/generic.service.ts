@@ -1,6 +1,5 @@
 import { http } from "@/services/Generics/httpClient";
 import { ENDPOINTS } from "@/services/Generics/endpoints";
-import { OfertaDTO } from "@/types";
 
 export class GenericService {
   async getTipoContrato() {

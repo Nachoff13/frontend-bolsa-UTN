@@ -1,4 +1,4 @@
-interface OpcionFiltro {
-  codigo: string;
-  descripcion: string;
+export class OpcionFiltro {
+  codigo!: string;
+  descripcion!: string;
 }

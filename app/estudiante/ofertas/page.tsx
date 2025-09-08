@@ -37,6 +37,8 @@ import {
   SnackbarType,
 } from "@/types/enums/snackbar";
 import { GrupoFiltroID } from "@/types/constants";
+import { postulanteService } from "@/services/postulante.service";
+import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 
 //#endregion
 
@@ -158,12 +160,12 @@ export default function EstudianteOfertasPage() {
   }, []);
   //#endregion
 
-//#region Renderizado de carga hasta obtener datos
+  //#region Renderizado de carga hasta obtener datos
   if (loading) return <LoadingModal open={loading} />;
 
   if (!ofertas.length)
-    return <EmptyState mensaje="No hay ofertas disponibles" />; 
-//#endregion
+    return <EmptyState mensaje="No hay ofertas disponibles" />;
+  //#endregion
 
   //#region EVENTO CAMBIO DE FILTROS
   const handleBuscar = () => {
@@ -185,6 +187,28 @@ export default function EstudianteOfertasPage() {
 
     console.log("Filtrar por", { idGrupo, nuevos });
   };
+  async function onClickPostularse(id: number): Promise<void> {
+    try {
+      const oferta = new OfertaDTO();
+      oferta.id = id;
+      oferta.titulo = "prueba titulo";
+      oferta.descripcion = "prueba descripcion";
+
+      
+        await postulanteService.postularseOferta(oferta);
+        showMessage("Postulación realizada con éxito", SnackbarType.Success, {
+          size: SnackbarSize.Medium,
+          position: SnackbarPosition.BottomCenter,
+        });
+    } catch (e) {
+      const error = e as ResponseError;
+      showMessage(error.message, SnackbarType.Error, {
+        size: SnackbarSize.Medium,
+        position: SnackbarPosition.BottomCenter,
+      });
+    }
+  }
+
   //#endregion
 
   //#region RENDERIZADO DE LA PAGINA
@@ -249,7 +273,7 @@ export default function EstudianteOfertasPage() {
                 ]}
                 onAccion1={() => console.log("Ver detalle", oferta.id)}
                 textoAccion1="Ver detalles"
-                onAccion2={() => console.log("Postularme", oferta.id)}
+                onAccion2={() => onClickPostularse(oferta.id)}
                 textoAccion2="Postularme"
               />
             ))}

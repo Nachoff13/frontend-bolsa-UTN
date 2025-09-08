@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-} from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { Snackbar, Alert } from "@mui/material";
 import {
   SnackbarType,
@@ -24,7 +19,9 @@ type SnackbarContextType = {
   ) => void;
 };
 
-const SnackbarContext = createContext<SnackbarContextType | undefined>(undefined);
+const SnackbarContext = createContext<SnackbarContextType | undefined>(
+  undefined
+);
 
 export function useSnackbar() {
   const context = useContext(SnackbarContext);
@@ -36,7 +33,9 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState<SnackbarType>(SnackbarType.Info);
-  const [position, setPosition] = useState<SnackbarPosition>(SnackbarPosition.BottomCenter);
+  const [position, setPosition] = useState<SnackbarPosition>(
+    SnackbarPosition.BottomCenter
+  );
   const [size, setSize] = useState<SnackbarSize>(SnackbarSize.Medium);
 
   const showMessage = (
@@ -84,7 +83,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
         <Alert
           onClose={() => setOpen(false)}
           severity={severity}
-          sx={{ width: "100%", ...getAlertStyles() }}
+          sx={{ width: "100%", whiteSpace: "pre-line", ...getAlertStyles() }}
         >
           {message}
         </Alert>
