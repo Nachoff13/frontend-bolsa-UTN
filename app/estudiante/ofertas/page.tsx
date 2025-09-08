@@ -25,8 +25,9 @@ import EmptyState from "@/components/shared/EmptyState";
 //#region IMPORTACIONES SERVICIOS Y TIPOS
 //Servicio para llamadas a la API
 import { empresaService } from "@/services/empresa.service";
+import { postulanteService } from "@/services/postulante.service";
 
-//Tipos y constantes
+//#region Tipos y constantes
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { GrupoFiltro } from "@/types/dto/filter/grupoFiltroDTO";
 import CardFiltros from "@/components/shared/CardFiltro";
@@ -37,8 +38,8 @@ import {
   SnackbarType,
 } from "@/types/enums/snackbar";
 import { GrupoFiltroID } from "@/types/constants";
-import { postulanteService } from "@/services/postulante.service";
 import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
+import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 
 //#endregion
 
@@ -187,15 +188,18 @@ export default function EstudianteOfertasPage() {
 
     console.log("Filtrar por", { idGrupo, nuevos });
   };
+
+
   async function onClickPostularse(id: number): Promise<void> {
     try {
-      const oferta = new OfertaDTO();
-      oferta.id = id;
-      oferta.titulo = "prueba titulo";
-      oferta.descripcion = "prueba descripcion";
+      const postulacion = new PostulacionDTO();
+      postulacion.idPerfilCandidato = 1; //a futuro traer del perfil del usuario logueado
+      postulacion.idOferta = id.toString();
+      postulacion.cartaPresentacion = "Carta de presentación de prueba";
+      postulacion.observacion = "Observación de prueba";
 
-      
-        await postulanteService.postularseOferta(oferta);
+
+        await postulanteService.postularseOferta(postulacion);
         showMessage("Postulación realizada con éxito", SnackbarType.Success, {
           size: SnackbarSize.Medium,
           position: SnackbarPosition.BottomCenter,
