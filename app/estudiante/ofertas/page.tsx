@@ -199,8 +199,8 @@ export default function EstudianteOfertasPage() {
       postulacion.observacion = "Observación de prueba";
 
 
-        await postulanteService.postularseOferta(postulacion);
-        showMessage("Postulación realizada con éxito", SnackbarType.Success, {
+        const response : string = await postulanteService.postularseOferta(postulacion);
+        showMessage(response, SnackbarType.Success, {
           size: SnackbarSize.Medium,
           position: SnackbarPosition.BottomCenter,
         });

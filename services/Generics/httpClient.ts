@@ -17,7 +17,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -29,7 +29,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -41,7 +41,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -53,7 +53,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -65,7 +65,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }

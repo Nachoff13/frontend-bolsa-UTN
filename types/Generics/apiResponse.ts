@@ -1,8 +1,6 @@
 export interface ApiResponse<T> {
   message: string;
-  result: { 
-    data: T 
-  };
+  result: T;
   statusCode?: number;
   isError?: boolean;
   responseException?: {

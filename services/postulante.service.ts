@@ -8,8 +8,8 @@ import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 class PostulanteService extends GenericService {
   async postularseOferta(data: PostulacionDTO) {
     try {
-      const res = await http.post<object>(ENDPOINTS.POSTULANTE.POSTULARSE, data);
-      return res;
+      const res = await http.post(ENDPOINTS.POSTULANTE.POSTULARSE, data);
+      return res as string;
     } catch (error) {
       throw error;
     }
