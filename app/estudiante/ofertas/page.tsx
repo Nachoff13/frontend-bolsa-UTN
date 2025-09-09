@@ -9,6 +9,7 @@ import {
   CalendarToday as CalendarTodayIcon,
   Event as EventIcon,
 } from "@mui/icons-material";
+import { useMemo } from "react";
 
 //#endregion
 
@@ -40,6 +41,7 @@ import {
 import { GrupoFiltroID } from "@/types/constants";
 import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
+import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 
 //#endregion
 
@@ -61,6 +63,8 @@ export default function EstudianteOfertasPage() {
 
   //#region VARIABLES CARD FILTRO
   const [busquedaInputFiltro, setBusquedaInputFiltro] = useState("");
+  const [inputBusquedaFinal, setInputBusquedaFinal] = useState("");
+
   const [mostrarBotonAccion, setMostrarBotonAccion] = useState(false);
 
   //para setear los filtros seleccionados
@@ -127,6 +131,27 @@ export default function EstudianteOfertasPage() {
     };
   });
 
+  //el useMemo memoriza el valor de los filtros para no recalcularlos en cada render
+  const filtros: FiltrosBusquedaDTO = useMemo(() => {
+    const f: FiltrosBusquedaDTO = {};
+
+    if (modalidadesSeleccionadas.length > 0)
+      f.modalidades = modalidadesSeleccionadas;
+
+    if (carrerasSeleccionadas.length > 0) f.carreras = carrerasSeleccionadas;
+
+    if (tiposContratoSeleccionados.length > 0)
+      f.tiposContrato = tiposContratoSeleccionados;
+
+    if (inputBusquedaFinal.trim()) f.input = inputBusquedaFinal.trim();
+    return f;
+  }, [
+    modalidadesSeleccionadas,
+    carrerasSeleccionadas,
+    tiposContratoSeleccionados,
+    inputBusquedaFinal,
+  ]);
+
   //#endregion
 
   //#region CARGA INICIAL DE LA PAGINA (useEffect)
@@ -135,19 +160,16 @@ export default function EstudianteOfertasPage() {
       try {
         setLoading(true);
 
-        const [ofertas, tipos, modos, carreras] = await Promise.all([
-          empresaService.getPublicacionesEmpleo(),
+        const [tipos, modos, carreras] = await Promise.all([
           empresaService.getTipoContrato(),
           empresaService.getModalidad(),
           empresaService.getCarreras(),
         ]);
 
-        setOfertas(ofertas);
         setTipoContratos(tipos);
         setModalidades(modos);
         setCarreras(carreras);
       } catch (e) {
-        //Manejo de errores que trae la API
         const err = e as ResponseError;
         showMessage(err.message, SnackbarType.Error, {
           size: SnackbarSize.Medium,
@@ -157,22 +179,50 @@ export default function EstudianteOfertasPage() {
         setLoading(false);
       }
     };
+
     cargarDatos();
   }, []);
+
+  //uso otro useEffect para cargar las ofertas cuando cambian los filtros
+  useEffect(() => {
+    const buscarOfertas = async () => {
+      try {
+        setLoading(true);
+
+        const nuevasOfertas = await empresaService.getPublicacionesEmpleo(
+          filtros
+        );
+        setOfertas(nuevasOfertas);
+      } catch (e) {
+        const err = e as ResponseError;
+        showMessage(err.message, SnackbarType.Error, {
+          size: SnackbarSize.Medium,
+          position: SnackbarPosition.BottomCenter,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    buscarOfertas();
+  }, [filtros]);
+
+  useEffect(() => {
+    if (busquedaInputFiltro.trim() === "") {
+      setInputBusquedaFinal(""); // dispara búsqueda sin input
+    }
+  }, [busquedaInputFiltro]);
   //#endregion
 
   //#region Renderizado de carga hasta obtener datos
   if (loading) return <LoadingModal open={loading} />;
 
-  if (!ofertas.length)
-    return <EmptyState mensaje="No hay ofertas disponibles" />;
   //#endregion
 
   //#region EVENTO CAMBIO DE FILTROS
   const handleBuscar = () => {
-    console.log("Buscar ofertas con:", busquedaInputFiltro);
+    setInputBusquedaFinal(busquedaInputFiltro);
   };
-
   const handleSeleccionFiltro = (idGrupo: string, nuevos: string[]) => {
     switch (idGrupo) {
       case GrupoFiltroID.Modalidad:
@@ -189,7 +239,6 @@ export default function EstudianteOfertasPage() {
     console.log("Filtrar por", { idGrupo, nuevos });
   };
 
-
   async function onClickPostularse(id: number): Promise<void> {
     try {
       const postulacion = new PostulacionDTO();
@@ -198,12 +247,13 @@ export default function EstudianteOfertasPage() {
       postulacion.cartaPresentacion = "Carta de presentación de prueba";
       postulacion.observacion = "Observación de prueba";
 
-
-        const response : string = await postulanteService.postularseOferta(postulacion);
-        showMessage(response, SnackbarType.Success, {
-          size: SnackbarSize.Medium,
-          position: SnackbarPosition.BottomCenter,
-        });
+      const response: string = await postulanteService.postularseOferta(
+        postulacion
+      );
+      showMessage(response, SnackbarType.Success, {
+        size: SnackbarSize.Medium,
+        position: SnackbarPosition.BottomCenter,
+      });
     } catch (e) {
       const error = e as ResponseError;
       showMessage(error.message, SnackbarType.Error, {
@@ -229,9 +279,15 @@ export default function EstudianteOfertasPage() {
         placeholder="Buscar por título, empresa, carrera…"
         valor={busquedaInputFiltro}
         onChange={(e) => setBusquedaInputFiltro(e.target.value)}
-        onAccion1={handleBuscar}
+        onAccion1={handleBuscar} //
         tituloBoton2="Limpiar"
-        onAccion2={() => setMostrarBotonAccion(true)}
+        onAccion2={() => {
+          setBusquedaInputFiltro("");
+          setInputBusquedaFinal(""); // esto hace que se dispare el useEffect
+          setModalidadesSeleccionadas([]);
+          setCarrerasSeleccionadas([]);
+          setTiposContratoSeleccionados([]);
+        }}
       />
 
       <Box display="flex" gap={3} mt={4}>
@@ -241,48 +297,53 @@ export default function EstudianteOfertasPage() {
             onSeleccionCambio={handleSeleccionFiltro}
           />
         </Box>
-
-        <Box flex={3}>
-          <Card variant="outlined" sx={{ p: 3, boxShadow: 1 }}>
-            <Titulo
-              titulo="Publicaciones de empleo recientes"
-              subtitulo="Nuevas oportunidades laborales"
-              variantTitulo="h5"
-              variantSubtitulo="body2"
-            />
-            {ofertas.map((oferta) => (
-              <CardGenerica
-                key={oferta.id}
-                titulo={oferta.titulo}
-                subtitulo={`🏢 ${oferta.nombreEmpresa}`}
-                descripcion={oferta.descripcion}
-                chips={[
-                  { label: oferta.nombreEmpresa, color: "success" },
-                  { label: oferta.modalidad, color: "secondary" },
-                  { label: oferta.tipoContrato, color: "info" },
-                ]}
-                infoExtra={[
-                  {
-                    icon: <LocationOnIcon fontSize="small" />,
-                    texto: oferta.nombreLocalidad,
-                  },
-                  {
-                    icon: <CalendarTodayIcon fontSize="small" />,
-                    texto: `Publicado el ${oferta.fechaInicio}`,
-                  },
-                  {
-                    icon: <EventIcon fontSize="small" />,
-                    texto: `Cierra el ${oferta.fechaFin}`,
-                  },
-                ]}
-                onAccion1={() => console.log("Ver detalle", oferta.id)}
-                textoAccion1="Ver detalles"
-                onAccion2={() => onClickPostularse(oferta.id)}
-                textoAccion2="Postularme"
+        {ofertas.length > 0 ? (
+          <Box flex={3}>
+            <Card variant="outlined" sx={{ p: 3, boxShadow: 1 }}>
+              <Titulo
+                titulo="Publicaciones de empleo recientes"
+                subtitulo="Nuevas oportunidades laborales"
+                variantTitulo="h5"
+                variantSubtitulo="body2"
               />
-            ))}
-          </Card>
-        </Box>
+              {ofertas.map((oferta) => (
+                <CardGenerica
+                  key={oferta.id}
+                  titulo={oferta.titulo}
+                  subtitulo={`🏢 ${oferta.nombreEmpresa}`}
+                  descripcion={oferta.descripcion}
+                  chips={[
+                    { label: oferta.nombreEmpresa, color: "success" },
+                    { label: oferta.modalidad, color: "secondary" },
+                    { label: oferta.tipoContrato, color: "info" },
+                  ]}
+                  infoExtra={[
+                    {
+                      icon: <LocationOnIcon fontSize="small" />,
+                      texto: oferta.nombreLocalidad,
+                    },
+                    {
+                      icon: <CalendarTodayIcon fontSize="small" />,
+                      texto: `Publicado el ${oferta.fechaInicio}`,
+                    },
+                    {
+                      icon: <EventIcon fontSize="small" />,
+                      texto: `Cierra el ${oferta.fechaFin}`,
+                    },
+                  ]}
+                  onAccion1={() => console.log("Ver detalle", oferta.id)}
+                  textoAccion1="Ver detalles"
+                  onAccion2={() => onClickPostularse(oferta.id)}
+                  textoAccion2="Postularme"
+                />
+              ))}
+            </Card>
+          </Box>
+        ) : (
+          <Box flex={3}>
+            <EmptyState mensaje="No hay ofertas disponibles" />
+          </Box>
+        )}
       </Box>
     </>
   );
