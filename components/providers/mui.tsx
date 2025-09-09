@@ -69,15 +69,16 @@ const theme = createTheme({
         root: {
           borderRadius: 12,
           boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-          backgroundColor: "#f0f8f9",
+          backgroundColor: "#ecf4f4ff",
         },
       },
     },
+
     MuiPaper: {
       styleOverrides: {
         root: {
           borderRadius: 12,
-          backgroundColor: "#f0f8f9",
+          backgroundColor: "#ecf4f4ff",
           padding: 16,
         },
       },

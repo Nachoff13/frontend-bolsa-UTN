@@ -17,7 +17,7 @@ export default function CardFiltros({
   onSeleccionCambio,
 }: CardFiltrosProps) {
   return (
-    <Card variant="outlined" sx={{ p: 3, boxShadow: 1 }}>
+<Card variant="outlined" sx={{ p: 3}}>
       {grupos.map((grupo) => (
         <div key={grupo.id}>
           <Typography variant="subtitle1" fontWeight={600} gutterBottom>

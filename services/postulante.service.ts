@@ -14,6 +14,16 @@ class PostulanteService extends GenericService {
       throw error;
     }
   }
+
+  async getPostulaciones(){
+    try {
+      const res = await http.get<PostulacionDTO[]>(ENDPOINTS.POSTULANTE.GET_POSTULACIONES);
+      return res;
+    }
+    catch (error) {
+      throw error;
+    }
+  }
 }
 
 export const postulanteService = new PostulanteService();

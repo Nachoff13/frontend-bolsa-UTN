@@ -3,6 +3,7 @@
 import {
   Box,
   Button,
+  Card,
   Stack,
   TextField,
   Typography,
@@ -23,9 +24,8 @@ export default function FilterSearch({
   mostrarBotonFiltros = true,
 }: FilterSearchProps) {
   return (
-    <Box
+    <Card
       sx={{
-        bgcolor: "background.paper",
         p: 3,
         borderRadius: 3,
         boxShadow: 3,
@@ -80,6 +80,6 @@ export default function FilterSearch({
           </Button>
         )}
       </Stack>
-    </Box>
+    </Card>
   );
 }

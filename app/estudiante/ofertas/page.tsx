@@ -67,7 +67,7 @@ export default function EstudianteOfertasPage() {
 
   const [mostrarBotonAccion, setMostrarBotonAccion] = useState(false);
 
-  //para setear los filtros seleccionados
+  //#region para setear los filtros seleccionados
   const [modalidadesSeleccionadas, setModalidadesSeleccionadas] = useState<
     string[]
   >([]);
@@ -156,56 +156,56 @@ export default function EstudianteOfertasPage() {
 
   //#region CARGA INICIAL DE LA PAGINA (useEffect)
   useEffect(() => {
-    const cargarDatos = async () => {
-      try {
-        setLoading(true);
-
-        const [tipos, modos, carreras] = await Promise.all([
-          empresaService.getTipoContrato(),
-          empresaService.getModalidad(),
-          empresaService.getCarreras(),
-        ]);
-
-        setTipoContratos(tipos);
-        setModalidades(modos);
-        setCarreras(carreras);
-      } catch (e) {
-        const err = e as ResponseError;
-        showMessage(err.message, SnackbarType.Error, {
-          size: SnackbarSize.Medium,
-          position: SnackbarPosition.BottomCenter,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     cargarDatos();
   }, []);
 
+  const cargarDatos = async () => {
+    try {
+      setLoading(true);
+
+      const [tipos, modos, carreras] = await Promise.all([
+        empresaService.getTipoContrato(),
+        empresaService.getModalidad(),
+        empresaService.getCarreras(),
+      ]);
+
+      setTipoContratos(tipos);
+      setModalidades(modos);
+      setCarreras(carreras);
+    } catch (e) {
+      const err = e as ResponseError;
+      showMessage(err.message, SnackbarType.Error, {
+        size: SnackbarSize.Medium,
+        position: SnackbarPosition.BottomCenter,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   //uso otro useEffect para cargar las ofertas cuando cambian los filtros
   useEffect(() => {
-    const buscarOfertas = async () => {
-      try {
-        setLoading(true);
-
-        const nuevasOfertas = await empresaService.getPublicacionesEmpleo(
-          filtros
-        );
-        setOfertas(nuevasOfertas);
-      } catch (e) {
-        const err = e as ResponseError;
-        showMessage(err.message, SnackbarType.Error, {
-          size: SnackbarSize.Medium,
-          position: SnackbarPosition.BottomCenter,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     buscarOfertas();
   }, [filtros]);
+
+  const buscarOfertas = async () => {
+    try {
+      setLoading(true);
+
+      const nuevasOfertas = await empresaService.getPublicacionesEmpleo(
+        filtros
+      );
+      setOfertas(nuevasOfertas);
+    } catch (e) {
+      const err = e as ResponseError;
+      showMessage(err.message, SnackbarType.Error, {
+        size: SnackbarSize.Medium,
+        position: SnackbarPosition.BottomCenter,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (busquedaInputFiltro.trim() === "") {
@@ -243,7 +243,7 @@ export default function EstudianteOfertasPage() {
     try {
       const postulacion = new PostulacionDTO();
       postulacion.idPerfilCandidato = 1; //a futuro traer del perfil del usuario logueado
-      postulacion.idOferta = id.toString();
+      postulacion.idOferta = id;
       postulacion.cartaPresentacion = "Carta de presentación de prueba";
       postulacion.observacion = "Observación de prueba";
 
