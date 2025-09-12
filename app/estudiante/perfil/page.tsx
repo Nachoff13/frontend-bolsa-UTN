@@ -3,26 +3,42 @@
 import { Card, CardContent, Typography, Chip, Button, Stack, Box, Avatar, IconButton } from "@mui/material";
 import Titulo from "@/components/shared/Titulo";
 import { Person as PersonIcon, Mail as MailIcon, Phone as PhoneIcon, LocationOn as LocationIcon, Edit as EditIcon, School as SchoolIcon, Description as DescriptionIcon, Download as DownloadIcon, Upload as UploadIcon } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import LoadingModal from "@/components/shared/LoadingModal";
+import { useSnackbar } from "@/components/providers/snackbar";
+import { candidatoService } from "@/services/candidato.service";
+import type { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
+import { SnackbarType } from "@/types/enums/snackbar";
 
 export default function PerfilEstudiantePage() {
-  const profile = {
-    nombre: "Juan Perez",
-    carrera: "Ingeniería en Sistemas de Información",
-    legajo: "31999",
-    email: "juanperez@hotmail.com",
-    telefono: "+54 9 221 999-9999",
-    localidad: "La Plata",
-    descripcion:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean tempor magna nec hendrerit semper. Nunc pretium diam sem, nec iaculis massa rhoncus ac. Ut euismod sem feugiat orci pharetra mattis.",
-    habilidades: ["Python", "SQL", "React", "Angular", "Metodologías Ágiles"],
-    educacion: {
-      titulo: "Ingeniería en Sistemas de Información",
-      institucion: "Universidad Tecnológica Nacional - FRLP",
-      periodo: "2020 - 2025 (En curso)",
-      progreso: "90% completado",
-    },
-    cvFile: "Juan_Perez_CV.pdf",
-    ultimaActualizacion: "hace 10 días",
+  const { showMessage } = useSnackbar();
+  const [loading, setLoading] = useState(true);
+  const [perfil, setPerfil] = useState<PerfilCandidatoDTO | null>(null);
+
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        setLoading(true);
+        const data = await candidatoService.getPerfil();
+        setPerfil(data);
+      } catch (e: any) {
+        showMessage(e?.message ?? "Error cargando perfil", SnackbarType.Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPerfil();
+  }, [showMessage]);
+
+  if (loading) return <LoadingModal open={loading} />;
+  if (!perfil) return null;
+
+  const habilidades = ["Python", "SQL", "React", "Angular", "Metodologías Ágiles"]; // TODO: traer de API cuando exista
+  const educacion = {
+    titulo: perfil.carrera ?? "",
+    institucion: "Universidad Tecnológica Nacional - FRLP",
+    periodo: perfil.anioEgreso ? `Hasta ${perfil.anioEgreso}` : "En curso",
+    progreso: `${perfil.porcentajePerfil ?? 90}% completado`,
   };
 
   return (
@@ -44,36 +60,44 @@ export default function PerfilEstudiantePage() {
               </Avatar>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h5" fontWeight={700} gutterBottom>
-                  {profile.nombre}
+                  {perfil.nombre}
                 </Typography>
                 <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
-                  {profile.carrera}
+                  {educacion.titulo || "Carrera no informada"}
                 </Typography>
 
                 <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                  <Chip label={`Legajo: ${profile.legajo}`} color="primary" size="small" sx={{ fontWeight: 500 }} />
+                  {perfil.legajo && (
+                    <Chip label={`Legajo: ${perfil.legajo}`} color="primary" size="small" sx={{ fontWeight: 500 }} />
+                  )}
                   <Chip label="Estudiante" variant="outlined" size="small" sx={{ fontWeight: 500 }} />
                 </Stack>
 
                 <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 1 }}>
-                  <Box>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <MailIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-                      <Typography variant="body2">{profile.email}</Typography>
-                    </Stack>
-                  </Box>
-                  <Box>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <PhoneIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-                      <Typography variant="body2">{profile.telefono}</Typography>
-                    </Stack>
-                  </Box>
-                  <Box>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <LocationIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-                      <Typography variant="body2">{profile.localidad}</Typography>
-                    </Stack>
-                  </Box>
+                  {perfil.email && (
+                    <Box>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <MailIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                        <Typography variant="body2">{perfil.email}</Typography>
+                      </Stack>
+                    </Box>
+                  )}
+                  {perfil.telefono && (
+                    <Box>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <PhoneIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                        <Typography variant="body2">{perfil.telefono}</Typography>
+                      </Stack>
+                    </Box>
+                  )}
+                  {perfil.localidad && (
+                    <Box>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <LocationIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                        <Typography variant="body2">{perfil.localidad}</Typography>
+                      </Stack>
+                    </Box>
+                  )}
                 </Box>
               </Box>
             </Stack>
@@ -87,7 +111,7 @@ export default function PerfilEstudiantePage() {
               <PersonIcon color="primary" />
               <Typography variant="h6" fontWeight={600}>Sobre Mí</Typography>
             </Stack>
-            <Typography variant="body2" color="text.secondary">{profile.descripcion}</Typography>
+            <Typography variant="body2" color="text.secondary">{perfil.descripcion || "Sin descripción."}</Typography>
           </CardContent>
         </Card>
 
@@ -98,7 +122,7 @@ export default function PerfilEstudiantePage() {
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>Habilidades y Competencias</Typography>
                 <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {profile.habilidades.map((h, i) => (
+                  {habilidades.map((h, i) => (
                     <Chip key={i} label={h} variant="outlined" size="small" sx={{ mr: 0.5, mb: 0.5 }} />
                   ))}
                 </Stack>
@@ -112,9 +136,9 @@ export default function PerfilEstudiantePage() {
                   <SchoolIcon color="primary" />
                   <Typography variant="h6" fontWeight={600}>Educación</Typography>
                 </Stack>
-                <Typography variant="subtitle1" fontWeight={600}>{profile.educacion.titulo}</Typography>
-                <Typography variant="body2" color="text.secondary">{profile.educacion.institucion} • {profile.educacion.periodo}</Typography>
-                <Chip label={profile.educacion.progreso} variant="outlined" size="small" sx={{ mt: 1 }} />
+                <Typography variant="subtitle1" fontWeight={600}>{educacion.titulo || "Sin datos"}</Typography>
+                <Typography variant="body2" color="text.secondary">{educacion.institucion} • {educacion.periodo}</Typography>
+                <Chip label={educacion.progreso} variant="outlined" size="small" sx={{ mt: 1 }} />
               </CardContent>
             </Card>
           </Box>
@@ -131,12 +155,12 @@ export default function PerfilEstudiantePage() {
               <Stack direction="row" spacing={2} alignItems="center">
                 <DescriptionIcon sx={{ color: "text.secondary" }} />
                 <Box>
-                  <Typography variant="subtitle2" fontWeight={600}>{profile.cvFile}</Typography>
-                  <Typography variant="caption" color="text.secondary">Última actualización {profile.ultimaActualizacion}</Typography>
+                  <Typography variant="subtitle2" fontWeight={600}>{perfil.cv ? "CV cargado" : "Sin CV"}</Typography>
+                  <Typography variant="caption" color="text.secondary">{perfil.cv ? "Disponible para descargar" : "Subí tu CV para mejorar tu perfil"}</Typography>
                 </Box>
               </Stack>
               <Stack direction="row" spacing={1}>
-                <Button variant="outlined" size="small" startIcon={<DownloadIcon />}>Descargar</Button>
+                <Button variant="outlined" size="small" startIcon={<DownloadIcon />} disabled={!perfil.cv}>Descargar</Button>
                 <Button variant="outlined" size="small" startIcon={<UploadIcon />}>Actualizar</Button>
               </Stack>
             </Box>
