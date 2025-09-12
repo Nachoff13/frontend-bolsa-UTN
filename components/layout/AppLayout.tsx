@@ -45,7 +45,7 @@ const navItems = [
     label: "Mis Postulaciones",
     icon: <DescriptionIcon />,
   },
-  { href: "/estudiante/perfil", label: "Mi Perfil", icon: <PersonIcon /> },
+        { href: "/estudiante/perfil/1", label: "Mi Perfil", icon: <PersonIcon /> }, // hardcodeado
 ];
 
 const footerItems = [

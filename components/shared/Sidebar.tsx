@@ -50,7 +50,7 @@ export default function Sidebar() {
     return [
       { href: '/estudiante/postulaciones', label: 'Ver Ofertas', icon: '📋' },
       { href: '/estudiante/mis-postulaciones', label: 'Mis Postulaciones', icon: '📝' },
-      { href: '/estudiante/perfil', label: 'Mi Perfil', icon: '👤' },
+        { href: '/estudiante/perfil/1', label: 'Mi Perfil', icon: '👤' }, // hardcodeado
       { href: '/empresa/ofertas', label: 'Mis Ofertas', icon: '💼' },
       { href: '/empresa/nueva-oferta', label: 'Nueva Oferta', icon: '➕' },
       { href: '/empresa/postulaciones', label: 'Postulaciones', icon: '👥' },

@@ -12,6 +12,22 @@ class CandidatoService extends GenericService {
     }
   }
 
+  async getPerfilById(perfilId: number): Promise<PerfilCandidatoDTO> {
+    try {
+      return await http.get<PerfilCandidatoDTO>(`${ENDPOINTS.CANDIDATO.GET_PERFIL}?perfilId=${perfilId}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getPerfilByUsuarioId(usuarioId: number): Promise<PerfilCandidatoDTO> {
+    try {
+      return await http.get<PerfilCandidatoDTO>(`${ENDPOINTS.CANDIDATO.GET_PERFIL}?usuarioId=${usuarioId}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async updatePerfil(data: PerfilCandidatoDTO): Promise<PerfilCandidatoDTO> {
     try {
       return await http.put<PerfilCandidatoDTO>(ENDPOINTS.CANDIDATO.UPDATE_PERFIL, data);
