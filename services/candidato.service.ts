@@ -36,16 +36,29 @@ class CandidatoService extends GenericService {
     }
   }
 
-  async uploadCv(formData: FormData): Promise<string> {
+  async uploadCv(file: File, perfilId: number): Promise<string> {
     try {
-      // Para subida de archivos, usamos api directamente por headers multipart
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${ENDPOINTS.CANDIDATO.UPLOAD_CV}`, {
+      const formData = new FormData();
+      formData.append('cv', file);
+      
+      // Usar la URL base configurada
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5113";
+      const url = `${baseURL}${ENDPOINTS.CANDIDATO.UPLOAD_CV}?perfilId=${perfilId}`;
+      
+      console.log('🔧 Upload CV URL:', url); // Debug
+      
+      const res = await fetch(url, {
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error("Error al subir CV");
-      const text = await res.text();
-      return text;
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.responseException?.exceptionMessage || "Error al subir CV");
+      }
+      
+      const result = await res.json();
+      return result.message || "CV subido exitosamente";
     } catch (error) {
       throw error;
     }

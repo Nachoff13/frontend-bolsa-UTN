@@ -20,6 +20,7 @@ import {
   LinearProgress,
 } from "@mui/material";
 import Titulo from "@/components/shared/Titulo";
+import FileUpload from "@/components/shared/FileUpload";
 import {
   Email,
   Phone,
@@ -38,9 +39,16 @@ export default function PerfilEstudiantePage() {
   const { showMessage } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [perfil, setPerfil] = useState<PerfilCandidatoDTO | null>(null);
+  const [uploadingCv, setUploadingCv] = useState(false);
+  const [cvUploadError, setCvUploadError] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
   // Obtener el perfilId de los parámetros de la ruta
   const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 2;
+  
+  // Debug: verificar el perfilId
+  console.log('🔧 PerfilId from params:', params?.perfilId);
+  console.log('🔧 Parsed perfilId:', perfilId);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -60,6 +68,73 @@ export default function PerfilEstudiantePage() {
     };
     fetchPerfil();
   }, [perfilId, showMessage]);
+
+  const handleFileSelect = (file: File) => {
+    setCvUploadError(null);
+    setUploadedFileName(null);
+  };
+
+  const handleCvUpload = async (file: File) => {
+    try {
+      setUploadingCv(true);
+      setCvUploadError(null);
+      
+      // Validar que perfilId sea válido
+      if (!perfilId || isNaN(perfilId)) {
+        throw new Error("ID de perfil inválido");
+      }
+      
+      console.log('🔧 Uploading CV for perfilId:', perfilId);
+      
+      await candidatoService.uploadCv(file, perfilId);
+      
+      setUploadedFileName(file.name);
+      showMessage("CV subido exitosamente", SnackbarType.Success);
+      
+      // Recargar el perfil para obtener la información actualizada
+      const data = await candidatoService.getPerfilById(perfilId);
+      setPerfil(data);
+      
+    } catch (error: any) {
+      const errorMessage = error?.message || "Error al subir el CV";
+      setCvUploadError(errorMessage);
+      showMessage(errorMessage, SnackbarType.Error);
+    } finally {
+      setUploadingCv(false);
+    }
+  };
+
+  const handleCvDownload = () => {
+    if (!perfil?.cv) {
+      showMessage("No hay CV disponible para descargar", SnackbarType.Error);
+      return;
+    }
+
+    try {
+      // Convertir base64 a blob
+      const byteCharacters = atob(perfil.cv);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+      // Crear URL del blob y descargar
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `CV_${perfil.nombre || 'candidato'}_${new Date().getFullYear()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showMessage("CV descargado exitosamente", SnackbarType.Success);
+    } catch (error) {
+      showMessage("Error al descargar el CV", SnackbarType.Error);
+    }
+  };
 
   if (loading) return <LoadingModal open={loading} />;
   if (!perfil) return (
@@ -235,31 +310,48 @@ export default function PerfilEstudiantePage() {
         {/* CV */}
         <Card>
           <CardContent sx={{ p: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
               <Description color="primary" />
               <Typography variant="h6" fontWeight={600}>
                 Curriculum Vitae
               </Typography>
             </Stack>
+            
             {perfil.cv ? (
-              <Box sx={{ textAlign: "center", py: 2 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  CV disponible para descarga
-                </Typography>
+              <Box sx={{ mb: 3 }}>
+                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                  <CheckCircle color="success" />
+                  <Typography variant="body2" color="success.main" fontWeight={500}>
+                    CV cargado exitosamente
+                  </Typography>
+                </Stack>
                 <Chip
                   icon={<Description />}
                   label="Descargar CV"
                   color="primary"
                   variant="outlined"
                   clickable
-                  sx={{ fontWeight: 500 }}
+                  onClick={handleCvDownload}
+                  sx={{ fontWeight: 500, cursor: 'pointer' }}
                 />
               </Box>
             ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
-                No hay CV cargado
-              </Typography>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: "italic" }}>
+                  No hay CV cargado. Sube tu CV en formato PDF.
+                </Typography>
+              </Box>
             )}
+
+            <FileUpload
+              onFileSelect={handleFileSelect}
+              onUpload={handleCvUpload}
+              isUploading={uploadingCv}
+              uploadedFileName={uploadedFileName || undefined}
+              accept=".pdf"
+              maxSize={5}
+              error={cvUploadError || undefined}
+            />
           </CardContent>
         </Card>
 
