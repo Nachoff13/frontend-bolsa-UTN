@@ -4,7 +4,7 @@
 export const CONTROLLERS = {
   PUBLICACION: "/publicacion",
   GENERIC : "/generic",
-  POSTULANTE: "/postulante",
+  POSTULACION: "/postulacion",
 } as const;
 
 export const ENDPOINTS = {
@@ -19,7 +19,7 @@ export const ENDPOINTS = {
     GET_CARRERAS: `${CONTROLLERS.GENERIC}/get_carreras`,
   },
   POSTULANTE: {
-    GET_POSTULACIONES: `${CONTROLLERS.POSTULANTE}/get_postulaciones`,
-    POSTULARSE: `${CONTROLLERS.POSTULANTE}/postularse_oferta`,
+    GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
+    POSTULARSE: `${CONTROLLERS.POSTULACION}/postularse_oferta`,
   },
 } as const;
