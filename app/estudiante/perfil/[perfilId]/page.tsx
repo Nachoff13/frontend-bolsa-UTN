@@ -71,7 +71,7 @@ export default function PerfilEstudiantePage() {
   );
 
   const educacion = {
-    titulo: perfil.carrera ?? "Carrera no especificada",
+    titulo: perfil.carreraNombre ?? perfil.carrera ?? "Carrera no especificada",
     institucion: "Universidad Tecnológica Nacional - FRLP",
     periodo: perfil.anioEgreso ? `Hasta ${perfil.anioEgreso}` : "En curso",
     progreso: `${perfil.porcentajePerfil ?? 0}% completado`,
@@ -108,15 +108,35 @@ export default function PerfilEstudiantePage() {
                 <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
                   {perfil.nombre || "Nombre no disponible"}
                 </Typography>
-                <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                {perfil.carreraNombre && (
+                  <Typography variant="h6" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
+                    {perfil.carreraNombre}
+                  </Typography>
+                )}
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
                   {perfil.legajo && (
-                    <Chip label={`Legajo: ${perfil.legajo}`} color="primary" size="small" sx={{ fontWeight: 500 }} />
+                    <Chip 
+                      label={`Legajo: ${perfil.legajo}`} 
+                      color="primary" 
+                      size="small" 
+                      sx={{ fontWeight: 500 }}
+                    />
                   )}
                   {perfil.rolNombre && (
-                    <Chip label={perfil.rolNombre} variant="outlined" size="small" sx={{ fontWeight: 500 }} />
+                    <Chip 
+                      label={perfil.rolNombre} 
+                      variant="outlined" 
+                      size="small" 
+                      sx={{ fontWeight: 500 }}
+                    />
                   )}
                   {perfil.generoNombre && (
-                    <Chip label={perfil.generoNombre} variant="outlined" size="small" sx={{ fontWeight: 500 }} />
+                    <Chip 
+                      label={perfil.generoNombre} 
+                      variant="outlined" 
+                      size="small" 
+                      sx={{ fontWeight: 500 }}
+                    />
                   )}
                 </Stack>
                 <Stack spacing={1}>
@@ -170,7 +190,7 @@ export default function PerfilEstudiantePage() {
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Habilidades y Competencias
             </Typography>
-            <Stack direction="row" flexWrap="wrap" spacing={1}>
+            <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
               {/* Habilidades hardcodeadas por ahora */}
               <Chip label="Python" color="primary" />
               <Chip label="SQL" color="primary" />
@@ -184,37 +204,30 @@ export default function PerfilEstudiantePage() {
         {/* Educación */}
         <Card>
           <CardContent sx={{ p: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
               <School color="primary" />
               <Typography variant="h6" fontWeight={600}>
                 Educación
               </Typography>
             </Stack>
             <Box sx={{ pl: 4 }}>
-              <Typography variant="h6" fontWeight={500} sx={{ mb: 1 }}>
+              <Typography variant="h6" fontWeight={500} sx={{ mb: 2 }}>
                 {educacion.titulo}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {educacion.institucion}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {educacion.periodo}
-              </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Progreso del perfil:
-                </Typography>
-                <Box sx={{ flex: 1, maxWidth: 200 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={perfil.porcentajePerfil ?? 0}
-                    sx={{ height: 6, borderRadius: 3 }}
+              <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                {perfil.anioEgreso && (
+                  <Chip 
+                    label={`Egreso: ${perfil.anioEgreso}`} 
+                    color="primary" 
+                    variant="outlined"
+                    size="small"
+                    sx={{ fontWeight: 500 }}
                   />
-                </Box>
-                <Typography variant="body2" fontWeight={500}>
-                  {educacion.progreso}
-                </Typography>
-              </Box>
+                )}
+              </Stack>
             </Box>
           </CardContent>
         </Card>

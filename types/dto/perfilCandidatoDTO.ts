@@ -25,11 +25,16 @@ export interface PerfilCandidatoDTO {
   rolNombre?: string | null;
   rolCodigo?: string | null;
   
+  // Derivados/relacionados desde Carrera (según diagrama)
+  idCarrera?: number | null;
+  carreraNombre?: string | null;
+  carreraCodigo?: string | null;
+  
   // Calculados por el backend
   porcentajePerfil?: number | null;
   
   // Campos que no están en el diagrama (se mantienen para compatibilidad UI)
   telefono?: string | null;
   localidad?: string | null;
-  carrera?: string | null;
+  carrera?: string | null; // DEPRECATED - usar carreraNombre
 } 
