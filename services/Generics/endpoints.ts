@@ -3,8 +3,8 @@
 // Controllers en un solo lugar
 export const CONTROLLERS = {
   PUBLICACION: "/publicacion",
-  GENERIC: "/generic",
-  POSTULACIONES: "/postulaciones",
+  GENERIC : "/generic",
+  POSTULACION: "/postulacion",
 } as const;
 
 export const ENDPOINTS = {
@@ -28,9 +28,14 @@ export const ENDPOINTS = {
       `${CONTROLLERS.POSTULACIONES}/get_postulaciones_por_estado/${idEstudiante}?idEstado=${idEstado}`,
   },
 
+
   GENERIC: {
     GET_TIPO_CONTRATO: `${CONTROLLERS.GENERIC}/get_tipos_contratos`,
     GET_MODALIDAD: `${CONTROLLERS.GENERIC}/get_modalidades`,
     GET_CARRERAS: `${CONTROLLERS.GENERIC}/get_carreras`,
+  },
+  POSTULANTE: {
+    GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
+    POSTULARSE: `${CONTROLLERS.POSTULACION}/postularse_oferta`,
   },
 } as const;

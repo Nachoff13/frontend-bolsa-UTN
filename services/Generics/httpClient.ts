@@ -17,7 +17,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -29,7 +29,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -41,7 +41,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -53,7 +53,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -65,7 +65,7 @@ export class HttpClient {
       if (res.data?.isError) {
         throw ParseError({ response: { data: res.data } } as any);
       }
-      return res.data.result.data;
+    return (res.data.result ?? res.data.message) as T;
     } catch (err) {
       throw ParseError(err);
     }
@@ -77,14 +77,40 @@ export const http = new HttpClient(process.env.NEXT_PUBLIC_API_URL || "");
 
 export function ParseError(err: unknown): ResponseError {
   const ax = err as AxiosError<ApiResponse<any>>;
-  const data = ax.response?.data;
+  const data = ax?.response?.data;
+
+  const exception = data?.responseException?.exceptionMessage;
+
+  const isValidationError =
+    exception && typeof exception === "object" && "errors" in exception;
+
+  if (isValidationError) {
+    const validationException = exception as {
+      errors: Record<string, string[]>;
+      title?: string;
+    };
+    const errors = validationException.errors;
+    const allErrors = Object.entries(errors)
+      .map(([field, messages]) => messages.join("\n"))
+      .join("\n");
+    return {
+      message: allErrors || validationException.title || "Error de validación",
+      status: ax.response?.status ?? 500,
+    };
+  }
+
+  if (typeof exception === "string" && exception.length > 0) {
+    return {
+      message: exception,
+      status: ax.response?.status ?? 500,
+    };
+  }
 
   return {
     message:
-      data?.responseException?.exceptionMessage ||
-      data?.message ||
-      ax.message ||
-      "Ocurrió un error",
-    status: ax.response?.status,
+      typeof data?.message === "string"
+        ? data.message
+        : ax?.message ?? "Ocurrió un error inesperado",
+    status: ax.response?.status ?? 500,
   };
 }

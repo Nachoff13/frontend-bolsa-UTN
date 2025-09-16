@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body>
         <MuiThemeProvider>
-          <SnackbarProvider> {/* 👈 envolvés toda tu app */}
+          <SnackbarProvider> 
             <AppLayout>{children}</AppLayout>
           </SnackbarProvider>
         </MuiThemeProvider>

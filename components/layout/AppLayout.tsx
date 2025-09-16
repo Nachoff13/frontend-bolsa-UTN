@@ -41,7 +41,7 @@ const navItems = [
     icon: <WorkIcon />,
   },
   {
-    href: "/postulaciones",
+    href: "/estudiante/postulaciones",
     label: "Mis Postulaciones",
     icon: <DescriptionIcon />,
   },
