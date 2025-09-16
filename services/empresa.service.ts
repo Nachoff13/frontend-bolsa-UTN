@@ -9,7 +9,7 @@ class EmpresaService extends GenericService {
   async getPublicacionesEmpleo(filtros : FiltrosBusquedaDTO) {
     try {
       console.log('Filtros enviados al servicio:', filtros);
-      const res = await http.post<OfertaDTO[]>(ENDPOINTS.PUBLICACION.GET_ALL, filtros);
+      const res : OfertaDTO[] = await http.post<OfertaDTO[]>(ENDPOINTS.PUBLICACION.GET_ALL, filtros);
       return res;
     } catch (error) {
       throw error;

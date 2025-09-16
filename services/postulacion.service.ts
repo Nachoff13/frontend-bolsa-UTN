@@ -5,10 +5,10 @@ import type { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { GenericService } from "./generic.service";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 
-class PostulanteService extends GenericService {
+class PostulacionService extends GenericService {
   async postularseOferta(data: PostulacionDTO) {
     try {
-      const res = await http.post(ENDPOINTS.POSTULANTE.POSTULARSE, data);
+      const res = await http.post(ENDPOINTS.POSTULACION.POSTULARSE, data);
       return res as string;
     } catch (error) {
       throw error;
@@ -17,7 +17,7 @@ class PostulanteService extends GenericService {
 
   async getPostulaciones(){
     try {
-      const res = await http.get<PostulacionDTO[]>(ENDPOINTS.POSTULANTE.GET_POSTULACIONES);
+      const res = await http.get<PostulacionDTO[]>(ENDPOINTS.POSTULACION.GET_POSTULACIONES);
       return res;
     }
     catch (error) {
@@ -26,4 +26,4 @@ class PostulanteService extends GenericService {
   }
 }
 
-export const postulanteService = new PostulanteService();
+export const postulanteService = new PostulacionService();

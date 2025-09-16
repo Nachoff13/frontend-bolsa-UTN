@@ -5,7 +5,7 @@ import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 export class GenericService {
   async getTipoContrato() {
     try {
-      const res = await http.get<OpcionFiltro[]>(
+      const res : OpcionFiltro[] = await http.get<OpcionFiltro[]>(
         ENDPOINTS.GENERIC.GET_TIPO_CONTRATO
       );
       return res;
@@ -17,7 +17,7 @@ export class GenericService {
 
   async getModalidad() {
     try {
-      const res = await http.get<OpcionFiltro[]>(
+      const res : OpcionFiltro[] = await http.get<OpcionFiltro[]>(
         ENDPOINTS.GENERIC.GET_MODALIDAD
       );
       return res;
@@ -28,7 +28,7 @@ export class GenericService {
   }
   async getCarreras() {
     try {
-      const res = await http.get<OpcionFiltro[]>(
+      const res : OpcionFiltro[] = await http.get<OpcionFiltro[]>(
         ENDPOINTS.GENERIC.GET_CARRERAS
       );
       return res;
