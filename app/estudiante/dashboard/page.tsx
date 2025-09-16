@@ -1,110 +1,109 @@
-// app/candidato/dashboard/page.tsx
+// app/estudiante/dashboard/page.tsx
 import React from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import StatCard from "@/components/shared/StatCard";
 import RecentOffers from "@/components/shared/RecentOffers";
 import MyApplications from "@/components/shared/MyApplications";
+
+import { empresaService } from "@/services/empresa.service";
 import { candidatoService } from "@/services/estudiante.service";
-import { empresaService } from "@/services/empresa.service"; // tu ejemplo
-import type { ApplicationCardDto } from "@/types/dto/postulacionDTO";
 import type { OfertaDTO } from "@/types/dto/ofertaDTO";
+import type { ApplicationCardDto } from "@/types/dto/postulacionDTO";
 
-// TODO: reemplazar por tu proveedor real (cookies/session/JWT)
-async function getCurrentStudentId(): Promise<number> {
-  // e.g. leer de cookies/headers o llamar a /me
-  return 123;
-}
+// ⚠️ Reemplazar por el id real desde sesión/auth
+const ID_ESTUDIANTE = 1;
 
+// Helpers
 function parseISO(d?: string) {
   if (!d) return null;
   const dt = new Date(d);
   return isNaN(dt.getTime()) ? null : dt;
 }
-
-function isWithinLastMonth(d?: string) {
+function isWithinLast30Days(d?: string) {
   const date = parseISO(d);
   if (!date) return false;
   const now = new Date();
-  const thirtyDaysAgo = new Date(now);
-  thirtyDaysAgo.setDate(now.getDate() - 30);
-  return date >= thirtyDaysAgo && date <= now;
+  const from = new Date(now);
+  from.setDate(now.getDate() - 30);
+  return date >= from && date <= now;
 }
 
 export default async function DashboardPage() {
-  const idEstudiante = await getCurrentStudentId();
-
   // Defaults
   let postulaciones: ApplicationCardDto[] = [];
   let postulacionesMes = 0;
   let publicaciones: OfertaDTO[] = [];
 
-  // Cargas SSR (livianas, solo para las métricas)
+  // SSR: cargar métricas
   try {
-    postulaciones = await candidatoService.getPostulaciones(idEstudiante);
-  } catch {
-    postulaciones = [];
-  }
+    postulaciones = await candidatoService.getPostulaciones(ID_ESTUDIANTE);
+  } catch {}
   try {
-    postulacionesMes = await candidatoService.getPostulacionesUltimoMes(idEstudiante);
-  } catch {
-    postulacionesMes = 0;
-  }
+    postulacionesMes = (await candidatoService.getPostulacionesRecientes(ID_ESTUDIANTE)).length;
+  } catch {}
   try {
-    const res = await empresaService.getPublicacionesEmpleo();
-    publicaciones = res?.data ?? res ?? [];
-  } catch {
-    publicaciones = [];
-  }
+    publicaciones = await empresaService.getPublicacionesEmpleo();
+  } catch {}
 
   // Métricas
   const postulacionesActivas = postulaciones.filter(
     (p) => p.estado !== "Rechazada"
   ).length;
 
-  // “Publicaciones del último mes” (card arriba)
   const publicacionesUltimoMes = publicaciones.filter((o) =>
-    isWithinLastMonth(o.fechaInicio)
+    isWithinLast30Days(o.fechaInicio)
   ).length;
 
-  // Si algún día querés traer el % perfil desde API, reemplazá esto
-  const perfilCompletado = 0;
+  const perfilCompletado = 85; // placeholder, reemplazar por API real
+  const entrevistasMes = postulaciones.filter(
+    (p) => p.estado === "Entrevista" && isWithinLast30Days(p.fechaPostulacion)
+  ).length;
 
   return (
-    <AppLayout title="Dashboard del Candidato">
-      <div className="mb-4 text-sm text-neutral-600">
-        Bienvenido al portal de empleos de la UTN FRLP
+    <AppLayout>
+      {/* Header */}
+      <div className="mb-2">
+        <h1 className="text-2xl font-semibold">Dashboard del Candidato</h1>
+        <p className="text-sm text-neutral-600">
+          Bienvenido al portal de empleos de la UTN FRLP
+        </p>
       </div>
 
-      {/* Métricas superiores */}
+      {/* Métricas */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
         <StatCard
           label="Postulaciones activas"
           value={postulacionesActivas}
-          subtitle="en proceso de revisión"
+          subtitle="esperando a revisión"
         />
         <StatCard
-          label="Postulaciones este mes"
-          value={postulacionesMes}
-          subtitle="últimos 30 días"
-        />
-        <StatCard
-          label="Publicaciones del último mes"
+          label="Ofertas nuevas"
           value={publicacionesUltimoMes}
-          subtitle="ofertas nuevas"
+          subtitle="este mes"
         />
+        <StatCard label="Perfil completado" value={`${perfilCompletado}%`} />
         <StatCard
-          label="Perfil completado"
-          value={`${perfilCompletado}%`}
+          label="Entrevistas"
+          value={entrevistasMes}
+          subtitle="este mes"
         />
       </div>
 
-      {/* Listas principales */}
+      {/* Columnas principales */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Publicaciones de empleo recientes (CSR) */}
-        <RecentOffers />
+        {/* Ofertas recientes */}
+        <section className="rounded-2xl border border-neutral-200 bg-white p-4">
+          <h3 className="mb-3 text-base font-semibold">
+            Publicaciones de empleo recientes
+          </h3>
+          <RecentOffers limit={3} />
+        </section>
 
-        {/* Mis postulaciones (CSR) */}
-        <MyApplications />
+        {/* Mis postulaciones */}
+        <section className="rounded-2xl border border-neutral-200 bg-white p-4">
+          <h3 className="mb-3 text-base font-semibold">Mis postulaciones</h3>
+          <MyApplications studentId={ID_ESTUDIANTE} />
+        </section>
       </div>
     </AppLayout>
   );

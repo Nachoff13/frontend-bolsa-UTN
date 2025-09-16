@@ -3,24 +3,29 @@
 // Controllers en un solo lugar
 export const CONTROLLERS = {
   PUBLICACION: "/publicacion",
-  GENERIC : "/generic",
-  POSTULACIONES : "/postulaciones",
+  GENERIC: "/generic",
+  POSTULACIONES: "/postulaciones",
 } as const;
 
 export const ENDPOINTS = {
-
    PUBLICACION: {
-    GET_ALL: `${CONTROLLERS.PUBLICACION}/get_publicaciones_empleo`,
-    GET_RECIENTES: `${CONTROLLERS.PUBLICACION}/recientes`,
-    GET_BY_CARRERA: (idCarrera: number | string) =>
-      `${CONTROLLERS.PUBLICACION}/por-carrera/${idCarrera}`,
+    GET_ALL: `${CONTROLLERS.PUBLICACION}/get_publicaciones`,
+
+    GET_RECIENTES: (limit: number = 3) =>
+      `${CONTROLLERS.PUBLICACION}/get_publicaciones_recientes?limit=${limit}`,
   },
 
   POSTULACIONES: {
-    GET_BY_ESTUDIANTE: (idEstudiante: number | string) =>
+    // ← ahora es función, porque la ruta necesita el id
+    GET_POSTULACIONES: (idEstudiante: number | string) =>
       `${CONTROLLERS.POSTULACIONES}/${idEstudiante}`,
+
     GET_ULTIMO_MES: (idEstudiante: number | string) =>
       `${CONTROLLERS.POSTULACIONES}/${idEstudiante}/ultimo-mes`,
+
+    // la de estado que teníamos
+    GET_POSTULACION_POR_ESTADO: (idEstudiante: number | string, idEstado: number | string) =>
+      `${CONTROLLERS.POSTULACIONES}/get_postulaciones_por_estado/${idEstudiante}?idEstado=${idEstado}`,
   },
 
   GENERIC: {
@@ -28,6 +33,4 @@ export const ENDPOINTS = {
     GET_MODALIDAD: `${CONTROLLERS.GENERIC}/get_modalidades`,
     GET_CARRERAS: `${CONTROLLERS.GENERIC}/get_carreras`,
   },
-  
-  
 } as const;

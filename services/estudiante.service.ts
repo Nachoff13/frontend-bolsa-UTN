@@ -8,7 +8,7 @@ class CandidatoService extends GenericService {
   async getPostulaciones(idEstudiante: number | string) {
     try {
       const res = await http.get<ApplicationCardDto[]>(
-        ENDPOINTS.POSTULACIONES.GET_BY_ESTUDIANTE(idEstudiante)
+        ENDPOINTS.POSTULACIONES.GET_POSTULACIONES(idEstudiante)
       );
       return res;
     } catch (error) {
@@ -16,27 +16,44 @@ class CandidatoService extends GenericService {
     }
   }
 
-  async getPostulacionesUltimoMes(idEstudiante: number | string) {
-    try {
-      const res = await http.get<number>(
-        ENDPOINTS.POSTULACIONES.GET_ULTIMO_MES(idEstudiante)
-      );
-      return res;
-    } catch (error) {
-      throw error;
-    }
+  async getPostulacionesRecientes(idEstudiante: number | string) {
+  try {
+    const res = await http.get<ApplicationCardDto[]>(
+      ENDPOINTS.POSTULACIONES.GET_POSTULACIONES(idEstudiante)
+    );
+    // res es ApplicationCardDto[]
+    return res.slice(0, 3); // 👈 quedate solo con 3
+  } catch (error) {
+    throw error;
   }
+}
 
-  async getPublicacionesRecientes() {
+
+  async getPublicacionesRecientes(limit: number = 3) {
     try {
       const res = await http.get<OfertaDTO[]>(
-        ENDPOINTS.PUBLICACION.GET_RECIENTES
+        ENDPOINTS.PUBLICACION.GET_RECIENTES(limit)
       );
       return res;
     } catch (error) {
       throw error;
     }
   }
+
+  async getPostulacionesPorEstado(
+    idEstudiante: number | string,
+    idEstado: number | string
+  ) {
+    try {
+      const res = await http.get<ApplicationCardDto[]>(
+        ENDPOINTS.POSTULACIONES.GET_POSTULACION_POR_ESTADO(idEstudiante, idEstado)
+      );
+      return res; // 👈 mantenemos AxiosResponse
+    } catch (error) {
+      throw error;
+    }
+  }
+
 }
 
 export const candidatoService = new CandidatoService();

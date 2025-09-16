@@ -1,16 +1,11 @@
-// import { useUser } from '@auth0/nextjs-auth0/client'
-// import { useRouter } from 'next/navigation'
-// import { useEffect } from 'react'
-// import { UserRole } from '@/types/auth'
+import type { AuthState } from "@/types/auth";
 
-// Hook para manejo de autenticación
-export function useAuth() {
-  // Aquí irá la lógica de autenticación
+export function useAuth(): AuthState & { login: () => void; logout: () => void } {
   return {
     user: null,
-    isLoading: false,
     isAuthenticated: false,
+    isLoading: false,
     login: () => {},
     logout: () => {},
-  }
-} 
+  };
+}
