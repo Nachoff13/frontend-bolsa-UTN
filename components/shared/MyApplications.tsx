@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { candidatoService as candidatoService } from "@/services/estudiante.service";
-import type { ApplicationCardDto as PostulacionDTO } from "@/types/dto/postulacionDTO";
+import type { PostulacionDTO as PostulacionDTO } from "@/types/dto/postulacionDTO";
 import SkeletonLoader from "./SkeletonLoader";
 import EmptyState from "./EmptyState";
 import {PostulacionCard} from "./CardPostulacion";
@@ -53,7 +53,7 @@ export default function MyApplications({ studentId, limit = 5 }: Props) {
   return (
     <div className="flex flex-col gap-2">
       {items.map((p) => (
-        <PostulacionCard key={p.idPostulacion} postulacion={p} />
+        <PostulacionCard key={p.id} postulacion={p} />
       ))}
     </div>
   );

@@ -1,20 +1,20 @@
 import CardGenerica from "@/components/shared/CardGenerica";
-import { ApplicationCardDto } from "@/types/dto/postulacionDTO";
+import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import BusinessIcon from "@mui/icons-material/Business";
 import EventIcon from "@mui/icons-material/Event";
 
-export function PostulacionCard({ postulacion }: { postulacion: ApplicationCardDto }) {
+export function PostulacionCard({ postulacion }: { postulacion: PostulacionDTO }) {
   return (
     <CardGenerica
       titulo={postulacion.tituloOferta}
       subtitulo={postulacion.nombreEmpresa}
       chips={[
         {
-          label: postulacion.estado,
+          label: postulacion.estadoPostulacion,
           color:
-            postulacion.estado === "En revisión"
+            postulacion.estadoPostulacion === "En revisión"
               ? "info"
-              : postulacion.estado === "Entrevista"
+              : postulacion.estadoPostulacion === "Entrevista"
               ? "success"
               : "error",
         },
@@ -26,10 +26,10 @@ export function PostulacionCard({ postulacion }: { postulacion: ApplicationCardD
         },
         {
           icon: <EventIcon fontSize="small" />,
-          texto: postulacion.fechaPostulacionTexto,
+          texto: postulacion.fechaPostulacion,
         },
       ]}
-      onAccion1={() => console.log("Ver estado", postulacion.idPostulacion)}
+      onAccion1={() => console.log("Ver estado", postulacion.id)}
       textoAccion1="Ver estado"
     />
   );

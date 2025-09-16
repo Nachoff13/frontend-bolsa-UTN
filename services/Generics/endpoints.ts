@@ -18,14 +18,14 @@ export const ENDPOINTS = {
   POSTULACIONES: {
     // ← ahora es función, porque la ruta necesita el id
     GET_POSTULACIONES: (idEstudiante: number | string) =>
-      `${CONTROLLERS.POSTULACIONES}/${idEstudiante}`,
+      `${CONTROLLERS.POSTULACION}/${idEstudiante}`,
 
     GET_ULTIMO_MES: (idEstudiante: number | string) =>
-      `${CONTROLLERS.POSTULACIONES}/${idEstudiante}/ultimo-mes`,
+      `${CONTROLLERS.POSTULACION}/${idEstudiante}/ultimo-mes`,
 
     // la de estado que teníamos
     GET_POSTULACION_POR_ESTADO: (idEstudiante: number | string, idEstado: number | string) =>
-      `${CONTROLLERS.POSTULACIONES}/get_postulaciones_por_estado/${idEstudiante}?idEstado=${idEstado}`,
+      `${CONTROLLERS.POSTULACION}/get_postulaciones_por_estado/${idEstudiante}?idEstado=${idEstado}`,
   },
 
 

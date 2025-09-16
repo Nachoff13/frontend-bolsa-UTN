@@ -1,13 +1,13 @@
 import { http } from "@/services/Generics/httpClient";
 import { ENDPOINTS } from "@/services/Generics/endpoints";
-import type { ApplicationCardDto } from "@/types/dto/postulacionDTO";
+import type { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import type { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { GenericService } from "./generic.service";
 
 class CandidatoService extends GenericService {
   async getPostulaciones(idEstudiante: number | string) {
     try {
-      const res = await http.get<ApplicationCardDto[]>(
+      const res = await http.get<PostulacionDTO[]>(
         ENDPOINTS.POSTULACIONES.GET_POSTULACIONES(idEstudiante)
       );
       return res;
@@ -18,7 +18,7 @@ class CandidatoService extends GenericService {
 
   async getPostulacionesRecientes(idEstudiante: number | string) {
   try {
-    const res = await http.get<ApplicationCardDto[]>(
+    const res = await http.get<PostulacionDTO[]>(
       ENDPOINTS.POSTULACIONES.GET_POSTULACIONES(idEstudiante)
     );
     // res es ApplicationCardDto[]
@@ -45,7 +45,7 @@ class CandidatoService extends GenericService {
     idEstado: number | string
   ) {
     try {
-      const res = await http.get<ApplicationCardDto[]>(
+      const res = await http.get<PostulacionDTO[]>(
         ENDPOINTS.POSTULACIONES.GET_POSTULACION_POR_ESTADO(idEstudiante, idEstado)
       );
       return res; // 👈 mantenemos AxiosResponse
