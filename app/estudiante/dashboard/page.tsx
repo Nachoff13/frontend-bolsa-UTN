@@ -1,63 +1,59 @@
-// app/estudiante/dashboard/page.tsx
-import React from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import StatCard from "@/components/shared/StatCard";
-import RecentOffers from "@/components/shared/RecentOffers";
 import MyApplications from "@/components/shared/MyApplications";
+import CardGenerica from "@/components/shared/CardGenerica";
 
 import { empresaService } from "@/services/empresa.service";
 import { candidatoService } from "@/services/estudiante.service";
 import type { OfertaDTO } from "@/types/dto/ofertaDTO";
-import type { ApplicationCardDto } from "@/types/dto/postulacionDTO";
+import type { PostulacionDTO } from "@/types/dto/postulacionDTO";
+
+import {
+  LocationOn as LocationOnIcon,
+  CalendarToday as CalendarTodayIcon,
+  Event as EventIcon,
+} from "@mui/icons-material";
 
 // ⚠️ Reemplazar por el id real desde sesión/auth
 const ID_ESTUDIANTE = 1;
 
-// Helpers
-function parseISO(d?: string) {
-  if (!d) return null;
-  const dt = new Date(d);
-  return isNaN(dt.getTime()) ? null : dt;
-}
-function isWithinLast30Days(d?: string) {
-  const date = parseISO(d);
-  if (!date) return false;
-  const now = new Date();
-  const from = new Date(now);
-  from.setDate(now.getDate() - 30);
-  return date >= from && date <= now;
-}
+export default function DashboardPage() {
+  // Estados métricas
+  const [postulacionesActivas, setPostulacionesActivas] = useState(0);
+  const [ofertasNuevas, setOfertasNuevas] = useState(0);
+  const [perfilCompletado, setPerfilCompletado] = useState(0);
+  const [entrevistasMes, setEntrevistasMes] = useState(0);
 
-export default async function DashboardPage() {
-  // Defaults
-  let postulaciones: ApplicationCardDto[] = [];
-  let postulacionesMes = 0;
-  let publicaciones: OfertaDTO[] = [];
+  // Estados listas
+  const [publicaciones, setPublicaciones] = useState<OfertaDTO[]>([]);
+  const [postulaciones, setPostulaciones] = useState<PostulacionDTO[]>([]);
 
-  // SSR: cargar métricas
-  try {
-    postulaciones = await candidatoService.getPostulaciones(ID_ESTUDIANTE);
-  } catch {}
-  try {
-    postulacionesMes = (await candidatoService.getPostulacionesRecientes(ID_ESTUDIANTE)).length;
-  } catch {}
-  try {
-    publicaciones = await empresaService.getPublicacionesEmpleo();
-  } catch {}
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1) Publicaciones
+        const pubs = await empresaService.getPublicaciones();
+        setPublicaciones(pubs);
 
-  // Métricas
-  const postulacionesActivas = postulaciones.filter(
-    (p) => p.estado !== "Rechazada"
-  ).length;
+        // 2) Postulaciones
+        const posts = await candidatoService.getPostulaciones();
+        setPostulaciones(posts);
 
-  const publicacionesUltimoMes = publicaciones.filter((o) =>
-    isWithinLast30Days(o.fechaInicio)
-  ).length;
+        // Métricas (por ahora con lógica simple)
+        setPostulacionesActivas(posts.filter((p) => p.estadoPostulacion !== "Rechazada").length);
+        setOfertasNuevas(pubs.length);
+        setPerfilCompletado(85); // ⚠️ reemplazar por endpoint real
+        setEntrevistasMes(posts.filter((p) => p.estadoPostulacion === "Entrevista").length);
+      } catch (err) {
+        console.error("Error cargando dashboard", err);
+      }
+    };
 
-  const perfilCompletado = 85; // placeholder, reemplazar por API real
-  const entrevistasMes = postulaciones.filter(
-    (p) => p.estado === "Entrevista" && isWithinLast30Days(p.fechaPostulacion)
-  ).length;
+    fetchData();
+  }, []);
 
   return (
     <AppLayout>
@@ -74,14 +70,17 @@ export default async function DashboardPage() {
         <StatCard
           label="Postulaciones activas"
           value={postulacionesActivas}
-          subtitle="esperando a revisión"
+          subtitle="en proceso de revisión"
         />
         <StatCard
           label="Ofertas nuevas"
-          value={publicacionesUltimoMes}
+          value={ofertasNuevas}
           subtitle="este mes"
         />
-        <StatCard label="Perfil completado" value={`${perfilCompletado}%`} />
+        <StatCard
+          label="Perfil completado"
+          value={`${perfilCompletado}%`}
+        />
         <StatCard
           label="Entrevistas"
           value={entrevistasMes}
@@ -91,18 +90,48 @@ export default async function DashboardPage() {
 
       {/* Columnas principales */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Ofertas recientes */}
+        {/* Izquierda: ofertas recientes */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-4">
           <h3 className="mb-3 text-base font-semibold">
             Publicaciones de empleo recientes
           </h3>
-          <RecentOffers limit={3} />
+
+          {publicaciones.slice(0, 3).map((oferta) => (
+            <CardGenerica
+              key={oferta.id}
+              titulo={oferta.titulo}
+              subtitulo={`🏢 ${oferta.nombreEmpresa ?? "Empresa"}`}
+              descripcion={oferta.descripcion}
+              chips={[
+                { label: oferta.modalidad ?? "Modalidad", color: "secondary" },
+                { label: oferta.tipoContrato ?? "Contrato", color: "info" },
+              ]}
+              infoExtra={[
+                {
+                  icon: <LocationOnIcon fontSize="small" />,
+                  texto: oferta.nombreLocalidad ?? "Ubicación no especificada",
+                },
+                {
+                  icon: <CalendarTodayIcon fontSize="small" />,
+                  texto: `Publicado el ${oferta.fechaInicio ?? "-"}`,
+                },
+                {
+                  icon: <EventIcon fontSize="small" />,
+                  texto: `Cierra el ${oferta.fechaFin ?? "-"}`,
+                },
+              ]}
+              onAccion1={() => console.log("Ver detalle", oferta.id)}
+              textoAccion1="Ver detalles"
+              onAccion2={() => console.log("Postularse", oferta.id)}
+              textoAccion2="Postularme"
+            />
+          ))}
         </section>
 
-        {/* Mis postulaciones */}
+        {/* Derecha: mis postulaciones */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-4">
           <h3 className="mb-3 text-base font-semibold">Mis postulaciones</h3>
-          <MyApplications studentId={ID_ESTUDIANTE} />
+          <MyApplications studentId={ID_ESTUDIANTE} limit={5} />
         </section>
       </div>
     </AppLayout>

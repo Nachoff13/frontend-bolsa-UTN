@@ -27,7 +27,7 @@ export default function MyApplications({ studentId, limit = 5 }: Props) {
     let mounted = true;
     (async () => {
       try {
-        const res = await candidatoService.getPostulaciones(id);
+        const res = await candidatoService.getPostulaciones();
         const data = res ?? []; // 👈 sin .data
         if (mounted) setItems(limit ? data.slice(0, limit) : data);
         } catch (e: any) {

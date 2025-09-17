@@ -16,6 +16,15 @@ class EmpresaService extends GenericService {
     }
   }
 
+  async getPublicaciones() {
+    try {
+      const res = await http.post<OfertaDTO[]>(ENDPOINTS.PUBLICACION.GET_ALL);
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
    // contador de publicaciones del mes actual
   async getPublicacionesDelMesActual() {
     try {
