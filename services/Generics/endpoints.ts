@@ -9,7 +9,7 @@ export const CONTROLLERS = {
 
 export const ENDPOINTS = {
    PUBLICACION: {
-    GET_ALL: `${CONTROLLERS.PUBLICACION}/get_publicaciones`,
+    GET_ALL: `${CONTROLLERS.PUBLICACION}/get_publicaciones_empleo`,
 
     GET_RECIENTES: (limit: number = 3) =>
       `${CONTROLLERS.PUBLICACION}/get_publicaciones_recientes?limit=${limit}`,

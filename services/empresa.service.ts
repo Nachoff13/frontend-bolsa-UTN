@@ -4,6 +4,7 @@ import type { ApiResponse } from "@/types/Generics/apiResponse";
 import type { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { GenericService } from "./generic.service";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
+import { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
 
 class EmpresaService extends GenericService {
   async getPublicacionesEmpleo(filtros : FiltrosBusquedaDTO) {
@@ -16,14 +17,17 @@ class EmpresaService extends GenericService {
     }
   }
 
-  async getPublicaciones() {
+  async getPublicaciones(): Promise<OfertaRecienteDTO> {
     try {
-      const res = await http.post<OfertaDTO[]>(ENDPOINTS.PUBLICACION.GET_ALL);
-      return res;
+      const res = await http.get<OfertaRecienteDTO>(ENDPOINTS.PUBLICACION.GET_RECIENTES(3));
+      console.log("Respuesta de getPublicaciones:", res);
+      return res; // 👈 mismo efecto que el primero
     } catch (error) {
       throw error;
     }
   }
+
+
 
    // contador de publicaciones del mes actual
   async getPublicacionesDelMesActual() {

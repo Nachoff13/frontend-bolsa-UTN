@@ -16,6 +16,7 @@ import {
   CalendarToday as CalendarTodayIcon,
   Event as EventIcon,
 } from "@mui/icons-material";
+import { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
 
 // ⚠️ Reemplazar por el id real desde sesión/auth
 const ID_ESTUDIANTE = 1;
@@ -28,35 +29,41 @@ export default function DashboardPage() {
   const [entrevistasMes, setEntrevistasMes] = useState(0);
 
   // Estados listas
-  const [publicaciones, setPublicaciones] = useState<OfertaDTO[]>([]);
+  const [publicaciones, setPublicaciones] = useState<OfertaRecienteDTO>({
+    ofertas: [],
+    cantidadOfertas: 0,
+  });
   const [postulaciones, setPostulaciones] = useState<PostulacionDTO[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // 1) Publicaciones
-        const pubs = await empresaService.getPublicaciones();
-        setPublicaciones(pubs);
+  const fetchData = async () => {
+    try {
+      // 1) Publicaciones
+      const pubs = await empresaService.getPublicaciones(); // <- Promise<OfertaRecienteDTO>
+      console.log("Publicaciones cargadas:", pubs);
+      setPublicaciones(pubs);
 
-        // 2) Postulaciones
-        const posts = await candidatoService.getPostulaciones();
-        setPostulaciones(posts);
+      // 2) Postulaciones
+      const posts = await candidatoService.getPostulaciones();
+      setPostulaciones(posts);
 
-        // Métricas (por ahora con lógica simple)
-        setPostulacionesActivas(posts.filter((p) => p.estadoPostulacion !== "Rechazada").length);
-        setOfertasNuevas(pubs.length);
-        setPerfilCompletado(85); // ⚠️ reemplazar por endpoint real
-        setEntrevistasMes(posts.filter((p) => p.estadoPostulacion === "Entrevista").length);
-      } catch (err) {
-        console.error("Error cargando dashboard", err);
-      }
-    };
+      // Métricas
+      setPostulacionesActivas(posts.filter(p => p.estadoPostulacion !== "Rechazada").length);
+      setOfertasNuevas(pubs.cantidadOfertas); // ✅ ya no rompe
+      setPerfilCompletado(85);
+      setEntrevistasMes(posts.filter(p => p.estadoPostulacion === "En revisión").length);
+    } catch (err) {
+      console.error("Error cargando dashboard", err);
+    }
+  };
 
-    fetchData();
-  }, []);
+  fetchData();
+}, []);
+
 
   return (
-    <AppLayout>
+  <div className="flex min-h-screen">
+    <main className="flex-1 p-4 md:p-6">
       {/* Header */}
       <div className="mb-2">
         <h1 className="text-2xl font-semibold">Dashboard del Candidato</h1>
@@ -70,33 +77,29 @@ export default function DashboardPage() {
         <StatCard
           label="Postulaciones activas"
           value={postulacionesActivas}
-          subtitle="en proceso de revisión"
+          subtitle="sin rechazar"
         />
         <StatCard
           label="Ofertas nuevas"
           value={ofertasNuevas}
           subtitle="este mes"
         />
+        <StatCard label="Perfil completado" value={`${perfilCompletado}%`} />
         <StatCard
-          label="Perfil completado"
-          value={`${perfilCompletado}%`}
-        />
-        <StatCard
-          label="Entrevistas"
+          label="Postulaciones en Revisión"
           value={entrevistasMes}
-          subtitle="este mes"
+          subtitle=""
         />
       </div>
 
       {/* Columnas principales */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Izquierda: ofertas recientes */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-4">
           <h3 className="mb-3 text-base font-semibold">
             Publicaciones de empleo recientes
           </h3>
 
-          {publicaciones.slice(0, 3).map((oferta) => (
+          {publicaciones?.ofertas.slice(0, 3).map((oferta) => (
             <CardGenerica
               key={oferta.id}
               titulo={oferta.titulo}
@@ -128,12 +131,15 @@ export default function DashboardPage() {
           ))}
         </section>
 
-        {/* Derecha: mis postulaciones */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-4">
           <h3 className="mb-3 text-base font-semibold">Mis postulaciones</h3>
           <MyApplications studentId={ID_ESTUDIANTE} limit={5} />
         </section>
       </div>
-    </AppLayout>
-  );
+    </main>
+
+    
+  </div>
+);
+
 }
