@@ -36,4 +36,9 @@ export const ENDPOINTS = {
     GET_CARRERAS: `${CONTROLLERS.GENERIC}/get_carreras`,
   },
 
+  POSTULANTE: {
+    GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
+    POSTULARSE: `${CONTROLLERS.POSTULACION}/postularse_oferta`,
+  },
+
 } as const;
