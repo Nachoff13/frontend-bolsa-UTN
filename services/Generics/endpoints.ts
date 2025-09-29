@@ -22,4 +22,9 @@ export const ENDPOINTS = {
     GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
     POSTULARSE: `${CONTROLLERS.POSTULACION}/postularse_oferta`,
   },
+  CANDIDATO: {
+    GET_PERFIL: `/api/candidato/get_perfil`,
+    UPDATE_PERFIL: `/api/candidato/update_perfil`,
+    UPLOAD_CV: `/api/candidato/upload_cv`,
+  },
 } as const;
