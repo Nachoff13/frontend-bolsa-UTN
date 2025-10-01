@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Button, Card, CardContent, Typography } from "@mui/material"
+import { Button, Card, CardContent, Typography } from "@mui/material";
 
 export default function Home() {
   return (
@@ -9,11 +9,9 @@ export default function Home() {
         <Typography variant="h4" gutterBottom>
           Bienvenido a la Bolsa de Trabajo
         </Typography>
-       
-        <Button variant="contained" sx={{ mt: 2}}>
-          Entrar
-        </Button>
+
+        <a href="/auth/login">Login</a>
       </CardContent>
     </Card>
-  )
+  );
 }
