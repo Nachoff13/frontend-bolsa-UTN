@@ -1,17 +1,17 @@
-"use client";
+import { redirect } from "next/navigation";
+import { auth0 } from "@/lib/auth0";
 
-import { Button, Card, CardContent, Typography } from "@mui/material";
+export default async function Home() {
+  const session = await auth0.getSession();
 
-export default function Home() {
+  if (!session) {
+    redirect("/auth/login"); // fuerza login
+  }
+
   return (
-    <Card sx={{ maxWidth: 900, m: 4 }}>
-      <CardContent>
-        <Typography variant="h4" gutterBottom>
-          Bienvenido a la Bolsa de Trabajo
-        </Typography>
-
-        <a href="/auth/login">Login</a>
-      </CardContent>
-    </Card>
+    <div>
+      <h1>Bienvenido a la Bolsa de Trabajo</h1>
+      <p>Usuario: {session.user.email}</p>
+    </div>
   );
 }
