@@ -1,18 +1,34 @@
-import axios from "axios"
+import axios from "axios";
 
-// Base URL desde .env.local con fallback
-export const API_BASE_URL = 
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5113"
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5113";
 
-// Debug: verificar que la URL está correcta
-if (typeof window !== 'undefined') {
-  console.log('🔧 API_BASE_URL:', API_BASE_URL);
+if (typeof window !== "undefined") {
+  console.log("API_BASE_URL:", API_BASE_URL);
 }
 
-// Instancia sin token
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-})
+});
+
+// Interceptor: agrega JWT automáticamente
+api.interceptors.request.use(async (config) => {
+  try {
+    // pedimos el token al servidor Next.js
+    const res = await fetch("/api/auth/token");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.accessToken) {
+        // Agrego el token a los headers para todas las peticiones
+        config.headers.Authorization = `Bearer ${data.accessToken}`;
+      }
+    }
+  } catch (err) {
+    console.warn("No se pudo obtener token:", err);
+  }
+
+  return config;
+});
