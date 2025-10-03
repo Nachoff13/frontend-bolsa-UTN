@@ -31,23 +31,50 @@ import {
   Logout as LogoutIcon,
 } from "@mui/icons-material";
 
+//se agrega para mostrar segun el rol
+import { USER_ROLES } from "@/lib/constants";
+import { useAuth } from "@/components/providers/AuthProvider";
+
 const drawerWidth = 280;
 
 const navItems = [
-  { href: "/", label: "Menú Principal", icon: <HomeIcon /> },
+  {
+    href: "/",
+    label: "Menú Principal",
+    icon: <HomeIcon />,
+    roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE],
+  },
   {
     href: "/estudiante/ofertas",
     label: "Ofertas Laborales",
     icon: <WorkIcon />,
+    roles: [USER_ROLES.ESTUDIANTE],
   },
   {
     href: "/estudiante/postulaciones",
     label: "Mis Postulaciones",
     icon: <DescriptionIcon />,
+    roles: [USER_ROLES.ESTUDIANTE],
   },
-        { href: "/estudiante/perfil/1", label: "Mi Perfil", icon: <PersonIcon /> }, // hardcodeado
+  {
+    href: "/estudiante/perfil/1",
+    label: "Mi Perfil",
+    icon: <PersonIcon />,
+    roles: [USER_ROLES.ESTUDIANTE],
+  },
+  {
+    href: "/empresa/publicaciones",
+    label: "Mis Publicaciones",
+    icon: <WorkIcon />,
+    roles: [USER_ROLES.EMPRESA],
+  },
+  {
+    href: "/admin/usuarios",
+    label: "Gestión de Usuarios",
+    icon: <PersonIcon />,
+    roles: [USER_ROLES.ADMIN],
+  },
 ];
-
 const footerItems = [
   { href: "/configuracion", label: "Configuración", icon: <SettingsIcon /> },
   { href: "/auth/logout", label: "Cerrar Sesión", icon: <LogoutIcon /> },
@@ -58,6 +85,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
+  const { rol } = useAuth();
 
   const DrawerContent = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -85,26 +113,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Divider />
 
       {/* Nav principal */}
-      <List sx={{ px: 1 }}>
-        {navItems.map((item) => {
-          const active =
-            pathname === item.href || pathname?.startsWith(item.href + "/");
-          return (
+      <List>
+        {navItems
+          .filter((item) => item.roles.includes(rol)) // 👈 filtra según el rol del contexto
+          .map((item) => (
             <ListItem key={item.href} disablePadding>
-              <ListItemButton
-                component={Link}
-                href={item.href}
-                selected={active}
-                sx={{ borderRadius: 1, mb: 0.5 }}
-              >
+              <ListItemButton component={Link} href={item.href}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.label} />
               </ListItemButton>
             </ListItem>
-          );
-        })}
+          ))}
       </List>
-
       <Box sx={{ flexGrow: 1 }} />
 
       {/* Footer */}
@@ -207,10 +227,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         component="main"
         sx={{
           flexGrow: 1,
-          mt:2,
-          p:1,
+          mt: 2,
+          p: 1,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-        
         }}
       >
         {/* separador para que el contenido no quede debajo del AppBar */}

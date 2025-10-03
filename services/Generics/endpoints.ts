@@ -17,6 +17,8 @@ export const ENDPOINTS = {
     GET_TIPO_CONTRATO: `${CONTROLLERS.GENERIC}/get_tipos_contratos`,
     GET_MODALIDAD: `${CONTROLLERS.GENERIC}/get_modalidades`,
     GET_CARRERAS: `${CONTROLLERS.GENERIC}/get_carreras`,
+    CARGAR_USUARIO: `${CONTROLLERS.GENERIC}/cargar_usuario`,
+
   },
   POSTULACION: {
     GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
