@@ -6,7 +6,6 @@ import type { PostulacionDTO as PostulacionDTO } from "@/types/dto/postulacionDT
 import SkeletonLoader from "./SkeletonLoader";
 import EmptyState from "./EmptyState";
 import {PostulacionCard} from "./CardPostulacion";
-import {useAuth} from "@/hooks/useAuth";
 
 type Props = {
   studentId?: number | string; // opcional: si no viene, lo tomo del auth
@@ -14,12 +13,8 @@ type Props = {
 };
 
 export default function MyApplications({ studentId, limit = 5 }: Props) {
-  const { user } = useAuth();
-  const id = useMemo(
-    () => Number(studentId ?? user?.id ?? 1),
-    [studentId, user]
-    );
 
+  const id = studentId ?? 1; // ⚠️ reemplazar por id real desde auth
   const [items, setItems] = useState<PostulacionDTO[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
