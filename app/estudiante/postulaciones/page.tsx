@@ -25,7 +25,7 @@ import EmptyState from "@/components/shared/EmptyState";
 
 //#region IMPORTACIONES SERVICIOS Y TIPOS
 //Servicio para llamadas a la API
-import { postulanteService } from "@/services/postulante.service";
+import { postulanteService } from "@/services/postulacion.service";
 
 //#region Tipos y constantes
 import { OfertaDTO } from "@/types/dto/ofertaDTO";

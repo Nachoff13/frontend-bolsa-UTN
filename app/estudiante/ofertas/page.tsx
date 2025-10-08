@@ -26,7 +26,7 @@ import EmptyState from "@/components/shared/EmptyState";
 //#region IMPORTACIONES SERVICIOS Y TIPOS
 //Servicio para llamadas a la API
 import { empresaService } from "@/services/empresa.service";
-import { postulanteService } from "@/services/postulante.service";
+import { postulanteService } from "@/services/postulacion.service";
 
 //#region Tipos y constantes
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
@@ -192,7 +192,7 @@ export default function EstudianteOfertasPage() {
     try {
       setLoading(true);
 
-      const nuevasOfertas = await empresaService.getPublicacionesEmpleo(
+      const nuevasOfertas : OfertaDTO[] = await empresaService.getPublicacionesEmpleo(
         filtros
       );
       setOfertas(nuevasOfertas);

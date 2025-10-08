@@ -1,8 +1,7 @@
-// Roles de usuario
 export const USER_ROLES = {
-  ESTUDIANTE: 'Estudiante',
-  EMPRESA: 'Empresa',
-  ADMIN: 'Admin',
+  ESTUDIANTE: 3,
+  EMPRESA: 2,
+  ADMIN: 1,
 } as const
 
 // Tipos de contrato

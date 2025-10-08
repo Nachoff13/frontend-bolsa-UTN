@@ -34,11 +34,16 @@ export const ENDPOINTS = {
     GET_TIPO_CONTRATO: `${CONTROLLERS.GENERIC}/get_tipos_contratos`,
     GET_MODALIDAD: `${CONTROLLERS.GENERIC}/get_modalidades`,
     GET_CARRERAS: `${CONTROLLERS.GENERIC}/get_carreras`,
-  },
+    CARGAR_USUARIO: `${CONTROLLERS.GENERIC}/cargar_usuario`,
 
-  POSTULANTE: {
+  },
+  POSTULACION: {
     GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
     POSTULARSE: `${CONTROLLERS.POSTULACION}/postularse_oferta`,
   },
-
+  CANDIDATO: {
+    GET_PERFIL: `/api/candidato/get_perfil`,
+    UPDATE_PERFIL: `/api/candidato/update_perfil`,
+    UPLOAD_CV: `/api/candidato/upload_cv`,
+  },
 } as const;
