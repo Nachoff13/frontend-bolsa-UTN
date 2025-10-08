@@ -8,7 +8,7 @@ import DetalleModal from "@/components/shared/DetalleModal";
 
 import { empresaService } from "@/services/empresa.service";
 import { candidatoService } from "@/services/estudiante.service";
-import { postulanteService } from "@/services/postulante.service";
+import { postulanteService } from "@/services/postulacion.service";
 
 import { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
