@@ -29,4 +29,8 @@ export const ENDPOINTS = {
     UPDATE_PERFIL: `/api/candidato/update_perfil`,
     UPLOAD_CV: `/api/candidato/upload_cv`,
   },
+  EMPRESA: {
+    GET_PERFIL: `/api/empresa/get_perfil`,
+    UPDATE_PERFIL: `/api/empresa/update_perfil`,
+  },
 } as const;
