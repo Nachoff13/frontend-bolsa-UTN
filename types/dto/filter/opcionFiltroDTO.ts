@@ -1,4 +1,6 @@
 export class OpcionFiltro {
+  id?: number;
   codigo!: string;
-  descripcion!: string;
+  descripcion?: string;
+  nombre?: string;
 }

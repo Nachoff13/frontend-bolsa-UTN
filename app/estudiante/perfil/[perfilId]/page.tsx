@@ -7,6 +7,8 @@ import type { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
 import LoadingModal from "@/components/shared/LoadingModal";
 import { useSnackbar } from "@/components/providers/snackbar";
 import { SnackbarType } from "@/types/enums/snackbar";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { genericService } from "@/services/generic.service";
 import {
   Box,
   Card,
@@ -18,6 +20,17 @@ import {
   Divider,
   Paper,
   LinearProgress,
+  IconButton,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import Titulo from "@/components/shared/Titulo";
 import FileUpload from "@/components/shared/FileUpload";
@@ -32,19 +45,38 @@ import {
   CalendarToday,
   CheckCircle,
   Cancel,
+  Edit,
+  Save,
+  Close,
 } from "@mui/icons-material";
+
+interface Carrera {
+  id: number;
+  nombre: string;
+  codigo: string;
+}
 
 export default function PerfilEstudiantePage() {
   const params = useParams();
   const { showMessage } = useSnackbar();
+  const { perfilId: userPerfilId } = useAuth(); // perfilId del usuario logueado
   const [loading, setLoading] = useState(true);
   const [perfil, setPerfil] = useState<PerfilCandidatoDTO | null>(null);
   const [uploadingCv, setUploadingCv] = useState(false);
   const [cvUploadError, setCvUploadError] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  
+  // Estados para edición
+  const [editMode, setEditMode] = useState(false);
+  const [editedData, setEditedData] = useState<any>({});
+  const [carreras, setCarreras] = useState<Carrera[]>([]);
+  const [savingChanges, setSavingChanges] = useState(false);
 
   // Obtener el perfilId de los parámetros de la ruta
   const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 2;
+  
+  // Verificar si el perfil que se está viendo es del usuario logueado
+  const isOwnProfile = userPerfilId === perfilId;
   
   // Debug: verificar el perfilId
   console.log('🔧 PerfilId from params:', params?.perfilId);
@@ -60,6 +92,14 @@ export default function PerfilEstudiantePage() {
         }
         const data = await candidatoService.getPerfilById(perfilId);
         setPerfil(data);
+        
+        // Inicializar datos para edición
+        setEditedData({
+          nombre: data.nombre || "",
+          descripcion: data.descripcion || "",
+          idCarrera: data.idCarrera || 0,
+          anioEgreso: data.anioEgreso || new Date().getFullYear(),
+        });
       } catch (e: any) {
         showMessage(e?.message ?? "Error cargando perfil", SnackbarType.Error);
       } finally {
@@ -68,6 +108,67 @@ export default function PerfilEstudiantePage() {
     };
     fetchPerfil();
   }, [perfilId, showMessage]);
+
+  useEffect(() => {
+    const fetchCarreras = async () => {
+      try {
+        const response: any = await genericService.getCarreras();
+        setCarreras(response || []);
+      } catch (error) {
+        console.error("Error al cargar carreras:", error);
+      }
+    };
+    
+    if (editMode && carreras.length === 0) {
+      fetchCarreras();
+    }
+  }, [editMode]);
+
+  const handleEditClick = () => {
+    setEditMode(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    // Restaurar datos originales
+    if (perfil) {
+      setEditedData({
+        nombre: perfil.nombre || "",
+        descripcion: perfil.descripcion || "",
+        idCarrera: perfil.idCarrera || 0,
+        anioEgreso: perfil.anioEgreso || new Date().getFullYear(),
+      });
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      setSavingChanges(true);
+      
+      if (!perfil || !perfilId) return;
+
+      const updatedPerfil: PerfilCandidatoDTO = {
+        ...perfil,
+        nombre: editedData.nombre,
+        descripcion: editedData.descripcion,
+        idCarrera: editedData.idCarrera,
+        anioEgreso: editedData.anioEgreso,
+      };
+
+      await candidatoService.updatePerfil(updatedPerfil);
+      
+      // Recargar perfil
+      const data = await candidatoService.getPerfilById(perfilId);
+      setPerfil(data);
+      
+      setEditMode(false);
+      showMessage("Perfil actualizado exitosamente", SnackbarType.Success);
+    } catch (error: any) {
+      showMessage(error?.message || "Error al actualizar perfil", SnackbarType.Error);
+    } finally {
+      setSavingChanges(false);
+    }
+  };
 
   const handleFileSelect = (file: File) => {
     setCvUploadError(null);
@@ -156,12 +257,24 @@ export default function PerfilEstudiantePage() {
     <Box sx={{ maxWidth: 1200, mx: "auto" }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
         <Titulo titulo={`Perfil ${perfil.nombre ? `de ${perfil.nombre}` : ''}`} />
-        <Chip
-          label={`${perfil.porcentajePerfil ?? 0}% completado`}
-          color="primary"
-          variant="outlined"
-          sx={{ fontWeight: 600 }}
-        />
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Chip
+            label={`${perfil.porcentajePerfil ?? 0}% completado`}
+            color="primary"
+            variant="outlined"
+            sx={{ fontWeight: 600 }}
+          />
+          {isOwnProfile && !editMode && (
+            <Button
+              variant="contained"
+              startIcon={<Edit />}
+              onClick={handleEditClick}
+              sx={{ textTransform: "none" }}
+            >
+              Editar Perfil
+            </Button>
+          )}
+        </Stack>
       </Stack>
       <Stack spacing={3}>
         {/* Información Personal */}
@@ -338,20 +451,22 @@ export default function PerfilEstudiantePage() {
             ) : (
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: "italic" }}>
-                  No hay CV cargado. Sube tu CV en formato PDF.
+                  {isOwnProfile ? "No hay CV cargado. Sube tu CV en formato PDF." : "Este usuario no ha cargado un CV aún."}
                 </Typography>
               </Box>
             )}
 
-            <FileUpload
-              onFileSelect={handleFileSelect}
-              onUpload={handleCvUpload}
-              isUploading={uploadingCv}
-              uploadedFileName={uploadedFileName || undefined}
-              accept=".pdf"
-              maxSize={5}
-              error={cvUploadError || undefined}
-            />
+            {isOwnProfile && (
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                onUpload={handleCvUpload}
+                isUploading={uploadingCv}
+                uploadedFileName={uploadedFileName || undefined}
+                accept=".pdf"
+                maxSize={5}
+                error={cvUploadError || undefined}
+              />
+            )}
           </CardContent>
         </Card>
 
@@ -393,6 +508,80 @@ export default function PerfilEstudiantePage() {
           </CardContent>
         </Card>
       </Stack>
+
+      {/* Modal de Edición - Solo visible para el dueño del perfil */}
+      {isOwnProfile && (
+        <Dialog open={editMode} onClose={handleCancelEdit} maxWidth="md" fullWidth>
+          <DialogTitle>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="h6" fontWeight={600}>
+                Editar Perfil
+              </Typography>
+              <IconButton onClick={handleCancelEdit} size="small">
+                <Close />
+              </IconButton>
+            </Stack>
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 2 }}>
+              <TextField
+                fullWidth
+                label="Nombre completo"
+                value={editedData.nombre}
+                onChange={(e) => setEditedData({ ...editedData, nombre: e.target.value })}
+              />
+
+              <FormControl fullWidth>
+                <InputLabel>Carrera</InputLabel>
+                <Select
+                  value={editedData.idCarrera}
+                  label="Carrera"
+                  onChange={(e) => setEditedData({ ...editedData, idCarrera: e.target.value })}
+                >
+                  <MenuItem value={0}>Seleccionar carrera...</MenuItem>
+                  {carreras.map((carrera) => (
+                    <MenuItem key={carrera.id} value={carrera.id}>
+                      {carrera.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <TextField
+                fullWidth
+                type="number"
+                label="Año de egreso"
+                inputProps={{ min: 2000, max: 2030 }}
+                value={editedData.anioEgreso}
+                onChange={(e) => setEditedData({ ...editedData, anioEgreso: parseInt(e.target.value) })}
+              />
+
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Descripción"
+                placeholder="Cuéntanos sobre ti, tus intereses profesionales..."
+                value={editedData.descripcion}
+                onChange={(e) => setEditedData({ ...editedData, descripcion: e.target.value })}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 3 }}>
+            <Button onClick={handleCancelEdit} variant="outlined">
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveChanges} 
+              variant="contained" 
+              startIcon={<Save />}
+              disabled={savingChanges}
+            >
+              {savingChanges ? "Guardando..." : "Guardar Cambios"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   );
 }
