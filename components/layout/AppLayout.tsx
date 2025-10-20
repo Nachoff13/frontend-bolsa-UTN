@@ -18,7 +18,6 @@ import {
   Toolbar,
   Typography,
   TextField,
-  Avatar,
   Stack,
 } from "@mui/material";
 import {
@@ -34,47 +33,10 @@ import {
 //se agrega para mostrar segun el rol
 import { USER_ROLES } from "@/lib/constants";
 import { useAuth } from "@/components/providers/AuthProvider";
+import UserMenu from "@/components/shared/UserMenu";
 
 const drawerWidth = 280;
 
-const navItems = [
-  {
-    href: "/",
-    label: "Menú Principal",
-    icon: <HomeIcon />,
-    roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE],
-  },
-  {
-    href: "/estudiante/ofertas",
-    label: "Ofertas Laborales",
-    icon: <WorkIcon />,
-    roles: [USER_ROLES.ESTUDIANTE],
-  },
-  {
-    href: "/estudiante/postulaciones",
-    label: "Mis Postulaciones",
-    icon: <DescriptionIcon />,
-    roles: [USER_ROLES.ESTUDIANTE],
-  },
-  {
-    href: "/estudiante/perfil/1",
-    label: "Mi Perfil",
-    icon: <PersonIcon />,
-    roles: [USER_ROLES.ESTUDIANTE],
-  },
-  {
-    href: "/empresa/publicaciones",
-    label: "Mis Publicaciones",
-    icon: <WorkIcon />,
-    roles: [USER_ROLES.EMPRESA],
-  },
-  {
-    href: "/admin/usuarios",
-    label: "Gestión de Usuarios",
-    icon: <PersonIcon />,
-    roles: [USER_ROLES.ADMIN],
-  },
-];
 const footerItems = [
   { href: "/configuracion", label: "Configuración", icon: <SettingsIcon /> },
   { href: "/auth/logout", label: "Cerrar Sesión", icon: <LogoutIcon /> },
@@ -85,7 +47,47 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
-  const { rol } = useAuth();
+  const { rol, perfilId } = useAuth();
+
+  // Construir navItems con perfilId dinámico
+  const navItems = [
+    {
+      href: "/",
+      label: "Menú Principal",
+      icon: <HomeIcon />,
+      roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE],
+    },
+    {
+      href: "/estudiante/ofertas",
+      label: "Ofertas Laborales",
+      icon: <WorkIcon />,
+      roles: [USER_ROLES.ESTUDIANTE],
+    },
+    {
+      href: "/estudiante/postulaciones",
+      label: "Mis Postulaciones",
+      icon: <DescriptionIcon />,
+      roles: [USER_ROLES.ESTUDIANTE],
+    },
+    {
+      href: perfilId ? `/estudiante/perfil/${perfilId}` : "/estudiante/perfil",
+      label: "Mi Perfil",
+      icon: <PersonIcon />,
+      roles: [USER_ROLES.ESTUDIANTE],
+    },
+    {
+      href: "/empresa/publicaciones",
+      label: "Mis Publicaciones",
+      icon: <WorkIcon />,
+      roles: [USER_ROLES.EMPRESA],
+    },
+    {
+      href: "/admin/usuarios",
+      label: "Gestión de Usuarios",
+      icon: <PersonIcon />,
+      roles: [USER_ROLES.ADMIN],
+    },
+  ];
 
   const DrawerContent = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -180,8 +182,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Box>
 
           {/* Acciones (derecha) */}
-          <Box sx={{ ml: 2, display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Avatar sx={{ width: 36, height: 36 }}>GS</Avatar>
+          <Box sx={{ ml: 2 }}>
+            <UserMenu />
           </Box>
         </Toolbar>
       </AppBar>

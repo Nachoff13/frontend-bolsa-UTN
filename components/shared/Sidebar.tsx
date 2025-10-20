@@ -10,9 +10,11 @@ import {
   Settings, 
   LogOut 
 } from 'lucide-react'
+import { useAuth } from '@/components/providers/AuthProvider'
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { perfilId } = useAuth()
 
   const isActive = (path: string) => pathname === path
 
@@ -20,7 +22,7 @@ export default function Sidebar() {
     { href: '/', label: 'Menú Principal', icon: Home, isActive: true },
     { href: '/estudiante/ofertas', label: 'Ofertas Laborales', icon: Briefcase },
     { href: '/estudiante/postulaciones', label: 'Mis Postulaciones', icon: FileText },
-    { href: '/estudiante/perfil', label: 'Mi Perfil', icon: User },
+    { href: perfilId ? `/estudiante/perfil/${perfilId}` : '/estudiante/perfil', label: 'Mi Perfil', icon: User },
   ]
 
   return (
