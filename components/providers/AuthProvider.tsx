@@ -39,7 +39,7 @@ export default function AuthProvider({
       }
 
       try {
-        debugger;
+        // debugger;
         const res: UsuarioDTO = await genericService.cargarUsuario();
         setRol(res.idRol); // <-- guardo el rol
       } catch (e) {
