@@ -5,6 +5,8 @@ import type { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { GenericService } from "./generic.service";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 import { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
+import { PostulacionDTO } from "@/types/dto/postulacionDTO";
+import { ResponseError } from "@/types/Generics/responseError";
 
 class EmpresaService extends GenericService {
   async getPublicacionesEmpleo(filtros : FiltrosBusquedaDTO) {
@@ -26,9 +28,6 @@ class EmpresaService extends GenericService {
       throw error;
     }
   }
-
-
-
    // contador de publicaciones del mes actual
   async getPublicacionesDelMesActual() {
     try {
@@ -51,6 +50,31 @@ class EmpresaService extends GenericService {
       return cantidad;
     } catch (error) {
       throw error;
+    }
+  }
+
+  async getPublicacionesEmpresa(emailEmpresa: string): Promise<OfertaDTO[]> {
+    try {
+      const res = await http.get<OfertaDTO[]>(
+        ENDPOINTS.PUBLICACION.GET_PUBLICACIONES_EMPRESA(emailEmpresa)
+      );
+      console.log("Respuesta de getPublicacionesEmpresa: ", res);
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getPostulacionesEmpresa(emailEmpresa: string): Promise<PostulacionDTO[]> {
+    try {
+      const res = await http.get<PostulacionDTO[]>(
+        ENDPOINTS.POSTULACIONES.GET_POSTULACIONES_EMPRESA(emailEmpresa)
+      );
+      return res;
+    } catch (e) {
+      const err = e as ResponseError;
+      console.error("Error al obtener postulaciones de la empresa:", err.message);
+      throw err;
     }
   }
 }

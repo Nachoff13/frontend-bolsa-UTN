@@ -13,6 +13,9 @@ export const ENDPOINTS = {
 
     GET_RECIENTES: (limit: number = 3) =>
       `${CONTROLLERS.PUBLICACION}/get_publicaciones_recientes?limit=${limit}`,
+
+    GET_PUBLICACIONES_EMPRESA: (emailEmpresa: string) =>
+      `${CONTROLLERS.PUBLICACION}/get_publicaciones_empresa/${emailEmpresa}`,
   },
 
   POSTULACIONES: {
@@ -27,6 +30,9 @@ export const ENDPOINTS = {
       `${CONTROLLERS.POSTULACION}/get_postulaciones_por_estado/${idEstudiante}?idEstado=${idEstado}`,
 
     POSTULARSE: `${CONTROLLERS.POSTULACION}/postularse_oferta`,
+
+    GET_POSTULACIONES_EMPRESA: (emailEmpresa: string) =>
+      `${CONTROLLERS.PUBLICACION}/get_postulaciones_empresa?email=${emailEmpresa}`,
   },
 
 
