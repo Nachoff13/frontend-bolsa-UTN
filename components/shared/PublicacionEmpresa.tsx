@@ -1,6 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import CardGenerica from "@/components/shared/CardGenerica";
+import DetalleModal from "@/components/shared/DetalleModal";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
-import { PostulacionDTO } from "@/types/dto/postulacionDTO";
+
 import {
   LocationOn as LocationOnIcon,
   CalendarToday as CalendarTodayIcon,
@@ -8,7 +12,10 @@ import {
   Group as GroupIcon,
   School as SchoolIcon,
   AccessTime as AccessTimeIcon,
+  Description as DescriptionIcon,
+  Business as BusinessIcon,
 } from "@mui/icons-material";
+import { Button } from "@mui/material";
 
 interface Props {
   ofertas: OfertaDTO[];
@@ -32,6 +39,14 @@ function calcularTiempoTranscurrido(fechaInicio: string | undefined): string {
 }
 
 export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
+  const [openDetalle, setOpenDetalle] = useState(false);
+  const [ofertaSeleccionada, setOfertaSeleccionada] = useState<OfertaDTO | null>(null);
+
+  const handleVerDetalle = (oferta: OfertaDTO) => {
+    setOfertaSeleccionada(oferta);
+    setOpenDetalle(true);
+  };
+
   if (loading) return <p>Cargando publicaciones...</p>;
 
   return (
@@ -69,7 +84,7 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
               },
               {
                 icon: <GroupIcon fontSize="small" />,
-                texto: `${oferta.cantidadPostulantes} postulante/s`,
+                texto: `${oferta.cantidadPostulantes ?? 0} postulante/s`,
               },
               {
                 icon: <AccessTimeIcon fontSize="small" />,
@@ -85,11 +100,37 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
               },
             ]}
             textoAccion1="Ver detalles"
-            onAccion1={() =>
-              console.log("Ver detalles de:", oferta.titulo)
-            }
+            onAccion1={() => handleVerDetalle(oferta)}
           />
         ))
+      )}
+
+      {/* 📄 Modal de detalle */}
+      {ofertaSeleccionada && (
+        <DetalleModal
+          open={openDetalle}
+          onClose={() => setOpenDetalle(false)}
+          title={ofertaSeleccionada.titulo}
+          fields={[
+            { label: "Empresa", value: ofertaSeleccionada.nombreEmpresa },
+            { label: "Carrera", value: ofertaSeleccionada.nombreCarrera },
+            { label: "Modalidad", value: ofertaSeleccionada.modalidad },
+            { label: "Tipo de contrato", value: ofertaSeleccionada.tipoContrato },
+            { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
+            { label: "Descripción", value: ofertaSeleccionada.descripcion },
+          ]}
+          chips={[
+            {
+              label: `${ofertaSeleccionada.cantidadPostulantes ?? 0} Postulante/s`,
+              color: "info",
+            },
+          ]}
+          actions={
+            <Button onClick={() => setOpenDetalle(false)} variant="contained" color="primary">
+              Cerrar
+            </Button>
+          }
+        />
       )}
     </section>
   );
