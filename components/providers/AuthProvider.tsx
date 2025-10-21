@@ -44,7 +44,7 @@ export default function AuthProvider({
       }
 
       try {
-        console.log("🔍 AuthProvider - Sincronizando usuario...");
+        // debugger;
         const res: UsuarioDTO = await genericService.cargarUsuario();
         console.log("✅ Usuario cargado:", res);
         

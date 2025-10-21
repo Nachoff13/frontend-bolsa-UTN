@@ -17,4 +17,5 @@ export class PostulacionDTO {
   descripcionOferta!: string;
   descripcionModalidad!: string;
   descripcionTipoContrato!: string;
+  nombreCandidato!: string;
 }
