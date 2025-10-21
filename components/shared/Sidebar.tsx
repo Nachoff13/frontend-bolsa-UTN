@@ -17,6 +17,7 @@ import { useAuth } from '@/components/providers/AuthProvider'
 export default function Sidebar() {
   const pathname = usePathname()
   const { rol, user } = useAuth()
+  const { perfilId } = useAuth()
 
   const isActive = (path: string) => pathname === path
 
@@ -31,7 +32,7 @@ export default function Sidebar() {
         ...baseItems,
         { href: '/estudiante/ofertas', label: 'Ofertas Laborales', icon: Briefcase },
         { href: '/estudiante/postulaciones', label: 'Mis Postulaciones', icon: FileText },
-        { href: '/estudiante/perfil', label: 'Mi Perfil', icon: User },
+        { href: perfilId ? `/estudiante/perfil/${perfilId}` : '/estudiante/perfil', label: 'Mi Perfil', icon: User },
       ]
     } else if (rol === 2) { // Empresa
       return [

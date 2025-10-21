@@ -8,6 +8,8 @@ export class OfertaDTO {
   fechaInicio!: string;
   fechaFin!: string;
   nombreEmpresa!: string;
+  nombreCarrera!: string;
+  cantidadPostulantes!: number;
 
   //datos extra para postularse
   cartaPresentacion!: string;
