@@ -2,6 +2,7 @@ import { http } from "@/services/Generics/httpClient";
 import { ENDPOINTS } from "@/services/Generics/endpoints";
 import { GenericService } from "./generic.service";
 import type { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
+import { api } from "@/services/Generics/api";
 
 class CandidatoService extends GenericService {
   async getPerfil(): Promise<PerfilCandidatoDTO> {
@@ -41,24 +42,40 @@ class CandidatoService extends GenericService {
       const formData = new FormData();
       formData.append('cv', file);
       
-      // Usar la URL base configurada
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5113";
-      const url = `${baseURL}${ENDPOINTS.CANDIDATO.UPLOAD_CV}?perfilId=${perfilId}`;
+      console.log('🔧 Uploading CV for perfilId:', perfilId);
       
-      console.log('🔧 Upload CV URL:', url); // Debug
+      // Usar api de axios que ya tiene el interceptor con el token
+      const response = await api.post(
+        `${ENDPOINTS.CANDIDATO.UPLOAD_CV}?perfilId=${perfilId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       
-      const res = await fetch(url, {
-        method: "POST",
-        body: formData,
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.responseException?.exceptionMessage || "Error al subir CV");
-      }
-      
-      const result = await res.json();
-      return result.message || "CV subido exitosamente";
+      return response.data.message || "CV subido exitosamente";
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.responseException?.exceptionMessage 
+        || error.response?.data?.message 
+        || error.message 
+        || "Error al subir CV";
+      throw new Error(errorMessage);
+    }
+  }
+
+  async verificarPerfil(email: string): Promise<any> {
+    try {
+      return await http.get<any>(`${ENDPOINTS.CANDIDATO.VERIFICAR_PERFIL}?email=${email}`);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async completarPerfil(data: any): Promise<PerfilCandidatoDTO> {
+    try {
+      return await http.post<PerfilCandidatoDTO>(ENDPOINTS.CANDIDATO.COMPLETAR_PERFIL, data);
     } catch (error) {
       throw error;
     }
