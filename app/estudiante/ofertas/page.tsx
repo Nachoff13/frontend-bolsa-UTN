@@ -25,7 +25,8 @@ import EmptyState from "@/components/shared/EmptyState";
 
 //#region IMPORTACIONES SERVICIOS Y TIPOS
 //Servicio para llamadas a la API
-import { empresaService } from "@/services/empresa.service";
+import { ofertaService } from "@/services/oferta.service";
+import { genericService } from "@/services/generic.service";
 import { postulanteService } from "@/services/postulacion.service";
 
 //#region Tipos y constantes
@@ -163,11 +164,11 @@ export default function EstudianteOfertasPage() {
     try {
       setLoading(true);
 
-      const [tipos, modos, carreras] = await Promise.all([
-        empresaService.getTipoContrato(),
-        empresaService.getModalidad(),
-        empresaService.getCarreras(),
-      ]);
+       const [tipos, modos, carreras] = await Promise.all([
+         genericService.getTipoContrato(),
+         genericService.getModalidad(),
+         genericService.getCarreras(),
+       ]);
 
       setTipoContratos(tipos);
       setModalidades(modos);
@@ -192,9 +193,9 @@ export default function EstudianteOfertasPage() {
     try {
       setLoading(true);
 
-      const nuevasOfertas : OfertaDTO[] = await empresaService.getPublicacionesEmpleo(
-        filtros
-      );
+       const nuevasOfertas : OfertaDTO[] = await ofertaService.buscarOfertas(
+         filtros
+       );
       setOfertas(nuevasOfertas);
     } catch (e) {
       const err = e as ResponseError;
@@ -236,7 +237,7 @@ export default function EstudianteOfertasPage() {
         break;
     }
 
-    console.log("Filtrar por", { idGrupo, nuevos });
+    // TODO: Implementar filtrado
   };
 
   async function onClickPostularse(id: number): Promise<void> {
@@ -359,7 +360,7 @@ export default function EstudianteOfertasPage() {
                       texto: `Cierra el ${calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}`,
                     },
                   ]}
-                  onAccion1={() => console.log("Ver detalle", oferta.id)}
+                  onAccion1={() => {/* TODO: Implementar ver detalle */}}
                   textoAccion1="Ver detalles"
                   onAccion2={() => onClickPostularse(oferta.id)}
                   textoAccion2="Postularme"
@@ -376,6 +377,6 @@ export default function EstudianteOfertasPage() {
     </>
   );
   //#endregion
-}
+}//#endregion
 
-//#endregion
+

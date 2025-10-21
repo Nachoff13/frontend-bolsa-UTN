@@ -47,8 +47,7 @@ export default function PerfilEstudiantePage() {
   const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 2;
   
   // Debug: verificar el perfilId
-  console.log('🔧 PerfilId from params:', params?.perfilId);
-  console.log('🔧 Parsed perfilId:', perfilId);
+  // PerfilId from params processed
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -84,7 +83,7 @@ export default function PerfilEstudiantePage() {
         throw new Error("ID de perfil inválido");
       }
       
-      console.log('🔧 Uploading CV for perfilId:', perfilId);
+      // Uploading CV for perfilId
       
       await candidatoService.uploadCv(file, perfilId);
       

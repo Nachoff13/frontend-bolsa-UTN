@@ -8,20 +8,44 @@ import {
   FileText, 
   User, 
   Settings, 
-  LogOut 
+  LogOut,
+  Users,
+  Building
 } from 'lucide-react'
+import { useAuth } from '@/components/providers/AuthProvider'
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { rol, user } = useAuth()
 
   const isActive = (path: string) => pathname === path
 
-  const menuItems = [
-    { href: '/', label: 'Menú Principal', icon: Home, isActive: true },
-    { href: '/estudiante/ofertas', label: 'Ofertas Laborales', icon: Briefcase },
-    { href: '/estudiante/postulaciones', label: 'Mis Postulaciones', icon: FileText },
-    { href: '/estudiante/perfil', label: 'Mi Perfil', icon: User },
-  ]
+  // Menú dinámico basado en el rol
+  const getMenuItems = () => {
+    const baseItems = [
+      { href: '/', label: 'Menú Principal', icon: Home, isActive: true }
+    ]
+
+    if (rol === 1) { // Estudiante
+      return [
+        ...baseItems,
+        { href: '/estudiante/ofertas', label: 'Ofertas Laborales', icon: Briefcase },
+        { href: '/estudiante/postulaciones', label: 'Mis Postulaciones', icon: FileText },
+        { href: '/estudiante/perfil', label: 'Mi Perfil', icon: User },
+      ]
+    } else if (rol === 2) { // Empresa
+      return [
+        ...baseItems,
+        { href: '/empresa/ofertas-publicadas', label: 'Ofertas Publicadas', icon: Briefcase },
+        { href: '/empresa/candidatos-postulados', label: 'Candidatos Postulados', icon: Users },
+        { href: '/empresa/perfil', label: 'Perfil Empresa', icon: Building },
+      ]
+    }
+
+    return baseItems
+  }
+
+  const menuItems = getMenuItems()
 
   return (
     <aside className="w-full h-[calc(100vh-16px)] bg-gray-50 border border-gray-300 flex flex-col rounded-[10px] mx-2 my-2 overflow-hidden sticky top-2">
@@ -36,6 +60,15 @@ export default function Sidebar() {
             <p className="text-black text-xs">Bolsa de Trabajo</p>
           </div>
         </div>
+        {/* Nombre del usuario */}
+        {user && (
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <p className="text-sm font-medium text-gray-700">{user.nombre}</p>
+            <p className="text-xs text-gray-500">
+              {rol === 1 ? 'Estudiante' : rol === 2 ? 'Empresa' : 'Usuario'}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Menú principal */}

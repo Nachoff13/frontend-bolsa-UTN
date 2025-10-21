@@ -13,3 +13,13 @@ export class OfertaDTO {
   cartaPresentacion!: string;
   observacion!: string;
 }
+
+export class CrearOfertaDTO {
+  titulo!: string;
+  descripcion!: string;
+  idModalidad?: number;
+  idTipoContrato?: number;
+  idLocalidad?: number;
+  fechaInicio?: string;
+  fechaFin?: string;
+}

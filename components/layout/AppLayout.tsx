@@ -63,9 +63,21 @@ const navItems = [
     roles: [USER_ROLES.ESTUDIANTE],
   },
   {
-    href: "/empresa/publicaciones",
-    label: "Mis Publicaciones",
+    href: "/empresa/ofertas-publicadas",
+    label: "Ofertas Publicadas",
     icon: <WorkIcon />,
+    roles: [USER_ROLES.EMPRESA],
+  },
+  {
+    href: "/empresa/candidatos-postulados",
+    label: "Candidatos Postulados",
+    icon: <DescriptionIcon />,
+    roles: [USER_ROLES.EMPRESA],
+  },
+  {
+    href: "/empresa/perfil",
+    label: "Perfil Empresa",
+    icon: <PersonIcon />,
     roles: [USER_ROLES.EMPRESA],
   },
   {
@@ -85,7 +97,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
-  const { rol } = useAuth();
+  const { rol, user } = useAuth();
 
   const DrawerContent = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -110,6 +122,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Box>
         </Stack>
       </Toolbar>
+      <Divider />
+
+      {/* Información del usuario */}
+      {user && (
+        <Box sx={{ px: 2, py: 2 }}>
+          <Typography variant="subtitle2" fontWeight={600} color="primary">
+            {user.name || user.email || "Usuario"}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {rol === USER_ROLES.ADMIN && "Administrador"}
+            {rol === USER_ROLES.EMPRESA && "Empresa"}
+            {rol === USER_ROLES.ESTUDIANTE && "Estudiante"}
+          </Typography>
+        </Box>
+      )}
       <Divider />
 
       {/* Nav principal */}

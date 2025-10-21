@@ -27,6 +27,7 @@ import ResumenPostulaciones from "@/components/shared/ResumenPostulaciones";
 //#region IMPORTACIONES SERVICIOS Y TIPOS
 //Servicio para llamadas a la API
 import { postulanteService } from "@/services/postulacion.service";
+import { genericService } from "@/services/generic.service";
 
 //#region Tipos y constantes
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
@@ -200,11 +201,11 @@ export default function EstudiantePostulacionesPage() {
 
   const cargarDatos = async () => {
     try {
-      const [tipos, modos, carreras] = await Promise.all([
-        postulanteService.getTipoContrato(),
-        postulanteService.getModalidad(),
-        postulanteService.getCarreras(),
-      ]);
+       const [tipos, modos, carreras] = await Promise.all([
+         genericService.getTipoContrato(),
+         genericService.getModalidad(),
+         genericService.getCarreras(),
+       ]);
 
       setTipoContratos(tipos);
       setModalidades(modos);
@@ -424,7 +425,7 @@ export default function EstudiantePostulacionesPage() {
                       texto: `Carta: ${postulacion.cartaPresentacion}`,
                     },
                   ]}
-                  onAccion1={() => console.log("Ver detalle", postulacion.id)}
+                  onAccion1={() => {/* TODO: Implementar ver detalle */}}
                   textoAccion1="Ver detalle"
                 />
               ))}
@@ -440,5 +441,5 @@ export default function EstudiantePostulacionesPage() {
   );
   //#endregion
 }
-
 //#endregion
+

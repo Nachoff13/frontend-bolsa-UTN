@@ -45,7 +45,7 @@ class CandidatoService extends GenericService {
       const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5113";
       const url = `${baseURL}${ENDPOINTS.CANDIDATO.UPLOAD_CV}?perfilId=${perfilId}`;
       
-      console.log('🔧 Upload CV URL:', url); // Debug
+      // Upload CV URL generated
       
       const res = await fetch(url, {
         method: "POST",
