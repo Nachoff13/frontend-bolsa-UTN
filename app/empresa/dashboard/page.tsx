@@ -25,6 +25,8 @@ import EmptyState from "@/components/shared/EmptyState";
 import PublicacionesEmpresa from "@/components/shared/PublicacionEmpresa";
 import CandidatosPostulados from "@/components/shared/CandidatosPostulados"; 
 
+import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
+
 // ⚠️ Reemplazar cuando se use sesión real
 
 
@@ -33,8 +35,10 @@ export default function DashboardEmpresaPage() {
   const [ofertas, setOfertas] = useState<OfertaDTO[]>([]);
   const [postulaciones, setPostulaciones] = useState<PostulacionDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPostulacion, setSelectedPostulacion] = useState<PostulacionDTO | null>(null);
 
-  // ⚠️ Fallback temporal (si no está conectado useAuth)
+  // Fallback temporal (si no está conectado useAuth)
   const emailEmpresa = user?.email || "gezbaez@gmail.com";
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export default function DashboardEmpresaPage() {
       try {
         setLoading(true);
 
-        // 🔹 Llamamos a los endpoints del backend
+        // Llamamos a los endpoints del backend
         const [pubs, posts] = await Promise.all([
           empresaService.getPublicacionesEmpresa(emailEmpresa),
           empresaService.getPostulacionesEmpresa(emailEmpresa),
@@ -63,7 +67,7 @@ export default function DashboardEmpresaPage() {
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 p-4 md:p-6">
-        {/* 🏷️ Encabezado */}
+        {/* Encabezado */}
         <div className="mb-4">
           <h1 className="text-2xl font-semibold">Dashboard de la empresa</h1>
           <p className="text-sm text-neutral-600">
@@ -71,7 +75,7 @@ export default function DashboardEmpresaPage() {
           </p>
         </div>
 
-        {/* 📊 Métricas */}
+        {/* Métricas */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
           <StatCard
             label="Ofertas publicadas"
@@ -87,7 +91,7 @@ export default function DashboardEmpresaPage() {
           <StatCard label="Entrevistas concretadas" value="3" subtitle="este mes" />
         </div>
 
-        {/* 🧩 Contenido principal */}
+        {/* Contenido principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <PublicacionesEmpresa ofertas={ofertas} loading={loading} />
           <CandidatosPostulados postulaciones={postulaciones} loading={loading} />
