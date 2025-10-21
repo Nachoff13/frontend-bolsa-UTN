@@ -37,10 +37,30 @@ export class GenericService {
     }
   }
 
+  async getLocalidades() {
+    try {
+      const res: OpcionFiltro[] = await http.get<OpcionFiltro[]>(
+        ENDPOINTS.GENERIC.GET_LOCALIDADES
+      );
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async cargarUsuario() {
     try {
       const res: UsuarioDTO = await http.post(ENDPOINTS.GENERIC.CARGAR_USUARIO);
       return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getPerfilEmpresaUsuario() {
+    try {
+      const res: { idPerfilEmpresa: number } = await http.get(ENDPOINTS.GENERIC.GET_PERFIL_EMPRESA_USUARIO);
+      return res.idPerfilEmpresa;
     } catch (error) {
       throw error;
     }

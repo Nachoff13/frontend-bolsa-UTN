@@ -47,7 +47,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
-  const { rol, perfilId } = useAuth();
+  const { rol, perfilId, user } = useAuth();
 
   // Construir navItems con perfilId dinámico
   const navItems = [
@@ -112,6 +112,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Box>
         </Stack>
       </Toolbar>
+      <Divider />
+
+      {/* Información del usuario */}
+      {user && (
+        <Box sx={{ px: 2, py: 2 }}>
+          <Typography variant="subtitle2" fontWeight={600} color="primary">
+            {user.name || user.email || "Usuario"}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {rol === USER_ROLES.ADMIN && "Administrador"}
+            {rol === USER_ROLES.EMPRESA && "Empresa"}
+            {rol === USER_ROLES.ESTUDIANTE && "Estudiante"}
+          </Typography>
+        </Box>
+      )}
       <Divider />
 
       {/* Nav principal */}

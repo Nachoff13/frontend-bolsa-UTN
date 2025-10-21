@@ -25,7 +25,8 @@ import EmptyState from "@/components/shared/EmptyState";
 
 //#region IMPORTACIONES SERVICIOS Y TIPOS
 //Servicio para llamadas a la API
-import { empresaService } from "@/services/empresa.service";
+import { ofertaService } from "@/services/oferta.service";
+import { genericService } from "@/services/generic.service";
 import { postulanteService } from "@/services/postulacion.service";
 
 //#region Tipos y constantes
@@ -163,11 +164,11 @@ export default function EstudianteOfertasPage() {
     try {
       setLoading(true);
 
-      const [tipos, modos, carreras] = await Promise.all([
-        empresaService.getTipoContrato(),
-        empresaService.getModalidad(),
-        empresaService.getCarreras(),
-      ]);
+       const [tipos, modos, carreras] = await Promise.all([
+         genericService.getTipoContrato(),
+         genericService.getModalidad(),
+         genericService.getCarreras(),
+       ]);
 
       setTipoContratos(tipos);
       setModalidades(modos);
@@ -192,9 +193,9 @@ export default function EstudianteOfertasPage() {
     try {
       setLoading(true);
 
-      const nuevasOfertas : OfertaDTO[] = await empresaService.getPublicacionesEmpleo(
-        filtros
-      );
+       const nuevasOfertas : OfertaDTO[] = await ofertaService.buscarOfertas(
+         filtros
+       );
       setOfertas(nuevasOfertas);
     } catch (e) {
       const err = e as ResponseError;
@@ -236,7 +237,7 @@ export default function EstudianteOfertasPage() {
         break;
     }
 
-    console.log("Filtrar por", { idGrupo, nuevos });
+    // TODO: Implementar filtrado
   };
 
   async function onClickPostularse(id: number): Promise<void> {
@@ -262,6 +263,34 @@ export default function EstudianteOfertasPage() {
       });
     }
   }
+
+  // Función para calcular fecha de cierre por defecto (60 días después de fechaInicio)
+  const calcularFechaCierre = (fechaInicio: string, fechaFin?: string): string => {
+    // Si hay fechaFin específica, la usamos
+    if (fechaFin && fechaFin.trim() !== '') {
+      return fechaFin;
+    }
+    
+    // Si no hay fechaFin, calculamos 60 días después de fechaInicio
+    // El formato viene como "dd/MM/yyyy" del backend
+    const partes = fechaInicio.split('/');
+    if (partes.length !== 3) return fechaInicio; // Si el formato es incorrecto, devolvemos la fecha original
+    
+    const dia = parseInt(partes[0]);
+    const mes = parseInt(partes[1]) - 1; // Los meses en JavaScript van de 0-11
+    const año = parseInt(partes[2]);
+    
+    const fechaInicioDate = new Date(año, mes, dia);
+    const fechaCierreDate = new Date(fechaInicioDate);
+    fechaCierreDate.setDate(fechaInicioDate.getDate() + 60); // Agregar 60 días
+    
+    // Formatear de vuelta a "dd/MM/yyyy"
+    const diaCierre = fechaCierreDate.getDate().toString().padStart(2, '0');
+    const mesCierre = (fechaCierreDate.getMonth() + 1).toString().padStart(2, '0');
+    const añoCierre = fechaCierreDate.getFullYear();
+    
+    return `${diaCierre}/${mesCierre}/${añoCierre}`;
+  };
 
   //#endregion
 
@@ -328,10 +357,10 @@ export default function EstudianteOfertasPage() {
                     },
                     {
                       icon: <EventIcon fontSize="small" />,
-                      texto: `Cierra el ${oferta.fechaFin}`,
+                      texto: `Cierra el ${calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}`,
                     },
                   ]}
-                  onAccion1={() => console.log("Ver detalle", oferta.id)}
+                  onAccion1={() => {/* TODO: Implementar ver detalle */}}
                   textoAccion1="Ver detalles"
                   onAccion2={() => onClickPostularse(oferta.id)}
                   textoAccion2="Postularme"
@@ -348,6 +377,6 @@ export default function EstudianteOfertasPage() {
     </>
   );
   //#endregion
-}
+}//#endregion
 
-//#endregion
+
