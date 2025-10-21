@@ -80,6 +80,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       roles: [USER_ROLES.EMPRESA],
     },
     {
+      href: "/empresa/candidatos-postulados",
+      label: "Candidatos Postulados",
+      icon: <DescriptionIcon />,
+      roles: [USER_ROLES.EMPRESA],
+    },
+    {
       href: "/admin/usuarios",
       label: "Gestión de Usuarios",
       icon: <PersonIcon />,
