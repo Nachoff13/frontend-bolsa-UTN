@@ -47,7 +47,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
-  const { rol, perfilId } = useAuth();
+  const { rol, perfilId, user } = useAuth();
 
   // Construir navItems con perfilId dinámico
   const navItems = [
