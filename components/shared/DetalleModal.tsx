@@ -20,7 +20,14 @@ interface Field {
 
 interface ChipItem {
   label: string;
-  color?: "default" | "primary" | "secondary" | "info" | "success" | "warning" | "error";
+  color?:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "info"
+    | "success"
+    | "warning"
+    | "error";
 }
 
 interface DetalleModalProps {
@@ -48,12 +55,36 @@ export default function DetalleModal({
       fullWidth
       PaperProps={{ sx: { borderRadius: 3, p: 1.5 } }}
     >
-      {/* Título */}
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.4rem" }}>
-        {title}
+      {/* 🔹 Encabezado con título y chip a la derecha */}
+      <DialogTitle
+        sx={{
+          fontWeight: "bold",
+          fontSize: "1.4rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+          {title}
+        </Typography>
+
+        {chips.length > 0 && (
+          <Box display="flex" gap={1}>
+            {chips.map((chip, idx) => (
+              <Chip
+                key={idx}
+                label={chip.label}
+                color={chip.color ?? "default"}
+                size="small"
+                sx={{ fontWeight: 600 }}
+              />
+            ))}
+          </Box>
+        )}
       </DialogTitle>
 
-      {/* Contenido */}
+      {/* 📋 Contenido principal */}
       <DialogContent dividers>
         <Box display="flex" flexDirection="column" gap={2}>
           {fields.map((f, idx) => (
@@ -65,21 +96,28 @@ export default function DetalleModal({
               <Typography variant="body2">{f.value}</Typography>
             </Box>
           ))}
-
-          {chips.length > 0 && (
-            <Box display="flex" gap={1} flexWrap="wrap" mt={2}>
-              {chips.map((chip, idx) => (
-                <Chip key={idx} label={chip.label} color={chip.color ?? "default"} size="small" />
-              ))}
-            </Box>
-          )}
         </Box>
       </DialogContent>
 
-      {/* Acciones */}
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cerrar</Button>
-        {actions}
+      {/* 🔘 Acciones */}
+      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+        <Button
+          onClick={() => console.log("Ver publicación")}
+          variant="outlined"
+          color="secondary"
+          sx={{ textTransform: "none", fontWeight: 600 }}
+        >
+          Ver Publicación
+        </Button>
+
+        <Button
+          onClick={onClose}
+          variant="contained"
+          color="primary"
+          sx={{ textTransform: "none", fontWeight: 600 }}
+        >
+          Cerrar
+        </Button>
       </DialogActions>
     </Dialog>
   );
