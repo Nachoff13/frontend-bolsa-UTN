@@ -37,11 +37,6 @@ import UserMenu from "@/components/shared/UserMenu";
 
 const drawerWidth = 280;
 
-const footerItems = [
-  { href: "/configuracion", label: "Configuración", icon: <SettingsIcon /> },
-  { href: "/auth/logout", label: "Cerrar Sesión", icon: <LogoutIcon /> },
-];
-
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -52,11 +47,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Construir navItems con perfilId dinámico
   const navItems = [
     {
-      href: "/",
+      href: "/empresa/dashboard",
       label: "Menú Principal",
       icon: <HomeIcon />,
-      roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE],
+      roles: [USER_ROLES.EMPRESA],
     },
+ {
+      href: "/estudiante/dashboard",
+      label: "Menú Principal",
+      icon: <HomeIcon />,
+      roles: [USER_ROLES.ESTUDIANTE],
+    },
+
+
     {
       href: "/estudiante/ofertas",
       label: "Ofertas Laborales",
@@ -69,12 +72,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: <DescriptionIcon />,
       roles: [USER_ROLES.ESTUDIANTE],
     },
-    {
-      href: perfilId ? `/estudiante/perfil/${perfilId}` : "/estudiante/perfil",
-      label: "Mi Perfil",
-      icon: <PersonIcon />,
-      roles: [USER_ROLES.ESTUDIANTE],
-    },
+
     {
       href: "/empresa/ofertas-publicadas",
       label: "Mis Publicaciones",
@@ -87,6 +85,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: <PersonIcon />,
       roles: [USER_ROLES.ADMIN],
     },
+  ];
+
+  const footerItems = [
+    {
+      href: perfilId ? `/estudiante/perfil/${perfilId}` : "/estudiante/perfil",
+      label: "Mi Perfil",
+      icon: <PersonIcon />,
+      roles: [USER_ROLES.ESTUDIANTE],
+    },
+    {
+      href: perfilId ? `/empresa/perfil/${perfilId}` : "/empresa/perfil",
+      label: "Mi Perfil",
+      icon: <PersonIcon />,
+      roles: [USER_ROLES.EMPRESA],
+    },
+    //tengo que agregar el rol de los 3
+    { href: "/configuracion", label: "Configuración", icon: <SettingsIcon/>, roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE] },
+    { href: "/auth/logout", label: "Cerrar Sesión", icon: <LogoutIcon />, roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE] },
   ];
 
   const DrawerContent = (
@@ -147,7 +163,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Footer */}
       <Divider />
       <List sx={{ px: 1, py: 1 }}>
-        {footerItems.map((item) => (
+        {footerItems
+        .filter((item) => item.roles.includes(rol)) // 👈 filtra según el rol del contexto
+        .map((item) => (
           <ListItem key={item.href} disablePadding>
             <ListItemButton
               component={Link}
