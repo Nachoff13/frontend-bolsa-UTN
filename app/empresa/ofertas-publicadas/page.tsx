@@ -63,6 +63,7 @@ export default function EmpresaOfertasPublicadasPage() {
   //#region DATOS DE LA API EN VARIABLES
   // Estados para las ofertas de la empresa
   const [ofertas, setOfertas] = useState<OfertaDTO[]>([]);
+  const [todasLasOfertas, setTodasLasOfertas] = useState<OfertaDTO[]>([]); // Cache de todas las ofertas
   
   // Estados para filtros
   const [tipoContratos, setTipoContratos] = useState<OpcionFiltro[]>([]);
@@ -95,7 +96,7 @@ export default function EmpresaOfertasPublicadasPage() {
       titulo: "Carrera",
       opciones: carreras.map((carrera) => ({
         codigo: carrera.codigo,
-        descripcion: carrera.descripcion,
+        descripcion: carrera.nombre,
       })),
     },
     {
@@ -108,7 +109,6 @@ export default function EmpresaOfertasPublicadasPage() {
     },
   ];
 
-  //Grupos filtros guarda el valor de los grupos y los seleccionados
   const gruposFiltros: GrupoFiltro[] = filtrosAPI.map((grupo) => {
     let valoresSeleccionados: string[] = [];
 
@@ -162,15 +162,18 @@ export default function EmpresaOfertasPublicadasPage() {
     try {
       setLoading(true);
 
-      const [tipos, modos, carreras] = await Promise.all([
+      const [tipos, modos, carreras, ofertas] = await Promise.all([
         genericService.getTipoContrato(),
         genericService.getModalidad(),
         genericService.getCarreras(),
+        ofertaService.getOfertasByEmpresa(),
       ]);
 
       setTipoContratos(tipos);
       setModalidades(modos);
-      setCarreras(carreras);
+      setCarreras(carreras || []);
+      setTodasLasOfertas(ofertas);
+      setOfertas(ofertas);
     } catch (e) {
       const err = e as ResponseError;
       showMessage(err.message, SnackbarType.Error, {
@@ -182,34 +185,49 @@ export default function EmpresaOfertasPublicadasPage() {
     }
   };
 
-  //uso otro useEffect para cargar las ofertas cuando cambian los filtros
   useEffect(() => {
-    buscarOfertas();
-  }, [filtros]);
+    if (todasLasOfertas.length === 0) return;
+    
+    aplicarFiltros();
+  }, [filtros, todasLasOfertas]);
 
-  const buscarOfertas = async () => {
-    try {
-      setLoading(true);
-
-      // Obtener el ID de la empresa del usuario logueado
-      const idEmpresa = await genericService.getPerfilEmpresaUsuario();
-      
-      const nuevasOfertas: OfertaDTO[] = await ofertaService.getOfertasByEmpresa();
-      setOfertas(nuevasOfertas);
-    } catch (e) {
-      const err = e as ResponseError;
-      showMessage(err.message, SnackbarType.Error, {
-        size: SnackbarSize.Medium,
-        position: SnackbarPosition.BottomCenter,
-      });
-    } finally {
-      setLoading(false);
+  const aplicarFiltros = () => {
+    let ofertasFiltradas = [...todasLasOfertas];
+    if (inputBusquedaFinal.trim()) {
+      const textoBusqueda = inputBusquedaFinal.toLowerCase();
+      ofertasFiltradas = ofertasFiltradas.filter(oferta => 
+        oferta.titulo?.toLowerCase().includes(textoBusqueda) ||
+        oferta.descripcion?.toLowerCase().includes(textoBusqueda)
+      );
     }
+    if (modalidadesSeleccionadas.length > 0) {
+      ofertasFiltradas = ofertasFiltradas.filter(oferta =>
+        modalidadesSeleccionadas.some(modalidad => 
+          oferta.modalidad === modalidades.find(m => m.codigo === modalidad)?.descripcion
+        )
+      );
+    }
+    if (tiposContratoSeleccionados.length > 0) {
+      ofertasFiltradas = ofertasFiltradas.filter(oferta =>
+        tiposContratoSeleccionados.some(tipo => 
+          oferta.tipoContrato === tipoContratos.find(t => t.codigo === tipo)?.descripcion
+        )
+      );
+    }
+    if (carrerasSeleccionadas.length > 0) {
+      ofertasFiltradas = ofertasFiltradas.filter(oferta =>
+        carrerasSeleccionadas.some(carrera => 
+          oferta.nombreCarrera === carreras.find(c => c.codigo === carrera)?.nombre
+        )
+      );
+    }
+
+    setOfertas(ofertasFiltradas);
   };
 
   useEffect(() => {
     if (busquedaInputFiltro.trim() === "") {
-      setInputBusquedaFinal(""); // dispara búsqueda sin input
+      setInputBusquedaFinal("");
     }
   }, [busquedaInputFiltro]);
   //#endregion
@@ -274,15 +292,14 @@ export default function EmpresaOfertasPublicadasPage() {
   };
 
   const getEstadoColor = (oferta: OfertaDTO) => {
-    // Determinar estado basado solo en fecha de fin
     const fechaFin = oferta.fechaFin ? new Date(oferta.fechaFin.split('/').reverse().join('-')) : null;
     const ahora = new Date();
     
     if (fechaFin && fechaFin < ahora) {
-      return 'error'; // Cerrada
+      return 'error';
     }
     
-    return 'success'; // Activa (por defecto, independientemente de fecha de inicio)
+    return 'success';
   };
 
   const getEstadoTexto = (oferta: OfertaDTO) => {
@@ -293,7 +310,7 @@ export default function EmpresaOfertasPublicadasPage() {
       return 'Cerrada';
     }
     
-    return 'Activa'; // Por defecto, independientemente de fecha de inicio
+    return 'Activa';
   };
 
   const handleCrearOferta = () => {
@@ -301,7 +318,6 @@ export default function EmpresaOfertasPublicadasPage() {
   };
 
   const handleEditarOferta = (id: number) => {
-    // TODO: Implementar edición de oferta
   };
 
   const handleEliminarOferta = async (id: number) => {
@@ -311,8 +327,7 @@ export default function EmpresaOfertasPublicadasPage() {
         size: SnackbarSize.Medium,
         position: SnackbarPosition.BottomCenter,
       });
-      // Recargar las ofertas
-      buscarOfertas();
+      cargarDatos();
     } catch (e) {
       const err = e as ResponseError;
       showMessage(err.message, SnackbarType.Error, {
@@ -326,127 +341,94 @@ export default function EmpresaOfertasPublicadasPage() {
 
   //#region RENDERIZADO DE LA PAGINA
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#F4FBF9' }}>
-      {/* Header */}
-      <Box sx={{ p: 3, backgroundColor: 'white' }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-          <Box>
-            <Typography variant="h4" fontWeight={700} gutterBottom>
-              Mis Ofertas Publicadas
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              Gestioná tus publicaciones laborales
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleCrearOferta}
-            sx={{
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 500,
-              px: 3,
-              py: 1.5
-            }}
-          >
-            Crear Nueva Oferta
-          </Button>
-        </Box>
-
-        {/* Barra de búsqueda */}
-        <FilterSearch
-          titulo="Buscar Ofertas"
-          subtitulo="Encuentra y gestiona tus ofertas publicadas"
-          placeholder="Buscar por título, descripción..."
-          valor={busquedaInputFiltro}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBusquedaInputFiltro(e.target.value)}
-          onAccion1={handleBuscar}
-          tituloBoton1="Buscar"
-          onAccion2={limpiarFiltros}
-          tituloBoton2="Limpiar"
-          mostrarBotonFiltros={true}
+    <>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Titulo
+          titulo="Mis Ofertas Publicadas"
+          subtitulo="Gestioná tus publicaciones laborales"
         />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleCrearOferta}
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 500,
+            px: 3,
+            py: 1.5
+          }}
+        >
+          Crear Nueva Oferta
+        </Button>
       </Box>
 
-      {/* Contenido principal */}
-      <Box sx={{ p: 3 }}>
-        <Box display="flex" gap={3}>
-          {/* Sidebar de filtros */}
-          <Box flex={1} maxWidth={300}>
-            <CardFiltros
-              grupos={gruposFiltros}
-              onSeleccionCambio={handleSeleccionFiltro}
-            />
-          </Box>
-          
-          {/* Lista de ofertas */}
-          <Box flex={3}>
-            {ofertas.length > 0 ? (
-              <Box>
-                <Titulo
-                  titulo="Ofertas Publicadas"
-                  subtitulo={`${ofertas.length} oferta${ofertas.length !== 1 ? 's' : ''} encontrada${ofertas.length !== 1 ? 's' : ''}`}
-                  variantTitulo="h5"
-                  variantSubtitulo="body2"
-                />
-                
-                <Stack spacing={2}>
-                  {ofertas.map((oferta) => (
-                    <CardGenerica
-                      key={oferta.id}
-                      titulo={oferta.titulo}
-                      descripcion={oferta.descripcion}
-                      chips={[
-                        { label: oferta.modalidad, color: "primary" },
-                        { label: oferta.tipoContrato, color: "secondary" },
-                        { label: getEstadoTexto(oferta), color: getEstadoColor(oferta) as any },
-                      ]}
-                      infoExtra={[
-                        {
-                          icon: <LocationOnIcon fontSize="small" />,
-                          texto: oferta.nombreLocalidad,
-                        },
-                        {
-                          icon: <CalendarTodayIcon fontSize="small" />,
-                          texto: `Publicado el ${oferta.fechaInicio}`,
-                        },
-                        {
-                          icon: <EventIcon fontSize="small" />,
-                          texto: `Cierra el ${calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}`,
-                        },
-                      ]}
-                      onAccion1={() => handleEditarOferta(oferta.id)}
-                      textoAccion1="Editar"
-                      onAccion2={() => handleEliminarOferta(oferta.id)}
-                      textoAccion2="Eliminar"
-                    />
-                  ))}
-                </Stack>
-              </Box>
-            ) : (
-              <Card elevation={1}>
-                <Box sx={{ p: 6, textAlign: 'center' }}>
-                  <Typography variant="h6" color="text.secondary" gutterBottom>
-                    No tienes ofertas publicadas
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Comienza creando tu primera oferta laboral
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={handleCrearOferta}
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Crear Primera Oferta
-                  </Button>
-                </Box>
-              </Card>
-            )}
-          </Box>
+      <FilterSearch
+        titulo="Buscar ofertas"
+        subtitulo="Encontrá y gestioná tus publicaciones"
+        placeholder="Buscar por título, descripción…"
+        valor={busquedaInputFiltro}
+        onChange={(e) => setBusquedaInputFiltro(e.target.value)}
+        onAccion1={handleBuscar}
+        tituloBoton2="Limpiar"
+        onAccion2={limpiarFiltros}
+      />
+
+      <Box display="flex" gap={3} mt={4}>
+        <Box flex={1} maxWidth={300}>
+          <CardFiltros
+            grupos={gruposFiltros}
+            onSeleccionCambio={handleSeleccionFiltro}
+          />
         </Box>
+        {ofertas.length > 0 ? (
+          <Box flex={3}>
+            <Card variant="outlined" sx={{ p: 3, boxShadow: 1 }}>
+              <Titulo
+                titulo="Tus ofertas publicadas"
+                subtitulo={`${ofertas.length} oferta${ofertas.length !== 1 ? 's' : ''} encontrada${ofertas.length !== 1 ? 's' : ''}`}
+                variantTitulo="h5"
+                variantSubtitulo="body2"
+              />
+              {ofertas.map((oferta) => (
+                <CardGenerica
+                  key={oferta.id}
+                  titulo={oferta.titulo}
+                  descripcion={oferta.descripcion}
+                  chips={[
+                    { label: oferta.modalidad, color: "primary" },
+                    { label: oferta.tipoContrato, color: "secondary" },
+                    { label: getEstadoTexto(oferta), color: getEstadoColor(oferta) as any },
+                  ]}
+                  infoExtra={[
+                    {
+                      icon: <LocationOnIcon fontSize="small" />,
+                      texto: oferta.nombreLocalidad,
+                    },
+                    {
+                      icon: <CalendarTodayIcon fontSize="small" />,
+                      texto: `Publicado el ${oferta.fechaInicio}`,
+                    },
+                    {
+                      icon: <EventIcon fontSize="small" />,
+                      texto: `Cierra el ${calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}`,
+                    },
+                  ]}
+                  onAccion1={() => handleEditarOferta(oferta.id)}
+                  textoAccion1="Editar"
+                  onAccion2={() => handleEliminarOferta(oferta.id)}
+                  textoAccion2="Eliminar"
+                />
+              ))}
+            </Card>
+          </Box>
+        ) : (
+          <Box flex={3}>
+            <EmptyState mensaje="No tienes ofertas publicadas" />
+          </Box>
+        )}
       </Box>
-    </Box>
+    </>
   );
+  //#endregion
 }
