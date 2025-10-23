@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    darkMode: ['class'],
+    darkMode: 'class', // Habilitar dark mode con clase
     content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -88,63 +88,63 @@ module.exports = {
   		},
   		fontSize: {
   			xs: [
-  				'0.75rem',
-  				{
-  					lineHeight: '1rem'
-  				}
-  			],
-  			sm: [
-  				'0.875rem',
+  				'0.8125rem', // Aumentado de 0.75rem (12px) a 0.8125rem (13px)
   				{
   					lineHeight: '1.25rem'
   				}
   			],
-  			base: [
-  				'1rem',
+  			sm: [
+  				'0.9375rem', // Aumentado de 0.875rem (14px) a 0.9375rem (15px)
   				{
   					lineHeight: '1.5rem'
   				}
   			],
-  			lg: [
-  				'1.125rem',
+  			base: [
+  				'1rem', // Se mantiene en 16px
   				{
-  					lineHeight: '1.75rem'
+  					lineHeight: '1.625rem' // Aumentado para mejor legibilidad
+  				}
+  			],
+  			lg: [
+  				'1.125rem', // 18px
+  				{
+  					lineHeight: '1.875rem' // Mejorado
   				}
   			],
   			xl: [
-  				'1.25rem',
+  				'1.25rem', // 20px
   				{
-  					lineHeight: '1.75rem'
+  					lineHeight: '2rem' // Mejorado
   				}
   			],
   			'2xl': [
-  				'1.5rem',
+  				'1.5rem', // 24px
   				{
-  					lineHeight: '2rem'
+  					lineHeight: '2.25rem' // Mejorado
   				}
   			],
   			'3xl': [
-  				'1.875rem',
+  				'1.875rem', // 30px
   				{
-  					lineHeight: '2.25rem'
+  					lineHeight: '2.5rem' // Mejorado
   				}
   			],
   			'4xl': [
-  				'2.25rem',
+  				'2.25rem', // 36px
   				{
-  					lineHeight: '2.5rem'
+  					lineHeight: '3rem' // Aumentado
   				}
   			],
   			'5xl': [
-  				'3rem',
+  				'3rem', // 48px
   				{
-  					lineHeight: '1'
+  					lineHeight: '1.2' // Mejorado
   				}
   			],
   			'6xl': [
-  				'3.75rem',
+  				'3.75rem', // 60px
   				{
-  					lineHeight: '1'
+  					lineHeight: '1.2' // Mejorado
   				}
   			]
   		},

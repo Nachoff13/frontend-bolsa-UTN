@@ -6,7 +6,7 @@ import InboxIcon from "@mui/icons-material/Inbox";
 
 export default function EmptyState({
   mensaje = "No hay información para mostrar",
-  icono = <InboxIcon sx={{ fontSize: 48, color: grey[400] }} />,
+  icono = <InboxIcon sx={{ fontSize: 64, color: grey[400] }} />, // Aumentado de 48 a 64
   color = grey[500],
   minHeight = "70vh",
 }: EmptyStateProps) {
@@ -19,10 +19,11 @@ export default function EmptyState({
       minHeight={minHeight}
       width="100%"
       textAlign="center"
-      px={2}
+      px={3} // Aumentado de 2 a 3
+      py={4} // Añadido padding vertical
     >
       {icono}
-      <Typography variant="h6" color={color} mt={2}>
+      <Typography variant="h5" color={color} mt={3} sx={{ fontWeight: 500 }}> {/* Cambiado de h6 a h5 */}
         {mensaje}
       </Typography>
     </Box>

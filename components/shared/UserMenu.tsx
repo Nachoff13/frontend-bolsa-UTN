@@ -12,19 +12,24 @@ import {
   Divider,
   ListItemIcon,
   ListItemText,
+  Switch,
 } from "@mui/material";
 import {
   Person as PersonIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
 } from "@mui/icons-material";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { USER_ROLES } from "@/lib/constants";
 
 export default function UserMenu() {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { rol, perfilId, usuarioDTO } = useAuth();
+  const { mode, toggleTheme } = useTheme();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -106,6 +111,32 @@ export default function UserMenu() {
             <ListItemText primaryTypographyProps={{ variant: 'body2' }}>Perfil</ListItemText>
           </MenuItem>
         )}
+        
+        {/* Toggle de Tema */}
+        <MenuItem 
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleTheme();
+          }}
+          sx={{ py: 1 }}
+        >
+          <ListItemIcon sx={{ minWidth: 36 }}>
+            {mode === 'dark' ? (
+              <LightModeIcon fontSize="small" />
+            ) : (
+              <DarkModeIcon fontSize="small" />
+            )}
+          </ListItemIcon>
+          <ListItemText primaryTypographyProps={{ variant: 'body2' }}>
+            {mode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
+          </ListItemText>
+          <Switch
+            checked={mode === 'dark'}
+            size="small"
+            onClick={(e) => e.stopPropagation()}
+            sx={{ ml: 1 }}
+          />
+        </MenuItem>
         
         <MenuItem onClick={handleMenuClose} sx={{ py: 1, mb: 0.5 }}>
           <ListItemIcon sx={{ minWidth: 36 }}>

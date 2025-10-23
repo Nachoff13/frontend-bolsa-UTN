@@ -146,14 +146,14 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Card sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
+      <Card sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}> {/* Aumentado de 800 a 900 */}
+        <CardContent sx={{ p: 5 }}> {/* Aumentado de 4 a 5 */}
+          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 5 }}> {/* Aumentado mb */}
             Crear Nueva Oferta
           </Typography>
           
           <Box component="form" onSubmit={handleSubmit(onFormSubmit)}>
-            <Stack spacing={3}>
+            <Stack spacing={3.5}> {/* Aumentado de 3 a 3.5 */}
               {/* Título */}
               <Controller
                 name="titulo"
@@ -327,12 +327,12 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
               />
 
               {/* Botones */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 4 }}>
+              <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 5 }}>
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isSubmitting}
-                  sx={{ minWidth: 120 }}
+                  sx={{ minWidth: 140, py: 1.5 }}
                 >
                   Cancelar
                 </Button>
@@ -340,7 +340,7 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                   type="submit"
                   variant="contained"
                   disabled={isSubmitting}
-                  sx={{ minWidth: 120 }}
+                  sx={{ minWidth: 140, py: 1.5 }}
                 >
                   {isSubmitting ? 'Creando...' : 'Crear Oferta'}
                 </Button>
