@@ -1,6 +1,5 @@
 export class PostulacionDTO {
   id!: number;
-  idPerfilCandidato!: number;
   idOferta!: number;
 
   // Datos propios de la postulación
