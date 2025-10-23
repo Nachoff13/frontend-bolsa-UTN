@@ -76,7 +76,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       roles: [USER_ROLES.ESTUDIANTE],
     },
     {
-      href: "/empresa/publicaciones",
+      href: "/empresa/ofertas-publicadas",
       label: "Mis Publicaciones",
       icon: <WorkIcon />,
       roles: [USER_ROLES.EMPRESA],
