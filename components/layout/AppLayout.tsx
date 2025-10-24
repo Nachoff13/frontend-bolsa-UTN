@@ -74,12 +74,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     },
 
     {
-      href: perfilId ? `/estudiante/perfil/${perfilId}` : "/estudiante/perfil",
-      label: "Mi Perfil",
-      icon: <PersonIcon />,
-      roles: [USER_ROLES.ESTUDIANTE],
-    },
-    {
       href: "/empresa/ofertas-publicadas",
       label: "Mis Publicaciones",
       icon: <WorkIcon />,
