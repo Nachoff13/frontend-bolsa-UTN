@@ -41,6 +41,7 @@ import {
   Edit,
   Save,
   Close,
+  PhotoCamera,
 } from "@mui/icons-material";
 import { genericService } from "@/services/generic.service";
 
@@ -58,6 +59,11 @@ export default function PerfilEstudiantePage() {
   const [uploadingCv, setUploadingCv] = useState(false);
   const [cvUploadError, setCvUploadError] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  
+  // Estados para foto de perfil
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [fotoUploadError, setFotoUploadError] = useState<string | null>(null);
+  const [uploadedFotoName, setUploadedFotoName] = useState<string | null>(null);
   
   // Estados para edición
   const [editMode, setEditMode] = useState(false);
@@ -194,6 +200,38 @@ export default function PerfilEstudiantePage() {
     }
   };
 
+  const handleFotoSelect = (file: File) => {
+    setFotoUploadError(null);
+    setUploadedFotoName(null);
+  };
+
+  const handleFotoUpload = async (file: File) => {
+    try {
+      setUploadingFoto(true);
+      setFotoUploadError(null);
+      
+      if (!perfil?.id) {
+        throw new Error("ID de perfil inválido");
+      }
+      
+      await candidatoService.uploadFotoPerfil(file, perfil.id);
+      
+      setUploadedFotoName(file.name);
+      showMessage("Foto de perfil subida exitosamente", SnackbarType.Success);
+      
+      // Recargar el perfil
+      const data = await candidatoService.getPerfilById(perfil.id);
+      setPerfil(data);
+      
+    } catch (error: any) {
+      const errorMessage = error?.message || "Error al subir la foto de perfil";
+      setFotoUploadError(errorMessage);
+      showMessage(errorMessage, SnackbarType.Error);
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
+
   const handleCvDownload = () => {
     if (!perfil?.cv) {
       showMessage("No hay CV disponible para descargar", SnackbarType.Error);
@@ -262,17 +300,53 @@ export default function PerfilEstudiantePage() {
         <Card>
           <CardContent sx={{ p: 3 }}>
             <Stack direction="row" spacing={3} alignItems="center">
-              <Avatar
-                sx={{
-                  width: 120,
-                  height: 120,
-                  bgcolor: "primary.main",
-                  fontSize: "2.5rem",
-                  fontWeight: 600,
-                }}
-              >
-                {perfil.nombre ? perfil.nombre.charAt(0).toUpperCase() : "U"}
-              </Avatar>
+              <Box sx={{ position: "relative" }}>
+                <Avatar
+                  src={perfil.fotoPerfil ? `data:image/jpeg;base64,${perfil.fotoPerfil}` : undefined}
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    bgcolor: "primary.main",
+                    fontSize: "2.5rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  {!perfil.fotoPerfil && perfil.nombre ? perfil.nombre.charAt(0).toUpperCase() : "U"}
+                </Avatar>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: 0,
+                    right: 0,
+                    bgcolor: "primary.main",
+                    borderRadius: "50%",
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    "&:hover": {
+                      bgcolor: "primary.dark",
+                    },
+                  }}
+                  component="label"
+                >
+                  <PhotoCamera sx={{ fontSize: 20, color: "white" }} />
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFotoSelect(file);
+                        handleFotoUpload(file);
+                      }
+                    }}
+                  />
+                </Box>
+              </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
                   {perfil.nombre || "Nombre no disponible"}
