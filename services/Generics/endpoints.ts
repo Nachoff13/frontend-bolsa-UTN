@@ -60,6 +60,7 @@ export const ENDPOINTS = {
     GET_PERFIL: `/Candidato/get_perfil`,
     UPDATE_PERFIL: `/Candidato/update_perfil`,
     UPLOAD_CV: `/Candidato/upload_cv`,
+    UPLOAD_FOTO_PERFIL: `/Candidato/upload_foto_perfil`,
     VERIFICAR_PERFIL: `/Candidato/verificar_perfil`,
     COMPLETAR_PERFIL: `/Candidato/completar_perfil`,
   },

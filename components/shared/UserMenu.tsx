@@ -63,8 +63,11 @@ export default function UserMenu() {
         sx={{ p: 0 }}
         aria-label="Menú de usuario"
       >
-        <Avatar sx={{ width: 36, height: 36, bgcolor: "primary.main", cursor: "pointer" }}>
-          {getInitials(usuarioDTO?.nombre)}
+        <Avatar 
+          src={usuarioDTO?.fotoPerfil ? `data:image/jpeg;base64,${usuarioDTO.fotoPerfil}` : undefined}
+          sx={{ width: 36, height: 36, bgcolor: "primary.main", cursor: "pointer" }}
+        >
+          {!usuarioDTO?.fotoPerfil && getInitials(usuarioDTO?.nombre)}
         </Avatar>
       </IconButton>
       
