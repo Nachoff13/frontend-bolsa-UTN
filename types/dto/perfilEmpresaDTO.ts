@@ -17,6 +17,7 @@ export interface PerfilEmpresaDTO {
   email?: string | null;
   usuarioActivo?: boolean | null;
   idRol?: number | null;
+  fotoPerfil?: string | null;
 
   // Derivados/relacionados desde Rol
   rolNombre?: string | null;
