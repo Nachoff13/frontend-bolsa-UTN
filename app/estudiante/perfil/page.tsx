@@ -30,6 +30,7 @@ import {
 } from "@mui/material";
 import Titulo from "@/components/shared/Titulo";
 import FileUpload from "@/components/shared/FileUpload";
+import PhotoEditor from "@/components/shared/PhotoEditor";
 import {
   Email,
   Phone,
@@ -41,7 +42,7 @@ import {
   Edit,
   Save,
   Close,
-  PhotoCamera,
+  CameraAlt,
 } from "@mui/icons-material";
 import { genericService } from "@/services/generic.service";
 
@@ -70,6 +71,11 @@ export default function PerfilEstudiantePage() {
   const [editedData, setEditedData] = useState<any>({});
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [savingChanges, setSavingChanges] = useState(false);
+  
+  // Estados para foto de perfil
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -262,6 +268,70 @@ export default function PerfilEstudiantePage() {
     }
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !perfil?.id) return;
+
+    // Validar que sea una imagen
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      showMessage("Por favor selecciona una imagen válida (JPG, PNG, GIF o WEBP)", SnackbarType.Error);
+      return;
+    }
+
+    // Validar tamaño máximo (2MB)
+    const maxSize = 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showMessage("La imagen no debe superar los 2MB", SnackbarType.Error);
+      return;
+    }
+
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+      setPhotoEditorOpen(true);
+    };
+    reader.readAsDataURL(file);
+    
+    // Limpiar el input para permitir seleccionar la misma imagen de nuevo
+    event.target.value = '';
+  };
+
+  const handleConfirmPhoto = async (croppedImageBlob: Blob) => {
+    if (!perfil?.id) return;
+
+    try {
+      setUploadingPhoto(true);
+      
+      // Convertir blob a File
+      const croppedFile = new File([croppedImageBlob], 'profile-photo.jpg', { 
+        type: 'image/jpeg' 
+      });
+      
+      await candidatoService.uploadFotoPerfil(croppedFile, perfil.id);
+      
+      showMessage("Foto de perfil actualizada exitosamente", SnackbarType.Success);
+      
+      // Recargar el perfil para mostrar la nueva foto
+      const data = await candidatoService.getPerfilById(perfil.id);
+      setPerfil(data);
+      
+      // Cerrar el diálogo y limpiar estados
+      setPhotoEditorOpen(false);
+      setPhotoPreview(null);
+    } catch (error: any) {
+      showMessage(error?.message || "Error al subir la foto de perfil", SnackbarType.Error);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleCancelPhoto = () => {
+    setPhotoEditorOpen(false);
+    setPhotoPreview(null);
+  };
+
   if (loading) return <LoadingModal open={loading} />;
   if (!perfil) return (
     <Box sx={{ maxWidth: 1200, mx: "auto", textAlign: "center", mt: 4 }}>
@@ -300,7 +370,7 @@ export default function PerfilEstudiantePage() {
         <Card>
           <CardContent sx={{ p: 3 }}>
             <Stack direction="row" spacing={3} alignItems="center">
-              <Box sx={{ position: "relative" }}>
+              <Box sx={{ position: 'relative' }}>
                 <Avatar
                   src={perfil.fotoPerfil ? `data:image/jpeg;base64,${perfil.fotoPerfil}` : undefined}
                   sx={{
@@ -313,39 +383,34 @@ export default function PerfilEstudiantePage() {
                 >
                   {!perfil.fotoPerfil && perfil.nombre ? perfil.nombre.charAt(0).toUpperCase() : "U"}
                 </Avatar>
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: 0,
-                    right: 0,
-                    bgcolor: "primary.main",
-                    borderRadius: "50%",
-                    width: 36,
-                    height: 36,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    "&:hover": {
-                      bgcolor: "primary.dark",
-                    },
-                  }}
-                  component="label"
-                >
-                  <PhotoCamera sx={{ fontSize: 20, color: "white" }} />
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleFotoSelect(file);
-                        handleFotoUpload(file);
-                      }
+                <input
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  style={{ display: 'none' }}
+                  id="foto-perfil-upload"
+                  type="file"
+                  onChange={handlePhotoUpload}
+                  disabled={uploadingPhoto}
+                />
+                <label htmlFor="foto-perfil-upload">
+                  <IconButton
+                    component="span"
+                    disabled={uploadingPhoto}
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      bgcolor: 'primary.main',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'primary.dark',
+                      },
+                      boxShadow: 2,
                     }}
-                  />
-                </Box>
+                    size="small"
+                  >
+                    <CameraAlt fontSize="small" />
+                  </IconButton>
+                </label>
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
@@ -558,6 +623,17 @@ export default function PerfilEstudiantePage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Editor de Foto de Perfil */}
+      {photoPreview && (
+        <PhotoEditor
+          open={photoEditorOpen}
+          imageSrc={photoPreview}
+          onCancel={handleCancelPhoto}
+          onConfirm={handleConfirmPhoto}
+          uploading={uploadingPhoto}
+        />
+      )}
     </Box>
   );
 }

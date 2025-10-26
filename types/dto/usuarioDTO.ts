@@ -7,6 +7,5 @@ export class UsuarioDTO {
   activo!: string;
   fechaAlta!: string;
   fechaBaja!: string;
-
-
+  fotoPerfil?: string | null;
 }

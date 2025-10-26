@@ -16,7 +16,7 @@ export interface PerfilCandidatoDTO {
   email?: string | null;
   usuarioActivo?: boolean | null;
   idRol?: number | null;
-  fotoPerfil?: string | null;
+  fotoPerfil?: string | null; // Foto de perfil en base64
   
   // Derivados/relacionados desde Genero (según diagrama)
   generoNombre?: string | null;
