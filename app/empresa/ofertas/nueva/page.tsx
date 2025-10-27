@@ -7,7 +7,8 @@ import OfertaForm from '@/components/ofertas/OfertaForm';
 import { ofertaService } from '@/services/oferta.service';
 import { CrearOfertaDTO } from '@/types/dto/ofertaDTO';
 import { useSnackbar } from '@/components/providers/snackbar';
-import { SnackbarType } from '@/types/enums/snackbar';
+import { SnackbarPosition, SnackbarSize, SnackbarType } from '@/types/enums/snackbar';
+import { ResponseError } from '@/types/Generics/responseError';
 
 export default function CreateOfertaPage() {
   const router = useRouter();
@@ -31,14 +32,14 @@ export default function CreateOfertaPage() {
       // Redirigir a la página de ofertas publicadas
       router.push('/empresa/ofertas-publicadas');
       
-    } catch (error: any) {
-      // Manejar errores específicos del backend
-      if (error.status === 400 || error.status === 422) {
-        showMessage(`Error de validación: ${error.message}`, SnackbarType.Error);
-      } else {
-        showMessage('Error al crear la oferta. Inténtalo nuevamente.', SnackbarType.Error);
-      }
-    } finally {
+    } catch (e) {
+          const err = e as ResponseError;
+          showMessage(err.message, SnackbarType.Error, {
+            size: SnackbarSize.Medium,
+            position: SnackbarPosition.BottomCenter,
+          });
+        } 
+        finally {
       setIsSubmitting(false);
     }
   };
