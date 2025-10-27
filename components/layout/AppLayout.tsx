@@ -91,6 +91,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: <PersonIcon />,
       roles: [USER_ROLES.ADMIN],
     },
+     {
+      href: "/admin/solicitantes",
+      label: "Gestión de Empresas",
+      icon: <PersonIcon />,
+      roles: [USER_ROLES.ADMIN],
+    },
   ];
 
   const footerItems = [

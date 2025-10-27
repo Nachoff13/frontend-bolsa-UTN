@@ -7,6 +7,7 @@ export const CONTROLLERS = {
   POSTULACION: "/postulacion",
   CANDIDATO: "/candidato",
   EMPRESA: "/empresa",
+  ADMIN: "/admin",
 } as const;
 
 export const ENDPOINTS = {
@@ -67,4 +68,7 @@ export const ENDPOINTS = {
     GET_PERFIL: `/Empresa/get_perfil`,
     UPDATE_PERFIL: `/Empresa/update_perfil`,
   },
+  ADMIN: {
+    GET_EMPRESAS: `${CONTROLLERS.ADMIN}/get_empresas_por_verificar`,
+  }
 } as const;
