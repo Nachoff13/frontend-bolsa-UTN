@@ -84,6 +84,7 @@ export default function EstudianteOfertasPage() {
   //#region ASIGNACION DE VALORES A GRUPOS DE FILTROS
   const filtrosAPI = [
     {
+      //le pongo id porque necesito identificar el grupo y para que no rompa
       id: GrupoFiltroID.Modalidad,
       titulo: "Modalidad",
       opciones: modalidades.map((mod) => ({
@@ -96,7 +97,7 @@ export default function EstudianteOfertasPage() {
       titulo: "Carrera",
       opciones: carreras.map((carrera) => ({
         codigo: carrera.codigo,
-        descripcion: carrera.nombre,
+        descripcion: carrera.descripcion,
       })),
     },
     {
@@ -171,7 +172,7 @@ export default function EstudianteOfertasPage() {
 
       setTipoContratos(tipos);
       setModalidades(modos);
-      setCarreras(carreras || []);
+      setCarreras(carreras);
     } catch (e) {
       const err = e as ResponseError;
       showMessage(err.message, SnackbarType.Error, {
@@ -195,7 +196,6 @@ export default function EstudianteOfertasPage() {
        const nuevasOfertas : OfertaDTO[] = await ofertaService.buscarOfertas(
          filtros
        );
-      
       setOfertas(nuevasOfertas);
     } catch (e) {
       const err = e as ResponseError;
@@ -210,7 +210,7 @@ export default function EstudianteOfertasPage() {
 
   useEffect(() => {
     if (busquedaInputFiltro.trim() === "") {
-      setInputBusquedaFinal("");
+      setInputBusquedaFinal(""); // dispara búsqueda sin input
     }
   }, [busquedaInputFiltro]);
   //#endregion
@@ -236,6 +236,8 @@ export default function EstudianteOfertasPage() {
         setTiposContratoSeleccionados(nuevos);
         break;
     }
+
+    // TODO: Implementar filtrado
   };
 
   async function onClickPostularse(id: number): Promise<void> {
@@ -305,11 +307,11 @@ export default function EstudianteOfertasPage() {
         placeholder="Buscar por título, empresa, carrera…"
         valor={busquedaInputFiltro}
         onChange={(e) => setBusquedaInputFiltro(e.target.value)}
-        onAccion1={handleBuscar}
+        onAccion1={handleBuscar} //
         tituloBoton2="Limpiar"
         onAccion2={() => {
           setBusquedaInputFiltro("");
-          setInputBusquedaFinal("");
+          setInputBusquedaFinal(""); // esto hace que se dispare el useEffect
           setModalidadesSeleccionadas([]);
           setCarrerasSeleccionadas([]);
           setTiposContratoSeleccionados([]);
@@ -357,7 +359,7 @@ export default function EstudianteOfertasPage() {
                       texto: `Cierra el ${calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}`,
                     },
                   ]}
-                  onAccion1={() => {}}
+                  onAccion1={() => {/* TODO: Implementar ver detalle */}}
                   textoAccion1="Ver detalles"
                   onAccion2={() => onClickPostularse(oferta.id)}
                   textoAccion2="Postularme"

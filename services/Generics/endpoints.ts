@@ -1,5 +1,7 @@
 // services/endpoints.ts
 
+import { GET } from "@/app/api/auth/token/route";
+
 // Controllers en un solo lugar
 export const CONTROLLERS = {
   PUBLICACION: "/publicacion",
@@ -52,6 +54,7 @@ export const ENDPOINTS = {
     GET_LOCALIDADES: `${CONTROLLERS.GENERIC}/get_localidades`,
     CARGAR_USUARIO: `${CONTROLLERS.GENERIC}/cargar_usuario`,
     GET_PERFIL_EMPRESA_USUARIO: `${CONTROLLERS.GENERIC}/get_perfil_empresa_usuario`,
+    GET_ESTADOS_VALIDACION: `${CONTROLLERS.GENERIC}/get_estados_validacion`,
   },
   POSTULACION: {
     GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
@@ -70,5 +73,6 @@ export const ENDPOINTS = {
   },
   ADMIN: {
     GET_EMPRESAS: `${CONTROLLERS.ADMIN}/get_empresas_por_verificar`,
+    CAMBIAR_ESTADO_VALIDACION: `${CONTROLLERS.ADMIN}/cambiar_estado_validacion`,
   }
 } as const;

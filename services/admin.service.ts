@@ -7,10 +7,18 @@ import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 import { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 
 class AdminService extends GenericService {
+  async cambiarEstadoValidacion(body: object): Promise<void> {
+     try {
+      debugger;
+      await http.post<PerfilEmpresaDTO[]>(ENDPOINTS.ADMIN.CAMBIAR_ESTADO_VALIDACION, body);
+    } catch (error) {
+      throw error;
+    }
+  }
  
-  async buscarEmpresas(): Promise<PerfilEmpresaDTO[]> {
+  async buscarEmpresas(filtros: FiltrosBusquedaDTO): Promise<PerfilEmpresaDTO[]> {
     try {
-      const res = await http.get<PerfilEmpresaDTO[]>(ENDPOINTS.ADMIN.GET_EMPRESAS);
+      const res = await http.post<PerfilEmpresaDTO[]>(ENDPOINTS.ADMIN.GET_EMPRESAS,filtros);
       return res;
     } catch (error) {
       throw error;

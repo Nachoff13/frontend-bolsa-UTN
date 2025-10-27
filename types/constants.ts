@@ -5,4 +5,5 @@ export enum GrupoFiltroID {
   Estado = "estado",
   FechaPostulacion = "fechaPostulacion",
   Empresa = "empresa",
+  EstadoValidacion = "estadoValidacion",
 }

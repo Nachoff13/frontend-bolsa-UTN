@@ -48,6 +48,17 @@ export class GenericService {
     }
   }
 
+    async getEstadosValidacion() {
+    try {
+      const res: OpcionFiltro[] = await http.get<OpcionFiltro[]>(
+        ENDPOINTS.GENERIC.GET_ESTADOS_VALIDACION
+      );
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async cargarUsuario() {
     try {
       const res: UsuarioDTO = await http.post(ENDPOINTS.GENERIC.CARGAR_USUARIO);
