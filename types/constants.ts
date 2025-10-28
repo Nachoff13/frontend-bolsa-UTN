@@ -14,3 +14,11 @@ export enum EstadoValidacionCodigo {
   Aprobado = "Aprobada",
   Rechazado = "Rechazada",
 }
+
+export enum RolNombre {
+  Administrador = "Administrador UTN",
+  Empresa = "Empresa",
+  Candidato = "Candidato",
+
+}
+

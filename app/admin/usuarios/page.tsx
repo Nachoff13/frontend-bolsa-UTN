@@ -4,44 +4,35 @@ import { adminService } from "@/services/admin.service";
 import { genericService } from "@/services/generic.service";
 import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { UsuarioDTO } from "@/types/dto/usuarioDTO";
-import {
-  SnackbarType,
-} from "@/types/enums/snackbar";
+import { SnackbarType } from "@/types/enums/snackbar";
 import { ResponseError } from "@/types/Generics/responseError";
 import { useEffect, useState } from "react";
 import { useSnackbar } from "@/components/providers/snackbar";
 import Titulo from "@/components/shared/Titulo";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { esES } from "@mui/x-data-grid/locales";
-
+import {
+  showConfirmDialog,
+  showError,
+  showSuccess,
+} from "@/components/shared/swalHelper";
 
 import AccionMenu from "@/components/shared/AccionMenu";
 import LoadingModal from "@/components/shared/LoadingModal";
+import { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
+import { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
+import { PerfilCompletoDTO } from "@/types/dto/perfilCompleetoDTO";
+import ModalDetalleUsuario from "@/components/admin/ModalDetalleUsuario";
 
 export default function GestionUsuarios() {
   const [loading, setLoading] = useState(true);
   const [usuarios, setUsuarios] = useState<UsuarioDTO[]>([]);
-  const [roles, setRoles] = useState<OpcionFiltro[]>([]);
+  const [perfilUsuario, setPerfilUsuario] = useState<PerfilCompletoDTO | null>(
+    null
+  );
+  const [mostrarModal, setMostrarModal] = useState(false);
+
   const { showMessage } = useSnackbar();
-
-  useEffect(() => {
-    buscarRoles();
-  }, []);
-
-  const buscarRoles = async () => {
-    try {
-      setLoading(true);
-
-      var roles = await genericService.getRoles();
-      console.log(roles);
-      setRoles(roles);
-    } catch (e) {
-      const err = e as ResponseError;
-      showMessage(err.message, SnackbarType.Error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     buscarUsuarios();
@@ -61,6 +52,8 @@ export default function GestionUsuarios() {
       setLoading(false);
     }
   };
+
+  // ───────────────────── Acciones tabla ─────────────────────
 
   //PARA LA TABLA
   //Declaro las columnas
@@ -97,10 +90,16 @@ export default function GestionUsuarios() {
   //acciones de la tabla
   const bajaUsuario = async (row: UsuarioDTO) => {
     try {
-      setLoading(true);
-      console.log(row);
+      const confirmado = await showConfirmDialog(
+        "¿Está seguro que desea continuar?",
+        "Esta acción modificará el estado de validación."
+      );
+      if (confirmado) {
+        setLoading(true);
+        console.log(row);
 
-      await adminService.bajaUsuario(row.id);
+        await adminService.bajaUsuario(row.id);
+      }
     } catch (e) {
       const err = e as ResponseError;
       showMessage(err.message, SnackbarType.Error);
@@ -112,10 +111,14 @@ export default function GestionUsuarios() {
 
   const altaUsuario = async (row: UsuarioDTO) => {
     try {
-      setLoading(true);
-
-      debugger;
-      await adminService.altaUsuario(row.id);
+      const confirmado = await showConfirmDialog(
+        "¿Está seguro que desea continuar?",
+        "Esta acción modificará el estado de validación."
+      );
+      if (confirmado) {
+        setLoading(true);
+        await adminService.altaUsuario(row.id);
+      }
     } catch (e) {
       const err = e as ResponseError;
       showMessage(err.message, SnackbarType.Error);
@@ -125,8 +128,18 @@ export default function GestionUsuarios() {
     }
   };
 
+  // Abre el modal, carga el perfil y configura el rol controlado
   const verDetalle = async (row: UsuarioDTO) => {
-    console.log("Ver detalle de usuario:", row);
+    try {
+      setLoading(true);
+      const perfil = await adminService.verDetalleUsuario(row.id);
+      setPerfilUsuario(perfil);
+      setMostrarModal(true);
+    } catch (e) {
+      showError((e as ResponseError).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return <LoadingModal open={loading} />;
@@ -152,6 +165,12 @@ export default function GestionUsuarios() {
         // checkboxSelection
         disableRowSelectionOnClick
         showToolbar
+      />
+
+      <ModalDetalleUsuario
+        open={mostrarModal}
+        onClose={() => setMostrarModal(false)}
+        perfil={perfilUsuario}
       />
     </>
   );

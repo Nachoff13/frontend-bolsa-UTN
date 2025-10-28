@@ -6,6 +6,8 @@ import { CrearOfertaDTO } from "@/types/dto/ofertaDTO";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 import { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 import { UsuarioDTO } from "@/types/dto/usuarioDTO";
+import { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
+import { PerfilCompletoDTO } from "@/types/dto/perfilCompleetoDTO";
 
 class AdminService extends GenericService {
   async cambiarEstadoValidacion(body: object): Promise<void> {
@@ -45,7 +47,7 @@ class AdminService extends GenericService {
     }
   }
 
-  async bajaUsuario(idUsuario: number): Promise<void> {
+  async bajaUsuario(idUsuario: number) {
     try {
       debugger;
       await http.post(`${ENDPOINTS.ADMIN.BAJA_USUARIO}`, idUsuario);
@@ -54,9 +56,33 @@ class AdminService extends GenericService {
     }
   }
 
-  async altaUsuario(idUsuarioAlta: number): Promise<void> {
+  async altaUsuario(idUsuarioAlta: number) {
     try {
       await http.post(`${ENDPOINTS.ADMIN.ALTA_USUARIO}`, idUsuarioAlta);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async verDetalleUsuario(idUsuarioRegistrado: number) {
+    try {
+      const res: PerfilCompletoDTO = await http.post<PerfilCompletoDTO>(
+        ENDPOINTS.ADMIN.VER_DETALLE_USUARIO,
+        idUsuarioRegistrado
+      );
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+    async actualizarRolUsuario(idUsuarioRegistrado: number, idRolEditado: number | null) {
+    try {
+      await http.post(ENDPOINTS.ADMIN.ACTUALIZAR_ROL_USUARIO, {
+        idUsuario: idUsuarioRegistrado,
+        idRol: idRolEditado,
+      });
     } catch (error) {
       throw error;
     }
