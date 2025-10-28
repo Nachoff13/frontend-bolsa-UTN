@@ -212,9 +212,9 @@ export default function EmpresasSolicitantesPage() {
               {empresas.map((empresa) => (
                 <CardGenerica
                   key={empresa.id}
-                  titulo={empresa.descripcion || "Sin descripción"}
-                  subtitulo={empresa.razonSocial || "Sin razón social"}
-                  descripcion={empresa.cuit || "Sin CUIT"}
+                  titulo={empresa.razonSocial || "Sin razón social"}
+                  subtitulo={ empresa.descripcion || "Sin descripción"}
+                  descripcion={"Nro Cuit : " + (empresa.cuit || "Sin CUIT")}
                   chips={[
                     {
                       label: empresa.estadoValidacionNombre || "Sin estado",
@@ -226,10 +226,12 @@ export default function EmpresasSolicitantesPage() {
                   }}
                   textoAccion1="Rechazar"
                   disabledAccion1={
-                    empresa.estadoValidacionCodigo === EstadoValidacionCodigo.Rechazado
+                    empresa.estadoValidacionCodigo ===
+                    EstadoValidacionCodigo.Rechazado
                   }
                   disabledAccion2={
-                    empresa.estadoValidacionCodigo === EstadoValidacionCodigo.Aprobado
+                    empresa.estadoValidacionCodigo ===
+                    EstadoValidacionCodigo.Aprobado
                   }
                   onAccion2={() => {
                     cambiarEstadoValidacion(empresa.id, true);
@@ -247,6 +249,4 @@ export default function EmpresasSolicitantesPage() {
       </Box>
     </>
   );
-
- 
 }
