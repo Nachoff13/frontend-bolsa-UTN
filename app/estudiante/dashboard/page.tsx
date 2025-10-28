@@ -83,7 +83,7 @@ export default function DashboardPage() {
    async function onClickPostularse(id: number): Promise<void> {
     try {
       const postulacion = new PostulacionDTO();
-      postulacion.idPerfilCandidato = 1; //a futuro traer del perfil del usuario logueado
+      // postulacion.idPerfilCandidato = 1; //a futuro traer del perfil del usuario logueado
       postulacion.idOferta = id;
       postulacion.cartaPresentacion = "Carta de presentación de prueba";
       postulacion.observacion = "Observación de prueba";

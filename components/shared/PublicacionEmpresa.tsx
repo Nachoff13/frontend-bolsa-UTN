@@ -16,6 +16,7 @@ import {
   Business as BusinessIcon,
 } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import CardPublicacion from "./CardPublicacion";
 
 interface Props {
   ofertas: OfertaDTO[];
@@ -50,88 +51,61 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
   if (loading) return <p>Cargando publicaciones...</p>;
 
   return (
-    <section className="rounded-2xl border border-neutral-200 bg-white p-4">
-      <h3 className="mb-3 text-base font-semibold">
-        Publicaciones de empleo recientes
-      </h3>
-      <p className="text-sm text-neutral-500 mb-4">
-        Revisá el estado de tus publicaciones
+  <section className="rounded-2xl border border-neutral-200 bg-white p-4">
+    <h3 className="mb-3 text-base font-semibold">
+      Publicaciones de empleo recientes
+    </h3>
+    <p className="text-sm text-neutral-500 mb-4">
+      Revisá el estado de tus publicaciones
+    </p>
+
+    {ofertas.length === 0 ? (
+      <p className="text-sm text-neutral-500">
+        No hay publicaciones registradas todavía.
       </p>
-
-      {ofertas.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          No hay publicaciones registradas todavía.
-        </p>
-      ) : (
-        ofertas.map((oferta) => (
-          <CardGenerica
+    ) : (
+      <div className="flex flex-col gap-4">  {/* 💡 agrega separación uniforme */}
+        {ofertas.map((oferta) => (
+          <CardPublicacion
             key={oferta.id}
-            titulo={oferta.titulo}
-            subtitulo={`🏢 ${oferta.nombreEmpresa ?? "Empresa"}`}
-            descripcion={oferta.descripcion}
-            chips={[
-              { label: oferta.modalidad ?? "Modalidad", color: "secondary" },
-              { label: oferta.tipoContrato ?? "Contrato", color: "info" },
-            ]}
-            infoExtra={[
-              {
-                icon: <LocationOnIcon fontSize="small" />,
-                texto: oferta.nombreLocalidad ?? "Ubicación no especificada",
-              },
-              {
-                icon: <SchoolIcon fontSize="small" />,
-                texto: oferta.nombreCarrera ?? "Carrera no especificada",
-              },
-              {
-                icon: <GroupIcon fontSize="small" />,
-                texto: `${oferta.cantidadPostulantes ?? 0} postulante/s`,
-              },
-              {
-                icon: <AccessTimeIcon fontSize="small" />,
-                texto: calcularTiempoTranscurrido(oferta.fechaInicio),
-              },
-              {
-                icon: <CalendarTodayIcon fontSize="small" />,
-                texto: `Inicio ${oferta.fechaInicio ?? "-"}`,
-              },
-              {
-                icon: <EventIcon fontSize="small" />,
-                texto: `Fin ${oferta.fechaFin ?? "-"}`,
-              },
-            ]}
-            textoAccion1="Ver detalles"
-            onAccion1={() => handleVerDetalle(oferta)}
+            oferta={oferta}
+            calcularTiempoTranscurrido={calcularTiempoTranscurrido}
+            onVerDetalle={handleVerDetalle}
           />
-        ))
-      )}
+        ))}
+      </div>
+    )}
 
-      {/* 📄 Modal de detalle */}
-      {ofertaSeleccionada && (
-        <DetalleModal
-          open={openDetalle}
-          onClose={() => setOpenDetalle(false)}
-          title={ofertaSeleccionada.titulo}
-          fields={[
-            { label: "Empresa", value: ofertaSeleccionada.nombreEmpresa },
-            { label: "Carrera", value: ofertaSeleccionada.nombreCarrera },
-            { label: "Modalidad", value: ofertaSeleccionada.modalidad },
-            { label: "Tipo de contrato", value: ofertaSeleccionada.tipoContrato },
-            { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
-            { label: "Descripción", value: ofertaSeleccionada.descripcion },
-          ]}
-          chips={[
-            {
-              label: `${ofertaSeleccionada.cantidadPostulantes ?? 0} Postulante/s`,
-              color: "info",
-            },
-          ]}
-          actions={
-            <Button onClick={() => setOpenDetalle(false)} variant="contained" color="primary">
-              Cerrar
-            </Button>
-          }
-        />
-      )}
-    </section>
-  );
-}
+    {/* 📄 Modal de detalle */}
+    {ofertaSeleccionada && (
+      <DetalleModal
+        open={openDetalle}
+        onClose={() => setOpenDetalle(false)}
+        title={ofertaSeleccionada.titulo}
+        fields={[
+          { label: "Empresa", value: ofertaSeleccionada.nombreEmpresa },
+          { label: "Carrera", value: ofertaSeleccionada.nombreCarrera },
+          { label: "Modalidad", value: ofertaSeleccionada.modalidad },
+          { label: "Tipo de contrato", value: ofertaSeleccionada.tipoContrato },
+          { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
+          { label: "Descripción", value: ofertaSeleccionada.descripcion },
+        ]}
+        chips={[
+          {
+            label: `${ofertaSeleccionada.cantidadPostulantes ?? 0} Postulante/s`,
+            color: "info",
+          },
+        ]}
+        actions={
+          <Button
+            onClick={() => setOpenDetalle(false)}
+            variant="contained"
+            color="primary"
+          >
+            Cerrar
+          </Button>
+        }
+      />
+    )}
+  </section>
+);}

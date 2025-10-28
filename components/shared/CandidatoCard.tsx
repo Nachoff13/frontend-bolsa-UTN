@@ -4,6 +4,7 @@ import {
   CalendarToday as CalendarIcon,
   Person as PersonIcon,
   ArrowDropDown as ArrowDropDownIcon,
+  WorkOutline as WorkIcon,
 } from "@mui/icons-material";
 import {
   Button,
@@ -12,12 +13,15 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Divider,
 } from "@mui/material";
 import { useState } from "react";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
+import { useRouter } from "next/navigation";
+
 
 interface CandidatoPostuladoCardProps {
   postulacion: PostulacionDTO;
@@ -35,7 +39,6 @@ export default function CandidatoPostuladoCard({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  // 🎨 Colores del chip de estado
   const getEstadoColor = (estado?: string) => {
     switch (estado?.toLowerCase()) {
       case "iniciada":
@@ -50,10 +53,10 @@ export default function CandidatoPostuladoCard({
     }
   };
 
-  // 🟥 Mostrar "Nueva" si estado = Iniciada
+  const router = useRouter();
+
   const mostrarNueva = estado?.toLowerCase() === "iniciada";
 
-  // 📋 Opciones disponibles
   const opciones = [
     { label: "En revisión", icon: <HourglassEmptyIcon fontSize="small" /> },
     { label: "Aceptada", icon: <CheckCircleOutlineIcon fontSize="small" /> },
@@ -73,8 +76,11 @@ export default function CandidatoPostuladoCard({
   };
 
   return (
-    <div className="relative border border-neutral-200 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-all shadow-sm px-5 py-4">
-      {/* 🔹 Chips superiores */}
+    <div
+      className="relative border border-neutral-200 rounded-xl bg-white shadow-sm 
+                 hover:shadow-md transition-all duration-200 p-5"
+    >
+      {/* 🔹 Chips de estado */}
       <div className="absolute top-3 right-4 flex gap-2">
         {mostrarNueva && (
           <Chip
@@ -82,7 +88,7 @@ export default function CandidatoPostuladoCard({
             color="error"
             size="small"
             sx={{
-              backgroundColor: "#dc2626",
+              backgroundColor: "#d64141ff",
               color: "white",
               fontWeight: 600,
             }}
@@ -96,75 +102,82 @@ export default function CandidatoPostuladoCard({
         />
       </div>
 
-      {/* 👤 Nombre */}
-      <div className="flex items-center mb-1">
+      {/* 🧑 Nombre del candidato */}
+      <div className="flex items-center mb-2">
         <PersonIcon fontSize="small" className="text-sky-700 mr-1" />
-        <h3 className="text-base font-semibold text-sky-800">
+        <h3 className="text-lg font-semibold text-sky-800">
           {nombreCandidato || "Candidato sin nombre"}
         </h3>
       </div>
 
+      <Divider sx={{ mb: 1 }} />
+
       {/* 💼 Puesto */}
-      <p className="text-sm text-neutral-600 mb-2">
-        Puesto de <span className="font-medium">{tituloOferta || "Sin puesto"}</span>
-      </p>
+      <div className="flex items-center text-sm text-neutral-700 mb-2">
+        <WorkIcon fontSize="small" className="mr-1 text-neutral-500" />
+        <span className="font-medium">{tituloOferta || "Sin puesto"}</span>
+      </div>
 
       {/* 📅 Fecha */}
       <div className="flex items-center text-sm text-neutral-500 mb-3">
-        <CalendarIcon fontSize="small" className="mr-1" />
+        <CalendarIcon fontSize="small" className="mr-1 text-neutral-400" />
         <span>Postulado el {fechaPostulacion ?? "-"}</span>
       </div>
 
+      <Divider sx={{ mb: 2 }} />
+
       {/* 🔘 Botones */}
-      <div className="flex justify-between gap-2 mt-auto pt-2">
+      <div className="flex justify-end gap-2">
         <Button
           variant="outlined"
           size="small"
-          fullWidth
-          onClick={() => onVer?.(postulacion)}
+          onClick={() => router.push("/empresa/candidatos-postulados")}
           sx={{
-            textTransform: "uppercase",
+            textTransform: "none",
             fontWeight: 600,
             borderColor: "#d1d5db",
             color: "#374151",
+            px: 2.5,
           }}
         >
-          Ver
+          Ver Postulaciones
         </Button>
 
-        {/* Botón desplegable */}
         <Button
-          variant="outlined"
+          variant="contained"
           size="small"
-          fullWidth
-          endIcon={<ArrowDropDownIcon />}
           onClick={handleClickMenu}
+          endIcon={<ArrowDropDownIcon />}
           sx={{
-            textTransform: "uppercase",
+            backgroundColor: "#469ff3e0", // 💙 azul personalizado
+            color: "white",
             fontWeight: 600,
-            borderColor: "#d1d5db",
-            color: "#374151",
+            textTransform: "none",
+            "&:hover": {
+              backgroundColor: "#1e40af", // tono más oscuro al hover
+            },
           }}
         >
           Cambiar estado
         </Button>
 
-        {/* 📋 Menú de opciones */}
-        <Menu
-          anchorEl={anchorEl}
-          open={open}
-          onClose={() => handleCloseMenu()}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          transformOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          {opciones.map((op) => (
-            <MenuItem key={op.label} onClick={() => handleCloseMenu(op.label)}>
-              <ListItemIcon>{op.icon}</ListItemIcon>
-              <ListItemText>{op.label}</ListItemText>
-            </MenuItem>
-          ))}
-        </Menu>
       </div>
+
+      {/* 📋 Menú de opciones */}
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={() => handleCloseMenu()}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        {opciones.map((op) => (
+          <MenuItem key={op.label} onClick={() => handleCloseMenu(op.label)}>
+            <ListItemIcon>{op.icon}</ListItemIcon>
+            <ListItemText>{op.label}</ListItemText>
+          </MenuItem>
+        ))}
+      </Menu>
     </div>
   );
 }

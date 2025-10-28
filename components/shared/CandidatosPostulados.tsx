@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import CandidatoCard from "./CandidatoCard";
 import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
@@ -27,7 +28,11 @@ export default function CandidatosPostulados({
     setOpenModal(false);
   };
 
+  const router = useRouter();
+
   if (loading) return <p>Cargando candidatos...</p>;
+
+  
 
   return (
     <section className="rounded-2xl border border-neutral-200 bg-white p-4">
