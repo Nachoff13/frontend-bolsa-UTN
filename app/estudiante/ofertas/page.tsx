@@ -49,6 +49,8 @@ import { GrupoFiltroID } from "@/types/constants";
 import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
+import ModalFormulario from "@/components/shared/ModalFormulario";
+import { CampoFormulario } from "@/components/shared/ModalFormulario";
 
 //#endregion
 
@@ -65,6 +67,10 @@ export default function EstudianteOfertasPage() {
   const [tipoContratos, setTipoContratos] = useState<OpcionFiltro[]>([]);
   const [modalidades, setModalidades] = useState<OpcionFiltro[]>([]);
   const [carreras, setCarreras] = useState<OpcionFiltro[]>([]);
+  const [modalPostulacionOpen, setModalPostulacionOpen] = useState(false);
+  const [ofertaSeleccionada, setOfertaSeleccionada] = useState<number | null>(
+    null
+  );
 
   //#endregion
 
@@ -246,29 +252,52 @@ export default function EstudianteOfertasPage() {
     // TODO: Implementar filtrado
   };
 
+  const camposPostulacion: CampoFormulario[] = [
+    {
+      id: "cartaPresentacion",
+      label: "Carta de presentación",
+      tipo: "textarea",
+      placeholder:
+        "Escribí una breve carta explicando por qué te interesa la oferta...",
+    },
+    {
+      id: "observacion",
+      label: "Observación",
+      tipo: "textarea",
+      placeholder: "Podés agregar comentarios adicionales si lo deseás...",
+    },
+  ];
+
   async function onClickPostularse(id: number): Promise<void> {
+    const confirmado = await showConfirmDialog(
+      "¿Está seguro que desea continuar?",
+      "Esta acción lo va a postular a la oferta de empleo."
+    );
+
+    if (confirmado) {
+      setOfertaSeleccionada(id);
+      setModalPostulacionOpen(true);
+    }
+  }
+
+  async function handleSubmitPostulacion(valores: Record<string, string>) {
     try {
+      setLoading(true);
       const postulacion = new PostulacionDTO();
-      postulacion.idOferta = id;
-      postulacion.cartaPresentacion = "Carta de presentación de prueba";
-      postulacion.observacion = "Observación de prueba";
+      postulacion.idOferta = ofertaSeleccionada!;
+      postulacion.cartaPresentacion = valores.cartaPresentacion;
+      postulacion.observacion = valores.observacion;
 
-      const confirmado = await showConfirmDialog(
-        "¿Está seguro que desea continuar?",
-        "Esta acción lo va a postular a la oferta de empleo."
+      const response: string = await postulanteService.postularseOferta(
+        postulacion
       );
+      showMessage(response, SnackbarType.Success, {
+        size: SnackbarSize.Medium,
+        position: SnackbarPosition.BottomCenter,
+      });
 
-      if (confirmado) {
-        setLoading(true);
-        const response: string = await postulanteService.postularseOferta(
-          postulacion
-        );
-        showMessage(response, SnackbarType.Success, {
-          size: SnackbarSize.Medium,
-          position: SnackbarPosition.BottomCenter,
-        });
-        buscarOfertas();
-      }
+      setModalPostulacionOpen(false);
+      buscarOfertas();
     } catch (e) {
       const error = e as ResponseError;
       showMessage(error.message, SnackbarType.Error, {
@@ -279,7 +308,6 @@ export default function EstudianteOfertasPage() {
       setLoading(false);
     }
   }
-
   // Función para calcular fecha de cierre por defecto (60 días después de fechaInicio)
   const calcularFechaCierre = (
     fechaInicio: string,
@@ -401,6 +429,13 @@ export default function EstudianteOfertasPage() {
           </Box>
         )}
       </Box>
+      <ModalFormulario
+        open={modalPostulacionOpen}
+        onClose={() => setModalPostulacionOpen(false)}
+        onSubmit={handleSubmitPostulacion}
+        titulo="Completar Postulación"
+        campos={camposPostulacion}
+      />
     </>
   );
   //#endregion
