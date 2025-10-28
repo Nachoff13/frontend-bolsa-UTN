@@ -76,6 +76,18 @@ export class GenericService {
       throw error;
     }
   }
+
+   async getRoles() {
+    try {
+      const res: OpcionFiltro[] = await http.get<OpcionFiltro[]>(
+        ENDPOINTS.GENERIC.GET_ROLES
+      );
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 }
 
 export const genericService = new GenericService();

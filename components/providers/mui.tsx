@@ -222,6 +222,7 @@ export function MuiThemeProvider({ children }: { children: ReactNode }) {
 
   return (
     <ThemeProvider theme={theme}>
+
       <CssBaseline />
       {children}
     </ThemeProvider>

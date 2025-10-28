@@ -55,6 +55,7 @@ export const ENDPOINTS = {
     CARGAR_USUARIO: `${CONTROLLERS.GENERIC}/cargar_usuario`,
     GET_PERFIL_EMPRESA_USUARIO: `${CONTROLLERS.GENERIC}/get_perfil_empresa_usuario`,
     GET_ESTADOS_VALIDACION: `${CONTROLLERS.GENERIC}/get_estados_validacion`,
+    GET_ROLES: `${CONTROLLERS.GENERIC}/get_roles`,
   },
   POSTULACION: {
     GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
@@ -74,5 +75,8 @@ export const ENDPOINTS = {
   ADMIN: {
     GET_EMPRESAS: `${CONTROLLERS.ADMIN}/get_empresas_por_verificar`,
     CAMBIAR_ESTADO_VALIDACION: `${CONTROLLERS.ADMIN}/cambiar_estado_validacion`,
+    GET_USUARIOS: `${CONTROLLERS.ADMIN}/get_usuarios`,
+    BAJA_USUARIO: `${CONTROLLERS.ADMIN}/baja_usuario`,
+    ALTA_USUARIO: `${CONTROLLERS.ADMIN}/alta_usuario`,
   }
 } as const;

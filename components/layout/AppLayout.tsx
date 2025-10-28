@@ -34,6 +34,7 @@ import {
 import { USER_ROLES } from "@/lib/constants";
 import { useAuth } from "@/components/providers/AuthProvider";
 import UserMenu from "@/components/shared/UserMenu";
+import { number } from "zod";
 
 const drawerWidth = 280;
 
@@ -44,7 +45,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
   const { rol, perfilId, user } = useAuth();
 
-  // Construir navItems con perfilId dinámico
   const navItems = [
     {
       href: "/empresa/dashboard",
@@ -94,7 +94,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
      {
       href: "/admin/solicitantes",
       label: "Gestión de Empresas",
-      icon: <PersonIcon />,
+      //el icono de empresa tiene que ser un edificio o algo asi
+      icon: <WorkIcon />,
       roles: [USER_ROLES.ADMIN],
     },
   ];
@@ -158,9 +159,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Divider />
 
       {/* Nav principal */}
+      
       <List>
         {navItems
-          .filter((item) => item.roles.includes(rol)) // 👈 filtra según el rol del contexto
+          .filter((item) => item.roles.includes(rol))
           .map((item) => (
             <ListItem key={item.href} disablePadding>
               <ListItemButton component={Link} href={item.href}>
@@ -176,7 +178,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Divider />
       <List sx={{ px: 1, py: 1 }}>
         {footerItems
-        .filter((item) => item.roles.includes(rol)) // 👈 filtra según el rol del contexto
+        .filter((item) => item.roles.includes(rol))
         .map((item) => (
           <ListItem key={item.href} disablePadding>
             <ListItemButton
