@@ -12,6 +12,8 @@ interface CardGenericaProps {
   }[];
   onAccion1?: () => void;
   textoAccion1?: string;
+  disabledAccion1?: boolean;
+  disabledAccion2?: boolean;
   onAccion2?: () => void;
   textoAccion2?: string;
 }

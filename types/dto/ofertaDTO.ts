@@ -14,6 +14,8 @@ export class OfertaDTO {
   //datos extra para postularse
   cartaPresentacion!: string;
   observacion!: string;
+
+  puedePostularse!: boolean;
 }
 
 export class CrearOfertaDTO {

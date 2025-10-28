@@ -1,32 +1,23 @@
 "use client";
-//use client para que se renderice en el cliente y no en el servidor, esto se usa cuando se usan hooks o estados
 
-//#region IMPORTACIOENS REACT
 import { useEffect, useState } from "react";
 import { Box, Card, Divider, Typography } from "@mui/material";
-import {
-  LocationOn as LocationOnIcon,
-  CalendarToday as CalendarTodayIcon,
-  Event as EventIcon,
-} from "@mui/icons-material";
 import { useMemo } from "react";
+import {
+  showConfirmDialog,
+  showError,
+  showSuccess,
+} from "@/components/shared/swalHelper";
 
 //#endregion
 
-//#region IMPORTACIONES COMPONENTES PROPIOS
 import Titulo from "@/components/shared/Titulo";
 import CardGenerica from "@/components/shared/CardGenerica";
 import { useSnackbar } from "@/components/providers/snackbar";
 import LoadingModal from "@/components/shared/LoadingModal";
 import EmptyState from "@/components/shared/EmptyState";
 
-//#endregion
-
-//#region IMPORTACIONES SERVICIOS Y TIPOS
-//Servicio para llamadas a la API
 import { adminService } from "@/services/admin.service";
-
-//#region Tipos y constantes
 import { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 import { ResponseError } from "@/types/Generics/responseError";
 import {
@@ -37,11 +28,11 @@ import {
 import FilterSearch from "@/components/shared/FilterSearch";
 import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { genericService } from "@/services/generic.service";
-import { GrupoFiltroID } from "@/types/constants";
+import { EstadoValidacionCodigo, GrupoFiltroID } from "@/types/constants";
 import { GrupoFiltro } from "@/types/dto/filter/grupoFiltroDTO";
 import CardFiltros from "@/components/shared/CardFiltro";
-import { id, no } from "zod/v4/locales";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
+import constants from "constants";
 
 //#endregion
 
@@ -85,7 +76,6 @@ export default function EmpresasSolicitantesPage() {
 
   const filtrosAPI = [
     {
-      //le pongo id porque necesito identificar el grupo y para que no rompa
       id: GrupoFiltroID.EstadoValidacion,
       titulo: "Estado de Validación",
       opciones: estadosValidacion.map((e) => ({
@@ -95,7 +85,6 @@ export default function EmpresasSolicitantesPage() {
     },
   ];
 
-  //Grupos filtros guarda el valor de los grupos y los seleccionados
   const gruposFiltros: GrupoFiltro[] = filtrosAPI.map((grupo) => {
     let valoresSeleccionados: string[] = [];
 
@@ -140,6 +129,7 @@ export default function EmpresasSolicitantesPage() {
       setLoading(true);
 
       const empresas = await adminService.buscarEmpresas(filtros);
+      console.log("Empresas obtenidas:", empresas);
       setEmpresas(empresas);
     } catch (e) {
       const err = e as ResponseError;
@@ -162,25 +152,28 @@ export default function EmpresasSolicitantesPage() {
     setEstadosValidacionSeleccionados([]);
   }
   const cambiarEstadoValidacion = async (id: number, aprobado: boolean) => {
+    try {
+      const confirmado = await showConfirmDialog(
+        "¿Está seguro que desea continuar?",
+        "Esta acción modificará el estado de validación."
+      );
 
-     try {
-      setLoading(true);
-      const body = {
-        idPerfilEmpresa: id,
-        aprobado: aprobado
+      if (confirmado) {
+        setLoading(true);
+
+        const body = { idPerfilEmpresa: id, aprobado };
+        await adminService.cambiarEstadoValidacion(body);
+        showSuccess("El estado se modificó correctamente.");
+        buscarEmpresas();
       }
-      await adminService.cambiarEstadoValidacion(body);
-      
     } catch (e) {
+      showError("No se pudo modificar el estado de validación.");
       const err = e as ResponseError;
-      showMessage(err.message, SnackbarType.Error);
+      showError(err.message);
     } finally {
       setLoading(false);
-      buscarEmpresas();
     }
-  }
-
-
+  };
   return (
     <>
       <Titulo
@@ -228,9 +221,19 @@ export default function EmpresasSolicitantesPage() {
                       color: "primary",
                     },
                   ]}
-                  onAccion1={() => {cambiarEstadoValidacion(empresa.id, false)}}
+                  onAccion1={() => {
+                    cambiarEstadoValidacion(empresa.id, false);
+                  }}
                   textoAccion1="Rechazar"
-                  onAccion2={() => {cambiarEstadoValidacion(empresa.id, true)}}
+                  disabledAccion1={
+                    empresa.estadoValidacionCodigo === EstadoValidacionCodigo.Rechazado
+                  }
+                  disabledAccion2={
+                    empresa.estadoValidacionCodigo === EstadoValidacionCodigo.Aprobado
+                  }
+                  onAccion2={() => {
+                    cambiarEstadoValidacion(empresa.id, true);
+                  }}
                   textoAccion2="Aprobar"
                 />
               ))}
@@ -238,25 +241,12 @@ export default function EmpresasSolicitantesPage() {
           </Box>
         ) : (
           <Box flex={3}>
-            <EmptyState mensaje="No hay ofertas disponibles" />
+            <EmptyState mensaje="No se han encontrado empresas." />
           </Box>
         )}
       </Box>
     </>
   );
 
-  return (
-    <>
-      <Titulo
-        titulo="Empresas Solicitantes"
-        subtitulo="Listado de empresas registradas en la plataforma"
-      />
-
-      <Box display="flex" gap={3} mt={4}>
-        {empresas.length === 0 && (
-          <EmptyState mensaje="No hay empresas para verificar en este momento." />
-        )}
-      </Box>
-    </>
-  );
+ 
 }

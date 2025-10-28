@@ -17,8 +17,10 @@ export default function CardGenerica({
   infoExtra = [],
   onAccion1,
   textoAccion1,
+  disabledAccion1 = false,
   onAccion2,
   textoAccion2,
+  disabledAccion2 = false,
 }: CardGenericaProps) {
   return (
  <Card
@@ -99,12 +101,12 @@ export default function CardGenerica({
         {(onAccion1 || onAccion2) && (
           <Stack direction="row" spacing={2} justifyContent="flex-end" flexWrap="wrap" gap={1.5}>
             {onAccion1 && (
-              <Button variant="outlined" onClick={onAccion1}>
+              <Button variant="outlined" onClick={onAccion1} disabled={disabledAccion1}>
                 {textoAccion1}
               </Button>
             )}
             {onAccion2 && (
-              <Button variant="contained" onClick={onAccion2}>
+              <Button variant="contained" onClick={onAccion2} disabled={disabledAccion2}>
                 {textoAccion2}
               </Button>
             )}

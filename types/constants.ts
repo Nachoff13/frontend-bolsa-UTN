@@ -7,3 +7,10 @@ export enum GrupoFiltroID {
   Empresa = "empresa",
   EstadoValidacion = "estadoValidacion",
 }
+
+
+export enum EstadoValidacionCodigo {
+  Pendiente = "Iniciada",
+  Aprobado = "Aprobada",
+  Rechazado = "Rechazada",
+}
