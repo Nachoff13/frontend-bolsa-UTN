@@ -8,6 +8,7 @@ import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 import { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import { ResponseError } from "@/types/Generics/responseError";
+import { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
 
 class EmpresaService extends GenericService {
   async getPublicacionesEmpleo(filtros : FiltrosBusquedaDTO) {
@@ -110,6 +111,20 @@ class EmpresaService extends GenericService {
       throw err;
     }
   }
+
+  async getCandidatosByPostulaciones(): Promise<PerfilCandidatoDTO[]> {
+    try {
+      const res = await http.get<PerfilCandidatoDTO[]>(
+        ENDPOINTS.POSTULACIONES.GET_CANDIDATOS_BY_POSTULACIONES
+      );
+      return res;
+    } catch (e) {
+      const err = e as ResponseError;
+      console.error("Error al obtener candidatos:", err.message);
+      throw err;
+    }
+  }
+
 }
 
 export const empresaService = new EmpresaService();
