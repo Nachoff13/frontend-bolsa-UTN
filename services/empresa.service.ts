@@ -9,6 +9,7 @@ import { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import { ResponseError } from "@/types/Generics/responseError";
 import { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
+import { PostulacionCandidatoDTO } from "@/types/dto/postulacionCandidatoDTO";
 
 class EmpresaService extends GenericService {
   async getPublicacionesEmpleo(filtros : FiltrosBusquedaDTO) {
@@ -112,10 +113,10 @@ class EmpresaService extends GenericService {
     }
   }
 
-  async getCandidatosByPostulaciones(): Promise<PerfilCandidatoDTO[]> {
+  async getPostulacionCandidatoEmpresa(): Promise<PostulacionCandidatoDTO[]> {
     try {
-      const res = await http.get<PerfilCandidatoDTO[]>(
-        ENDPOINTS.POSTULACIONES.GET_CANDIDATOS_BY_POSTULACIONES
+      const res = await http.get<PostulacionCandidatoDTO[]>(
+        ENDPOINTS.POSTULACIONES.GET_POSTULACIONES_CANDIDATOS_EMPRESA
       );
       return res;
     } catch (e) {
