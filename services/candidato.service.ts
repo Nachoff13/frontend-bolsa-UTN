@@ -70,7 +70,7 @@ class CandidatoService extends GenericService {
       const formData = new FormData();
       formData.append('foto', file);
       
-      console.log('🔧 Uploading foto perfil for perfilId:', perfilId);
+      console.log('Subiendo foto de perfil para perfilId:', perfilId);
       
       // Usar api de axios que ya tiene el interceptor con el token
       const response = await api.post(

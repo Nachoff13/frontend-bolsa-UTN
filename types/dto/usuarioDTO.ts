@@ -3,5 +3,5 @@ export class UsuarioDTO {
   email!: string;
   nombre?: string;
   idRol!: number;
-
+  fotoPerfil?: string | null;
 }
