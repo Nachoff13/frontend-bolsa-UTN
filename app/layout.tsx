@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { MuiThemeProvider } from "@/components/providers/mui";
+import { ThemeContextProvider } from "@/components/providers/ThemeProvider";
 import AppLayout from "@/components/layout/AppLayout";
 import { SnackbarProvider } from "@/components/providers/snackbar";
 import AuthGuard from "@/components/providers/AuthGuard";
@@ -20,15 +21,35 @@ export default async function RootLayout({
 
 
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var mode = localStorage.getItem('theme-mode');
+                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var isDark = mode === 'dark' || (!mode && prefersDark);
+                  if (isDark) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
-        <MuiThemeProvider>
-          <SnackbarProvider>
-            <AuthGuard>
-              <AppLayout>{children}</AppLayout>
-            </AuthGuard>
-          </SnackbarProvider>
-        </MuiThemeProvider>
+        <ThemeContextProvider>
+          <MuiThemeProvider>
+            <SnackbarProvider>
+              <AuthGuard>
+                <AppLayout>{children}</AppLayout>
+              </AuthGuard>
+            </SnackbarProvider>
+          </MuiThemeProvider>
+        </ThemeContextProvider>
       </body>
     </html>
   );

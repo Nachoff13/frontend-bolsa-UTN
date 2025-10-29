@@ -93,23 +93,23 @@ export default function CompleteProfileModal({
   return (
     <Dialog
       open={isOpen}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
       disableEscapeKeyDown
       PaperProps={{
-        sx: { borderRadius: 2 },
+        sx: { borderRadius: 3, p: 1 }
       }}
     >
-      <DialogTitle>
-        <Typography variant="h5" fontWeight="bold">
+      <DialogTitle sx={{ pb: 2 }}>
+        <Typography variant="h4" fontWeight="bold">
           Completa tu perfil
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5 }}>
           Por favor, completa la siguiente información para continuar
         </Typography>
       </DialogTitle>
 
-      <DialogContent>
+      <DialogContent sx={{ pt: 3 }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           <TextField
             fullWidth
@@ -118,10 +118,11 @@ export default function CompleteProfileModal({
             placeholder="Ej: Juan Pérez"
             value={formData.nombre}
             onChange={(e) => handleChange("nombre", e.target.value)}
-            sx={{ mb: 2 }}
+            sx={{ mb: 3 }}
+            size="medium"
           />
 
-          <FormControl fullWidth required sx={{ mb: 2 }}>
+          <FormControl fullWidth required sx={{ mb: 3 }}>
             <InputLabel>Género</InputLabel>
             <Select
               value={formData.idGenero}
@@ -133,7 +134,7 @@ export default function CompleteProfileModal({
             </Select>
           </FormControl>
 
-          <FormControl fullWidth required sx={{ mb: 2 }}>
+          <FormControl fullWidth required sx={{ mb: 3 }}>
             <InputLabel>Carrera</InputLabel>
             <Select
               value={formData.idCarrera}
@@ -159,7 +160,8 @@ export default function CompleteProfileModal({
             placeholder="Ej: 12345"
             value={formData.legajo}
             onChange={(e) => handleChange("legajo", e.target.value)}
-            sx={{ mb: 2 }}
+            sx={{ mb: 3 }}
+            size="medium"
           />
 
           <TextField
@@ -172,18 +174,19 @@ export default function CompleteProfileModal({
             onChange={(e) =>
               handleChange("anioEgreso", parseInt(e.target.value))
             }
-            sx={{ mb: 2 }}
+            sx={{ mb: 3 }}
+            size="medium"
           />
 
           <TextField
             fullWidth
             multiline
-            rows={3}
+            rows={4}
             label="Descripción"
             placeholder="Cuéntanos sobre ti, tus intereses profesionales..."
             value={formData.descripcion}
             onChange={(e) => handleChange("descripcion", e.target.value)}
-            sx={{ mb: 3 }}
+            sx={{ mb: 4 }}
           />
 
           <Button
@@ -191,7 +194,7 @@ export default function CompleteProfileModal({
             variant="contained"
             fullWidth
             disabled={loading || formData.idCarrera === 0}
-            sx={{ py: 1.5 }}
+            sx={{ py: 2 }}
           >
             {loading ? (
               <>

@@ -51,33 +51,33 @@ export default function DetalleModal({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="md" // Cambiado de sm a md para más espacio
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3, p: 1.5 } }}
+      PaperProps={{ sx: { borderRadius: 3, p: 2 } }} // Aumentado padding
     >
       {/* 🔹 Encabezado con título y chip a la derecha */}
       <DialogTitle
         sx={{
           fontWeight: "bold",
-          fontSize: "1.4rem",
+          fontSize: "1.75rem", // Aumentado de 1.4rem
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          pb: 2,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}> {/* Cambiado de h6 a h5 */}
           {title}
         </Typography>
 
         {chips.length > 0 && (
-          <Box display="flex" gap={1}>
+          <Box display="flex" gap={1.5}> {/* Aumentado gap */}
             {chips.map((chip, idx) => (
               <Chip
                 key={idx}
                 label={chip.label}
                 color={chip.color ?? "default"}
-                size="small"
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 600 }} // Removido size="small" para usar tamaño default
               />
             ))}
           </Box>
@@ -85,22 +85,26 @@ export default function DetalleModal({
       </DialogTitle>
 
       {/* 📋 Contenido principal */}
-      <DialogContent dividers>
-        <Box display="flex" flexDirection="column" gap={2}>
+      <DialogContent dividers sx={{ py: 3 }}> {/* Añadido padding vertical */}
+        <Box display="flex" flexDirection="column" gap={2.5}> {/* Aumentado gap */}
           {fields.map((f, idx) => (
-            <Box key={idx} display="flex" alignItems="center" gap={1}>
-              {f.icon}
-              <Typography variant="body2" fontWeight="bold">
+            <Box key={idx} display="flex" alignItems="center" gap={1.5}> {/* Aumentado gap */}
+              {f.icon && (
+                <Box sx={{ fontSize: "1.5rem" }}> {/* Hacer iconos más grandes */}
+                  {f.icon}
+                </Box>
+              )}
+              <Typography variant="body1" fontWeight="bold"> {/* Cambiado de body2 a body1 */}
                 {f.label}:
               </Typography>
-              <Typography variant="body2">{f.value}</Typography>
+              <Typography variant="body1">{f.value}</Typography> {/* Cambiado de body2 a body1 */}
             </Box>
           ))}
         </Box>
       </DialogContent>
 
       {/* 🔘 Acciones */}
-      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+      <DialogActions sx={{ px: 3, py: 2.5, gap: 1.5 }}> {/* Aumentado padding y gap */}
         <Button
           onClick={() => console.log("Ver publicación")}
           variant="outlined"

@@ -10,6 +10,7 @@ import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import { ResponseError } from "@/types/Generics/responseError";
 import { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
 import { PostulacionCandidatoDTO } from "@/types/dto/postulacionCandidatoDTO";
+import { api } from "@/services/Generics/api";
 
 class EmpresaService extends GenericService {
   async getPublicacionesEmpleo(filtros : FiltrosBusquedaDTO) {
@@ -51,6 +52,34 @@ class EmpresaService extends GenericService {
       return await http.put<PerfilEmpresaDTO>(ENDPOINTS.EMPRESA.UPDATE_PERFIL, data);
     } catch (error) {
       throw error;
+    }
+  }
+
+  async uploadFotoPerfil(file: File, perfilId: number): Promise<string> {
+    try {
+      const formData = new FormData();
+      formData.append('foto', file);
+      
+      console.log('🔧 Uploading foto perfil for perfilId:', perfilId);
+      
+      // Usar api de axios que ya tiene el interceptor con el token
+      const response = await api.post(
+        `${ENDPOINTS.EMPRESA.UPLOAD_FOTO_PERFIL}?perfilId=${perfilId}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      
+      return response.data.message || "Foto de perfil subida exitosamente";
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.responseException?.exceptionMessage 
+        || error.response?.data?.message 
+        || error.message 
+        || "Error al subir foto de perfil";
+      throw new Error(errorMessage);
     }
   }
 

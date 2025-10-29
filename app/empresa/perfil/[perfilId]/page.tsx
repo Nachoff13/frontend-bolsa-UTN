@@ -7,6 +7,7 @@ import type { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 import LoadingModal from "@/components/shared/LoadingModal";
 import { useSnackbar } from "@/components/providers/snackbar";
 import { SnackbarType } from "@/types/enums/snackbar";
+import { useAuth } from "@/components/providers/AuthProvider";
 import {
   Box,
   Card,
@@ -27,16 +28,24 @@ import {
   Work,
   Article,
   VerifiedUser,
+  PhotoCamera,
 } from "@mui/icons-material";
 
 export default function PerfilEmpresaPage() {
   const params = useParams();
   const { showMessage } = useSnackbar();
+  const { perfilId: authPerfilId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [perfil, setPerfil] = useState<PerfilEmpresaDTO | null>(null);
 
+  // Estados para foto de perfil
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+
   // Obtener el perfilId de los parámetros de la ruta
   const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 1;
+
+  // Determinar si el usuario actual es dueño del perfil
+  const isOwner = authPerfilId === perfilId;
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -56,6 +65,30 @@ export default function PerfilEmpresaPage() {
     };
     fetchPerfil();
   }, [perfilId, showMessage]);
+
+  const handleFotoUpload = async (file: File) => {
+    try {
+      setUploadingFoto(true);
+      
+      if (!perfil?.id) {
+        throw new Error("ID de perfil inválido");
+      }
+      
+      await empresaService.uploadFotoPerfil(file, perfil.id);
+      
+      showMessage("Foto de perfil subida exitosamente", SnackbarType.Success);
+      
+      // Recargar el perfil
+      const data = await empresaService.getPerfilById(perfil.id);
+      setPerfil(data);
+      
+    } catch (error: any) {
+      const errorMessage = error?.message || "Error al subir la foto de perfil";
+      showMessage(errorMessage, SnackbarType.Error);
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
 
   if (loading) return <LoadingModal open={loading} />;
   if (!perfil)
@@ -83,17 +116,54 @@ export default function PerfilEmpresaPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Stack direction="row" spacing={3} alignItems="center">
-            <Avatar
-              sx={{
-                width: 120,
-                height: 120,
-                bgcolor: "primary.main",
-                fontSize: "2.5rem",
-                fontWeight: 600,
-              }}
-            >
-              {perfil.razonSocial ? perfil.razonSocial.charAt(0).toUpperCase() : "E"}
-            </Avatar>
+            <Box sx={{ position: "relative" }}>
+              <Avatar
+                src={perfil.fotoPerfil ? `data:image/jpeg;base64,${perfil.fotoPerfil}` : undefined}
+                sx={{
+                  width: 120,
+                  height: 120,
+                  bgcolor: "primary.main",
+                  fontSize: "2.5rem",
+                  fontWeight: 600,
+                }}
+              >
+                {!perfil.fotoPerfil && perfil.razonSocial ? perfil.razonSocial.charAt(0).toUpperCase() : "E"}
+              </Avatar>
+              {isOwner && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    bottom: 0,
+                    right: 0,
+                    bgcolor: "primary.main",
+                    borderRadius: "50%",
+                    width: 36,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    "&:hover": {
+                      bgcolor: "primary.dark",
+                    },
+                  }}
+                  component="label"
+                >
+                  <PhotoCamera sx={{ fontSize: 20, color: "white" }} />
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleFotoUpload(file);
+                      }
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
             <Box sx={{ flex: 1 }}>
               <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
                 {perfil.razonSocial || "Razón Social no disponible"}

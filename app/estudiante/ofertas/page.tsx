@@ -11,6 +11,12 @@ import {
 } from "@mui/icons-material";
 import { useMemo } from "react";
 
+import {
+  showConfirmDialog,
+  showError,
+  showSuccess,
+} from "@/components/shared/swalHelper";
+
 //#endregion
 
 //#region IMPORTACIONES COMPONENTES PROPIOS
@@ -43,6 +49,8 @@ import { GrupoFiltroID } from "@/types/constants";
 import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
+import ModalFormulario from "@/components/shared/ModalFormulario";
+import { CampoFormulario } from "@/components/shared/ModalFormulario";
 
 //#endregion
 
@@ -59,6 +67,10 @@ export default function EstudianteOfertasPage() {
   const [tipoContratos, setTipoContratos] = useState<OpcionFiltro[]>([]);
   const [modalidades, setModalidades] = useState<OpcionFiltro[]>([]);
   const [carreras, setCarreras] = useState<OpcionFiltro[]>([]);
+  const [modalPostulacionOpen, setModalPostulacionOpen] = useState(false);
+  const [ofertaSeleccionada, setOfertaSeleccionada] = useState<number | null>(
+    null
+  );
 
   //#endregion
 
@@ -164,11 +176,11 @@ export default function EstudianteOfertasPage() {
     try {
       setLoading(true);
 
-       const [tipos, modos, carreras] = await Promise.all([
-         genericService.getTipoContrato(),
-         genericService.getModalidad(),
-         genericService.getCarreras(),
-       ]);
+      const [tipos, modos, carreras] = await Promise.all([
+        genericService.getTipoContrato(),
+        genericService.getModalidad(),
+        genericService.getCarreras(),
+      ]);
 
       setTipoContratos(tipos);
       setModalidades(modos);
@@ -193,9 +205,9 @@ export default function EstudianteOfertasPage() {
     try {
       setLoading(true);
 
-       const nuevasOfertas : OfertaDTO[] = await ofertaService.buscarOfertas(
-         filtros
-       );
+      const nuevasOfertas: OfertaDTO[] = await ofertaService.buscarOfertas(
+        filtros
+      );
       setOfertas(nuevasOfertas);
     } catch (e) {
       const err = e as ResponseError;
@@ -240,12 +252,41 @@ export default function EstudianteOfertasPage() {
     // TODO: Implementar filtrado
   };
 
+  const camposPostulacion: CampoFormulario[] = [
+    {
+      id: "cartaPresentacion",
+      label: "Carta de presentación",
+      tipo: "textarea",
+      placeholder:
+        "Escribí una breve carta explicando por qué te interesa la oferta...",
+    },
+    {
+      id: "observacion",
+      label: "Observación",
+      tipo: "textarea",
+      placeholder: "Podés agregar comentarios adicionales si lo deseás...",
+    },
+  ];
+
   async function onClickPostularse(id: number): Promise<void> {
+    const confirmado = await showConfirmDialog(
+      "¿Está seguro que desea continuar?",
+      "Esta acción lo va a postular a la oferta de empleo."
+    );
+
+    if (confirmado) {
+      setOfertaSeleccionada(id);
+      setModalPostulacionOpen(true);
+    }
+  }
+
+  async function handleSubmitPostulacion(valores: Record<string, string>) {
     try {
+      setLoading(true);
       const postulacion = new PostulacionDTO();
-      postulacion.idOferta = id;
-      postulacion.cartaPresentacion = "Carta de presentación de prueba";
-      postulacion.observacion = "Observación de prueba";
+      postulacion.idOferta = ofertaSeleccionada!;
+      postulacion.cartaPresentacion = valores.cartaPresentacion;
+      postulacion.observacion = valores.observacion;
 
       const response: string = await postulanteService.postularseOferta(
         postulacion
@@ -254,40 +295,49 @@ export default function EstudianteOfertasPage() {
         size: SnackbarSize.Medium,
         position: SnackbarPosition.BottomCenter,
       });
+
+      setModalPostulacionOpen(false);
+      buscarOfertas();
     } catch (e) {
       const error = e as ResponseError;
       showMessage(error.message, SnackbarType.Error, {
         size: SnackbarSize.Medium,
         position: SnackbarPosition.BottomCenter,
       });
+    } finally {
+      setLoading(false);
     }
   }
-
   // Función para calcular fecha de cierre por defecto (60 días después de fechaInicio)
-  const calcularFechaCierre = (fechaInicio: string, fechaFin?: string): string => {
+  const calcularFechaCierre = (
+    fechaInicio: string,
+    fechaFin?: string
+  ): string => {
     // Si hay fechaFin específica, la usamos
-    if (fechaFin && fechaFin.trim() !== '') {
+    if (fechaFin && fechaFin.trim() !== "") {
       return fechaFin;
     }
-    
+
     // Si no hay fechaFin, calculamos 60 días después de fechaInicio
     // El formato viene como "dd/MM/yyyy" del backend
-    const partes = fechaInicio.split('/');
+    const partes = fechaInicio.split("/");
     if (partes.length !== 3) return fechaInicio; // Si el formato es incorrecto, devolvemos la fecha original
-    
+
     const dia = parseInt(partes[0]);
     const mes = parseInt(partes[1]) - 1; // Los meses en JavaScript van de 0-11
     const año = parseInt(partes[2]);
-    
+
     const fechaInicioDate = new Date(año, mes, dia);
     const fechaCierreDate = new Date(fechaInicioDate);
     fechaCierreDate.setDate(fechaInicioDate.getDate() + 60); // Agregar 60 días
-    
+
     // Formatear de vuelta a "dd/MM/yyyy"
-    const diaCierre = fechaCierreDate.getDate().toString().padStart(2, '0');
-    const mesCierre = (fechaCierreDate.getMonth() + 1).toString().padStart(2, '0');
+    const diaCierre = fechaCierreDate.getDate().toString().padStart(2, "0");
+    const mesCierre = (fechaCierreDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0");
     const añoCierre = fechaCierreDate.getFullYear();
-    
+
     return `${diaCierre}/${mesCierre}/${añoCierre}`;
   };
 
@@ -356,13 +406,19 @@ export default function EstudianteOfertasPage() {
                     },
                     {
                       icon: <EventIcon fontSize="small" />,
-                      texto: `Cierra el ${calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}`,
+                      texto: `Cierra el ${calcularFechaCierre(
+                        oferta.fechaInicio,
+                        oferta.fechaFin
+                      )}`,
                     },
                   ]}
-                  onAccion1={() => {/* TODO: Implementar ver detalle */}}
+                  onAccion1={() => {
+                    /* TODO: Implementar ver detalle */
+                  }}
                   textoAccion1="Ver detalles"
                   onAccion2={() => onClickPostularse(oferta.id)}
                   textoAccion2="Postularme"
+                  disabledAccion2={!oferta.puedePostularse}
                 />
               ))}
             </Card>
@@ -373,9 +429,14 @@ export default function EstudianteOfertasPage() {
           </Box>
         )}
       </Box>
+      <ModalFormulario
+        open={modalPostulacionOpen}
+        onClose={() => setModalPostulacionOpen(false)}
+        onSubmit={handleSubmitPostulacion}
+        titulo="Completar Postulación"
+        campos={camposPostulacion}
+      />
     </>
   );
   //#endregion
-}//#endregion
-
-
+} //#endregion

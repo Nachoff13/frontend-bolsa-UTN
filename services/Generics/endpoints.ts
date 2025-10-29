@@ -1,5 +1,7 @@
 // services/endpoints.ts
 
+import { GET } from "@/app/api/auth/token/route";
+
 // Controllers en un solo lugar
 export const CONTROLLERS = {
   PUBLICACION: "/publicacion",
@@ -7,6 +9,7 @@ export const CONTROLLERS = {
   POSTULACION: "/postulacion",
   CANDIDATO: "/candidato",
   EMPRESA: "/empresa",
+  ADMIN: "/admin",
 } as const;
 
 export const ENDPOINTS = {
@@ -53,6 +56,8 @@ export const ENDPOINTS = {
     GET_LOCALIDADES: `${CONTROLLERS.GENERIC}/get_localidades`,
     CARGAR_USUARIO: `${CONTROLLERS.GENERIC}/cargar_usuario`,
     GET_PERFIL_EMPRESA_USUARIO: `${CONTROLLERS.GENERIC}/get_perfil_empresa_usuario`,
+    GET_ESTADOS_VALIDACION: `${CONTROLLERS.GENERIC}/get_estados_validacion`,
+    GET_ROLES: `${CONTROLLERS.GENERIC}/get_roles`,
   },
   POSTULACION: {
     GET_POSTULACIONES: `${CONTROLLERS.POSTULACION}/get_postulaciones`,
@@ -62,11 +67,22 @@ export const ENDPOINTS = {
     GET_PERFIL: `/Candidato/get_perfil`,
     UPDATE_PERFIL: `/Candidato/update_perfil`,
     UPLOAD_CV: `/Candidato/upload_cv`,
+    UPLOAD_FOTO_PERFIL: `/Candidato/upload_foto_perfil`,
     VERIFICAR_PERFIL: `/Candidato/verificar_perfil`,
     COMPLETAR_PERFIL: `/Candidato/completar_perfil`,
   },
   EMPRESA: {
     GET_PERFIL: `/Empresa/get_perfil`,
     UPDATE_PERFIL: `/Empresa/update_perfil`,
+    UPLOAD_FOTO_PERFIL: `/Empresa/upload_foto_perfil`,
   },
+  ADMIN: {
+    GET_EMPRESAS: `${CONTROLLERS.ADMIN}/get_empresas_por_verificar`,
+    CAMBIAR_ESTADO_VALIDACION: `${CONTROLLERS.ADMIN}/cambiar_estado_validacion`,
+    GET_USUARIOS: `${CONTROLLERS.ADMIN}/get_usuarios`,
+    BAJA_USUARIO: `${CONTROLLERS.ADMIN}/baja_usuario`,
+    ALTA_USUARIO: `${CONTROLLERS.ADMIN}/alta_usuario`,
+    VER_DETALLE_USUARIO: `${CONTROLLERS.ADMIN}/ver_detalle_usuario`,
+    ACTUALIZAR_ROL_USUARIO: `${CONTROLLERS.ADMIN}/actualizar_rol_usuario`,
+  }
 } as const;

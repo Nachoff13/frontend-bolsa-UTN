@@ -1,12 +1,14 @@
 "use client";
 
-import { ReactNode } from "react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ReactNode, useMemo } from "react";
+import { ThemeProvider, createTheme, PaletteMode } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
+import { useTheme as useThemeContext } from "./ThemeProvider";
 
-const theme = createTheme({
+// Función para crear el tema basado en el modo
+const createAppTheme = (mode: PaletteMode) => createTheme({
   palette: {
-    mode: "light",
+    mode,
     primary: {
       main: "#00658f", // Azul UTN
       contrastText: "#ffffff",
@@ -23,44 +25,99 @@ const theme = createTheme({
     error: {
       main: "#ef5350",
     },
-    background: {
-      default: "#f9fafa", 
-      paper: "#f0f8f9", 
+    success: {
+      main: "#4caf50",
     },
-    text: {
-      primary: "#222",
-      secondary: "#555",
-    },
+    ...(mode === "light"
+      ? {
+          // Modo Claro
+          background: {
+            default: "#f9fafa", 
+            paper: "#f0f8f9", 
+          },
+          text: {
+            primary: "#222",
+            secondary: "#555",
+          },
+        }
+      : {
+          // Modo Oscuro - Negro/Gris
+          background: {
+            default: "#121212", // Negro suave
+            paper: "#1e1e1e",   // Gris oscuro
+          },
+          text: {
+            primary: "#ffffff",  // Blanco puro para mejor contraste
+            secondary: "#b0b0b0", // Gris claro
+          },
+        }),
   },
   typography: {
     fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
-    h4: {
+    fontSize: 16, // Aumentar tamaño base de 14px a 16px
+    h3: {
+      fontSize: "2rem", // 32px
       fontWeight: 700,
+      lineHeight: 1.3,
+    },
+    h4: {
+      fontSize: "1.75rem", // 28px
+      fontWeight: 700,
+      lineHeight: 1.3,
+    },
+    h5: {
+      fontSize: "1.5rem", // 24px
+      fontWeight: 600,
+      lineHeight: 1.4,
+    },
+    h6: {
+      fontSize: "1.25rem", // 20px
+      fontWeight: 600,
+      lineHeight: 1.4,
+    },
+    subtitle1: {
+      fontSize: "1.125rem", // 18px
+      lineHeight: 1.5,
+    },
+    subtitle2: {
+      fontSize: "1rem", // 16px
+      lineHeight: 1.5,
+    },
+    body1: {
+      fontSize: "1rem", // 16px
+      lineHeight: 1.6,
     },
     body2: {
+      fontSize: "0.9375rem", // 15px
+      lineHeight: 1.6,
       color: "#555",
+    },
+    button: {
+      fontSize: "1rem", // 16px
+      fontWeight: 500,
+      textTransform: "none", // Evitar mayúsculas automáticas
+    },
+    caption: {
+      fontSize: "0.875rem", // 14px (aumentado desde 12px)
+      lineHeight: 1.5,
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
+        root: {
+          padding: "10px 24px",
+          fontSize: "1rem",
+        },
         contained: {
           borderRadius: 8,
           fontWeight: 500,
           minWidth: 120,
         },
         outlined: {
-          backgroundColor: "#ffffff",
-          color: "#222",
-          borderColor: "#ccc",
           borderRadius: 8,
           fontWeight: 500,
           minWidth: 120,
-
-          "&:hover": {
-            backgroundColor: "#f4f4f4",
-            borderColor: "#aaa",
-          },
         },
       },
     },
@@ -68,18 +125,19 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-          backgroundColor: "#ecf4f4ff",
+          boxShadow: mode === "light" 
+            ? "0 2px 6px rgba(0,0,0,0.05)" 
+            : "0 2px 6px rgba(0,0,0,0.3)",
+          backgroundImage: "none",
         },
       },
     },
-
     MuiPaper: {
       styleOverrides: {
         root: {
           borderRadius: 12,
-          backgroundColor: "#ecf4f4ff",
           padding: 16,
+          backgroundImage: "none",
         },
       },
     },
@@ -87,11 +145,70 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 500,
-          fontSize: "0.75rem",
+          fontSize: "0.875rem", // Aumentado de 0.75rem a 0.875rem (14px)
           textTransform: "capitalize",
           borderRadius: 8,
-          padding: "0 8px",
-          height: 24,
+          padding: "0 12px", // Más padding horizontal
+          height: 32, // Aumentado de 24px a 32px
+        },
+        sizeSmall: {
+          fontSize: "0.8125rem", // 13px
+          height: 28,
+          padding: "0 10px",
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          "& .MuiInputBase-root": {
+            fontSize: "1rem", // Asegurar tamaño de fuente consistente
+          },
+          "& .MuiInputLabel-root": {
+            fontSize: "1rem", // Labels más grandes
+          },
+          "& .MuiFormHelperText-root": {
+            fontSize: "0.875rem", // Helper text más grande
+          },
+        },
+      },
+      defaultProps: {
+        variant: "outlined",
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          fontSize: "1rem",
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          fontSize: "1rem",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontSize: "1rem", // Items de menú más grandes
+          padding: "12px 16px", // Más padding para mejor clickabilidad
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          padding: "10px", // Aumentar área de click
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: {
+          fontSize: "1rem", // Labels de checkboxes y radios más grandes
         },
       },
     },
@@ -99,8 +216,13 @@ const theme = createTheme({
 });
 
 export function MuiThemeProvider({ children }: { children: ReactNode }) {
+  const { mode } = useThemeContext();
+  
+  const theme = useMemo(() => createAppTheme(mode), [mode]);
+
   return (
     <ThemeProvider theme={theme}>
+
       <CssBaseline />
       {children}
     </ThemeProvider>
