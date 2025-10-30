@@ -204,8 +204,8 @@ export default function EmpresasSolicitantesPage() {
           <Box flex={3}>
             <Card variant="outlined" sx={{ p: 3, boxShadow: 1 }}>
               <Titulo
-                titulo="Publicaciones de empleo recientes"
-                subtitulo="Nuevas oportunidades laborales"
+                titulo="Empresas Solicitantes"
+                subtitulo="Listado de empresas registradas en la plataforma"
                 variantTitulo="h5"
                 variantSubtitulo="body2"
               />
@@ -224,7 +224,7 @@ export default function EmpresasSolicitantesPage() {
                   onAccion1={() => {
                     cambiarEstadoValidacion(empresa.id, false);
                   }}
-                  textoAccion1="Rechazar"
+                  textoAccion1="Deshabilitar"
                   disabledAccion1={
                     empresa.estadoValidacionCodigo ===
                     EstadoValidacionCodigo.Rechazado
@@ -236,7 +236,7 @@ export default function EmpresasSolicitantesPage() {
                   onAccion2={() => {
                     cambiarEstadoValidacion(empresa.id, true);
                   }}
-                  textoAccion2="Aprobar"
+                  textoAccion2="Habilitar"
                 />
               ))}
             </Card>
