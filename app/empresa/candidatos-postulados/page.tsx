@@ -9,6 +9,10 @@ import {
   Divider,
   Stack,
   Avatar,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
   Button,
 } from "@mui/material";
 import {
@@ -27,19 +31,40 @@ import { useSnackbar } from "@/components/providers/snackbar";
 
 import { empresaService } from "@/services/empresa.service";
 import { PostulacionCandidatoDTO } from "@/types/dto/postulacionCandidatoDTO";
-import { SnackbarPosition, SnackbarSize, SnackbarType } from "@/types/enums/snackbar";
+import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
+import {
+  SnackbarPosition,
+  SnackbarSize,
+  SnackbarType,
+} from "@/types/enums/snackbar";
 
-// Colores de chips por estado
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+
+// 🟢 Colores dinámicos adaptados al tema global
 const getEstadoChipColor = (estado: string) => {
   switch (estado.toLowerCase()) {
     case "aprobada":
-      return { bg: "#E8F5E9", color: "#2E7D32" };
+      return {
+        bg: "hsl(var(--chart-2)) / 0.15",
+        color: "hsl(var(--chart-2))",
+      };
     case "rechazada":
-      return { bg: "#FFEBEE", color: "#C62828" };
+      return {
+        bg: "hsl(var(--destructive)) / 0.15",
+        color: "hsl(var(--destructive))",
+      };
     case "en revisión":
-      return { bg: "#FFF3CD", color: "#856404" };
-    default: // iniciada u otros
-      return { bg: "#E3F2FD", color: "#0D47A1" };
+      return {
+        bg: "hsl(var(--chart-4)) / 0.15",
+        color: "hsl(var(--chart-4))",
+      };
+    default:
+      return {
+        bg: "hsl(var(--chart-1)) / 0.15",
+        color: "hsl(var(--chart-1))",
+      };
   }
 };
 
@@ -48,48 +73,25 @@ const ESTADOS = ["Iniciada", "En revisión", "Aprobada", "Rechazada"];
 export default function CandidatosPostuladosPage() {
   const { showMessage } = useSnackbar();
   const [loading, setLoading] = useState(true);
-  const [postulaciones, setPostulaciones] = useState<PostulacionCandidatoDTO[]>([]);
+  const [postulaciones, setPostulaciones] = useState<PostulacionCandidatoDTO[]>(
+    []
+  );
+  const [openModal, setOpenModal] = useState(false);
+  const [postulacionSeleccionada, setPostulacionSeleccionada] =
+    useState<PostulacionCandidatoDTO | null>(null);
 
   const [busquedaInputFiltro, setBusquedaInputFiltro] = useState("");
   const [inputBusquedaFinal, setInputBusquedaFinal] = useState("");
-  const [estadosSeleccionados, setEstadosSeleccionados] = useState<string[]>([]);
-
+  const [estadosSeleccionados, setEstadosSeleccionados] = useState<string[]>(
+    []
+  );
   const [fechasSeleccionadas, setFechasSeleccionadas] = useState<string[]>([]);
 
-  const filtrosAPI = [
-    {
-      id: "estado",
-      titulo: "Estado",
-      opciones: ESTADOS.map((estado) => ({
-        codigo: estado,
-        descripcion: estado,
-      })),
-    },
-    {
-      id: "fecha",
-      titulo: "Fecha de postulación",
-      opciones: [
-        { codigo: "ultimaSemana", descripcion: "Última semana" },
-        { codigo: "ultimoMes", descripcion: "Último mes" },
-        { codigo: "ultimos3Meses", descripcion: "Últimos 3 meses" },
-        { codigo: "mas3Meses", descripcion: "Más de 3 meses" },
-      ],
-    },
-  ];
+  const [anchorMenu, setAnchorMenu] = useState<null | HTMLElement>(null);
+  const [postulacionEnCambio, setPostulacionEnCambio] =
+    useState<PostulacionCandidatoDTO | null>(null);
 
-
-  const gruposFiltros = filtrosAPI.map((grupo) => ({
-    ...grupo,
-    valoresSeleccionados: estadosSeleccionados,
-  }));
-
-  const filtros = useMemo(() => {
-    const f: any = {};
-    if (estadosSeleccionados.length > 0) f.estados = estadosSeleccionados;
-    if (inputBusquedaFinal.trim()) f.input = inputBusquedaFinal.trim();
-    return f;
-  }, [estadosSeleccionados, inputBusquedaFinal]);
-
+  // 🟢 Background y tipografía adaptados al tema base
   useEffect(() => {
     cargarPostulaciones();
   }, []);
@@ -110,16 +112,43 @@ export default function CandidatosPostuladosPage() {
     }
   };
 
+  const abrirMenuCambiarEstado = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    postulacion: PostulacionCandidatoDTO
+  ) => {
+    setAnchorMenu(event.currentTarget);
+    setPostulacionEnCambio(postulacion);
+  };
+
+  const cerrarMenuCambiarEstado = (nuevoEstado?: string) => {
+    setAnchorMenu(null);
+    if (nuevoEstado && postulacionEnCambio) {
+      const actualizadas = postulaciones.map((p) =>
+        p.idPostulacion === postulacionEnCambio.idPostulacion
+          ? { ...p, estadoPostulacion: nuevoEstado }
+          : p
+      );
+      setPostulaciones(actualizadas);
+      showMessage(`Estado cambiado a "${nuevoEstado}"`, SnackbarType.Success);
+    }
+  };
+
+  // 🧮 Filtros
   const postulacionesFiltradas = useMemo(() => {
     return postulaciones.filter((p) => {
       const fecha = new Date(p.fechaPostulacion);
       const hoy = new Date();
-      const diasDiferencia = (hoy.getTime() - fecha.getTime()) / (1000 * 3600 * 24);
+      const diasDiferencia =
+        (hoy.getTime() - fecha.getTime()) / (1000 * 3600 * 24);
 
       const coincideBusqueda =
         inputBusquedaFinal.trim() === "" ||
-        p.nombreCandidato?.toLowerCase().includes(inputBusquedaFinal.toLowerCase()) ||
-        p.tituloOferta?.toLowerCase().includes(inputBusquedaFinal.toLowerCase());
+        p.nombreCandidato
+          ?.toLowerCase()
+          .includes(inputBusquedaFinal.toLowerCase()) ||
+        p.tituloOferta
+          ?.toLowerCase()
+          .includes(inputBusquedaFinal.toLowerCase());
 
       const coincideEstado =
         estadosSeleccionados.length === 0 ||
@@ -144,31 +173,12 @@ export default function CandidatosPostuladosPage() {
 
       return coincideBusqueda && coincideEstado && coincideFecha;
     });
-  }, [postulaciones, inputBusquedaFinal, estadosSeleccionados, fechasSeleccionadas]);
-
-
-
-
-  const handleBuscar = () => setInputBusquedaFinal(busquedaInputFiltro);
-  const handleSeleccionFiltro = (idGrupo: string, nuevos: string[]) => {
-    if (idGrupo === "estado") setEstadosSeleccionados(nuevos);
-    if (idGrupo === "fecha") setFechasSeleccionadas(nuevos);
-  };
-
-  const handleVerCV = (cvBase64: string | null | undefined) => {
-    if (!cvBase64) {
-      showMessage("Este candidato no tiene CV disponible", SnackbarType.Warning);
-      return;
-    }
-    const byteCharacters = atob(cvBase64);
-    const byteNumbers = new Array(byteCharacters.length)
-      .fill(0)
-      .map((_, i) => byteCharacters.charCodeAt(i));
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-  };
+  }, [
+    postulaciones,
+    inputBusquedaFinal,
+    estadosSeleccionados,
+    fechasSeleccionadas,
+  ]);
 
   if (loading) return <LoadingModal open={loading} />;
 
@@ -177,86 +187,132 @@ export default function CandidatosPostuladosPage() {
     postulaciones.filter((p) => p.estadoPostulacion === estado).length;
 
   return (
-    <Box sx={{ backgroundColor: "#f9fafb", minHeight: "100vh", p: 3 }}>
+    <Box
+      className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors"
+      sx={{
+        minHeight: "100vh",
+        padding: "2rem",
+        borderRadius: "var(--radius)",
+      }}
+    >
+      {/* 🟢 Título principal */}
       <Titulo
         titulo="Candidatos Postulados"
         subtitulo="Revisá los perfiles y estados de las postulaciones recibidas"
       />
 
-      {/* 🔍 Buscador */}
       <FilterSearch
         titulo="Buscar candidatos"
         subtitulo="Filtrá por nombre o título de la oferta"
         placeholder="Buscar por candidato u oferta…"
         valor={busquedaInputFiltro}
         onChange={(e) => setBusquedaInputFiltro(e.target.value)}
-        onAccion1={handleBuscar}
+        onAccion1={() => setInputBusquedaFinal(busquedaInputFiltro)}
         tituloBoton2="Limpiar"
         onAccion2={() => {
           setBusquedaInputFiltro("");
           setInputBusquedaFinal("");
           setEstadosSeleccionados([]);
+          setFechasSeleccionadas([]);
         }}
       />
 
-      {/* 🧮 Cards resumen */}
+      {/* 🧮 Resumen con diseño Tailwind + theme vars */}
       <Box display="flex" gap={2} mt={3}>
         <Card
+          className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] shadow-sm"
           sx={{
-            p: 2,
             flex: 1,
             textAlign: "center",
-            borderRadius: 3,
-            background: "linear-gradient(145deg, #fff, #f0f4f8)",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            borderRadius: "var(--radius)",
+            padding: "1rem",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-2px)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            },
           }}
         >
-          <Typography variant="h5" fontWeight={700} color="primary">
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            sx={{ color: "hsl(var(--primary))" }}
+          >
             {total}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{ color: "hsl(var(--muted-foreground))" }}
+          >
             Total de postulaciones
           </Typography>
         </Card>
+
         {ESTADOS.map((estado) => (
           <Card
             key={estado}
+            className="bg-[hsl(var(--card))] border border-[hsl(var(--border))]"
             sx={{
-              p: 2,
               flex: 1,
               textAlign: "center",
-              borderRadius: 3,
-              background: "linear-gradient(145deg, #fff, #f0f4f8)",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+              borderRadius: "var(--radius)",
+              padding: "1rem",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              },
             }}
           >
-            <Typography variant="h5" fontWeight={700} color="primary">
+            <Typography
+              variant="h5"
+              fontWeight={700}
+              sx={{ color: "hsl(var(--primary))" }}
+            >
               {totalPorEstado(estado)}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{ color: "hsl(var(--muted-foreground))" }}
+            >
               {estado}
             </Typography>
           </Card>
         ))}
       </Box>
 
-      {/* 🎛 Filtros + resultados */}
+      {/* 🧭 Filtros y contenido */}
       <Box display="flex" gap={3} mt={4}>
-        {/* Filtros laterales */}
         <Box flex={1} maxWidth={300}>
-          <CardFiltros grupos={gruposFiltros} onSeleccionCambio={handleSeleccionFiltro} />
+          <CardFiltros
+            grupos={[
+              {
+                id: "estado",
+                titulo: "Estado",
+                opciones: ESTADOS.map((e) => ({
+                  codigo: e,
+                  descripcion: e,
+                })),
+                valoresSeleccionados: estadosSeleccionados,
+              },
+            ]}
+            onSeleccionCambio={(id, nuevos) =>
+              id === "estado"
+                ? setEstadosSeleccionados(nuevos)
+                : setFechasSeleccionadas(nuevos)
+            }
+          />
         </Box>
 
-        {/* Listado principal */}
+        {/* 🟢 Listado con colores y sombras suaves */}
         <Box flex={3}>
           {postulacionesFiltradas.length > 0 ? (
             <Card
-              variant="outlined"
+              className="bg-[hsl(var(--card))] border border-[hsl(var(--border))]"
               sx={{
-                p: 3,
-                borderRadius: 3,
+                borderRadius: "var(--radius)",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                backgroundColor: "#fff",
+                p: 3,
               }}
             >
               <Titulo
@@ -273,11 +329,11 @@ export default function CandidatosPostuladosPage() {
                   return (
                     <Card
                       key={p.idPostulacion}
+                      className="bg-[hsl(var(--background))] border border-[hsl(var(--border))]"
                       sx={{
                         p: 3,
-                        borderRadius: 3,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                        transition: "all 0.2s",
+                        borderRadius: "var(--radius)",
+                        transition: "all 0.25s ease",
                         "&:hover": {
                           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                           transform: "translateY(-2px)",
@@ -285,15 +341,32 @@ export default function CandidatosPostuladosPage() {
                       }}
                     >
                       <Box display="flex" alignItems="center">
-                        <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>
+                        <Avatar
+                          sx={{
+                            bgcolor: "hsl(var(--chart-3))",
+                            mr: 2,
+                            color: "white",
+                          }}
+                        >
                           {p.nombreCandidato?.[0] ?? "?"}
                         </Avatar>
 
                         <Box flexGrow={1}>
-                          <Typography variant="h6" color="primary.main" fontWeight={600}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              color: "hsl(var(--primary))",
+                              fontWeight: 600,
+                            }}
+                          >
                             {p.nombreCandidato ?? "Candidato desconocido"}
                           </Typography>
-                          <Typography variant="subtitle1" sx={{ color: "#555" }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              color: "hsl(var(--muted-foreground))",
+                            }}
+                          >
                             {p.tituloOferta ?? "Sin título"}
                           </Typography>
                         </Box>
@@ -307,69 +380,62 @@ export default function CandidatosPostuladosPage() {
                               fontWeight: 600,
                             }}
                           />
-                          {p.carreraNombre && (
-                            <Chip
-                              label={p.carreraNombre}
-                              color="secondary"
-                              variant="outlined"
-                            />
-                          )}
-                          {p.modalidad && (
-                            <Chip
-                              label={p.modalidad}
-                              color="info"
-                              variant="outlined"
-                            />
-                          )}
                         </Stack>
                       </Box>
 
                       <Box display="flex" alignItems="center" gap={2} mt={2}>
-                        <LocationOnIcon fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
+                        <LocationOnIcon
+                          fontSize="small"
+                          sx={{ color: "hsl(var(--muted-foreground))" }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "hsl(var(--muted-foreground))" }}
+                        >
                           {p.localidad ?? "-"}
                         </Typography>
-                        <CalendarTodayIcon fontSize="small" color="action" />
-                        <Typography variant="body2" color="text.secondary">
-                          Postulado el{" "}
-                          {new Date(p.fechaPostulacion).toLocaleDateString("es-AR")}
+                        <CalendarTodayIcon
+                          fontSize="small"
+                          sx={{ color: "hsl(var(--muted-foreground))" }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "hsl(var(--muted-foreground))" }}
+                        >
+                          {new Date(p.fechaPostulacion).toLocaleDateString(
+                            "es-AR"
+                          )}
                         </Typography>
                       </Box>
 
-                      {p.descripcionPerfil && (
-                        <Box mt={2}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                            }}
-                          >
-                            {p.descripcionPerfil}
-                          </Typography>
-                        </Box>
-                      )}
-
-                      <Box display="flex" justifyContent="flex-end" gap={1} mt={3}>
+                      <Box
+                        display="flex"
+                        justifyContent="flex-end"
+                        gap={1}
+                        mt={3}
+                      >
                         <Button
                           variant="outlined"
                           startIcon={<DownloadIcon />}
-                          onClick={() => handleVerCV(p.cv)}
+                          sx={{
+                            color: "hsl(var(--primary))",
+                            borderColor: "hsl(var(--border))",
+                            textTransform: "none",
+                          }}
                         >
                           Ver CV
                         </Button>
                         <Button
                           variant="contained"
                           startIcon={<VisibilityIcon />}
-                          onClick={() =>
-                            showMessage(
-                              `Ver detalles de ${p.nombreCandidato}`,
-                              SnackbarType.Info
-                            )
-                          }
+                          sx={{
+                            backgroundColor: "hsl(var(--chart-3))",
+                            color: "hsl(var(--primary-foreground))",
+                            textTransform: "none",
+                            "&:hover": {
+                              backgroundColor: "hsl(var(--chart-2))",
+                            },
+                          }}
                         >
                           Ver Detalles
                         </Button>

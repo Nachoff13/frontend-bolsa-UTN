@@ -3,15 +3,15 @@
 import {
   Dialog,
   DialogContent,
-  DialogActions,
   Typography,
   Box,
   Chip,
-  Button,
   Divider,
   Avatar,
   Paper,
   Stack,
+  Button,
+  DialogActions,
 } from "@mui/material";
 
 import {
@@ -19,18 +19,18 @@ import {
   Work as WorkIcon,
   CalendarToday as CalendarIcon,
   Description as DescriptionIcon,
-  Apartment as EmpresaIcon,
-  Assignment as CartaIcon,
+  School as CarreraIcon,
   Info as InfoIcon,
-  ModeComment as ObservacionIcon,
+  LocationOn as LocationIcon,
+  Mail as MailIcon,
 } from "@mui/icons-material";
-import { PostulacionDTO } from "@/types/dto/postulacionDTO";
-import Grid from "@mui/material/Grid"
+
+import { PostulacionCandidatoDTO } from "@/types/dto/postulacionCandidatoDTO";
 
 interface DetalleCandidatoModalProps {
   open: boolean;
   onClose: () => void;
-  postulacion?: PostulacionDTO;
+  postulacion?: PostulacionCandidatoDTO;
 }
 
 export default function DetalleCandidatoModal({
@@ -42,26 +42,23 @@ export default function DetalleCandidatoModal({
 
   const {
     nombreCandidato,
-    nombreEmpresa,
+    email,
     tituloOferta,
     descripcionOferta,
-    descripcionModalidad,
-    descripcionTipoContrato,
-    cartaPresentacion,
-    observacion,
+    carreraNombre,
+    modalidad,
+    tipoContrato,
     estadoPostulacion,
     fechaPostulacion,
+    localidad,
+    descripcionPerfil,
   } = postulacion;
-
-  const handleVerPerfil = (post: PostulacionDTO) => {
-    console.log(`👤 Ver perfil de: ${post.nombreCandidato}`);
-  };
 
   const getEstadoColor = (estado?: string) => {
     switch (estado?.toLowerCase()) {
       case "en revisión":
         return "info";
-      case "aceptada":
+      case "aprobada":
         return "success";
       case "rechazada":
         return "error";
@@ -72,7 +69,7 @@ export default function DetalleCandidatoModal({
     }
   };
 
-    return (
+  return (
     <Dialog
       open={open}
       onClose={onClose}
@@ -90,79 +87,119 @@ export default function DetalleCandidatoModal({
       {/* Header */}
       <Box
         sx={{
-          background: "linear-gradient(135deg, #0d6efd 0%, #00b4d8 100%)",
+          background: "linear-gradient(135deg, #5395d6ff 0%, #2276a3ff 100%)",
           color: "white",
           py: 3,
           px: 3,
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
           gap: 2,
         }}
       >
-        <Avatar sx={{ bgcolor: "white", color: "#0d6efd", width: 56, height: 56 }}>
-          <PersonIcon fontSize="large" />
-        </Avatar>
-        <Box>
-          <Typography variant="h6" fontWeight="bold">
-            {nombreCandidato || "Candidato sin nombre"}
-          </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            {tituloOferta || "Postulación sin puesto"}
-          </Typography>
-        </Box>
-        {/* Estado */}
-          <Box display="flex" justifyContent="center">
-            <Chip
-              label={estadoPostulacion ?? "Sin estado"}
-              color={getEstadoColor(estadoPostulacion) as any}
-              sx={{
-                fontWeight: 600,
-                px: 3,
-                py: 0.5,
-                borderRadius: 2,
-                fontSize: "0.9rem",
-              }}
-            />
+        <Box display="flex" alignItems="center" gap={2}>
+          <Avatar
+            sx={{ bgcolor: "white", color: "#1976d2", width: 56, height: 56 }}
+          >
+            <PersonIcon fontSize="large" />
+          </Avatar>
+          <Box>
+            <Typography variant="h6" fontWeight="bold">
+              {nombreCandidato || "Candidato sin nombre"}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: "bold", color: "rgba(255,255,255,0.8)" }}
+            >
+              {tituloOferta || "Sin puesto asociado"}
+            </Typography>
           </Box>
+        </Box>
+
+        <Chip
+          label={estadoPostulacion ?? "Sin estado"}
+          color={getEstadoColor(estadoPostulacion) as any}
+          sx={{
+            fontWeight: 600,
+            px: 2,
+            py: 0.5,
+            borderRadius: 2,
+            fontSize: "0.85rem",
+          }}
+        />
       </Box>
 
       {/* Contenido */}
       <DialogContent sx={{ mt: 2 }}>
         <Stack spacing={2}>
-          {/* Empresa */}
+          {/* Información básica */}
           <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <EmpresaIcon color="action" />
-              <Typography variant="body2" fontWeight="bold">
-                Empresa:
-              </Typography>
-              <Typography variant="body2">{nombreEmpresa || "-"}</Typography>
-            </Box>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <MailIcon color="action" />
+              <Typography variant="body2">{email || "-"}</Typography>
+            </Stack>
           </Paper>
 
-          {/* Contrato y Modalidad */}
           <Box display="flex" gap={2} flexWrap="wrap">
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, flex: 1, minWidth: "45%" }}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <InfoIcon color="action" />
+            <Paper
+              variant="outlined"
+              sx={{ p: 2, borderRadius: 3, flex: 1, minWidth: "45%" }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center">
+                <CarreraIcon color="action" />
                 <Typography variant="body2" fontWeight="bold">
-                  Contrato:
+                  Carrera:
                 </Typography>
-              </Box>
+              </Stack>
               <Typography variant="body2" sx={{ mt: 0.5 }}>
-                {descripcionTipoContrato || "No especificado"}
+                {carreraNombre || "No especificada"}
               </Typography>
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, flex: 1, minWidth: "45%" }}>
-              <Box display="flex" alignItems="center" gap={1}>
+            <Paper
+              variant="outlined"
+              sx={{ p: 2, borderRadius: 3, flex: 1, minWidth: "45%" }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center">
                 <InfoIcon color="action" />
                 <Typography variant="body2" fontWeight="bold">
                   Modalidad:
                 </Typography>
-              </Box>
+              </Stack>
               <Typography variant="body2" sx={{ mt: 0.5 }}>
-                {descripcionModalidad || "No especificada"}
+                {modalidad || "No especificada"}
+              </Typography>
+            </Paper>
+          </Box>
+
+          <Box display="flex" gap={2} flexWrap="wrap">
+            <Paper
+              variant="outlined"
+              sx={{ p: 2, borderRadius: 3, flex: 1, minWidth: "45%" }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center">
+                <InfoIcon color="action" />
+                <Typography variant="body2" fontWeight="bold">
+                  Tipo de contrato:
+                </Typography>
+              </Stack>
+              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                {tipoContrato || "No especificado"}
+              </Typography>
+            </Paper>
+
+            <Paper
+              variant="outlined"
+              sx={{ p: 2, borderRadius: 3, flex: 1, minWidth: "45%" }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center">
+                <LocationIcon color="action" />
+                <Typography variant="body2" fontWeight="bold">
+                  Localidad:
+                </Typography>
+              </Stack>
+              <Typography variant="body2" sx={{ mt: 0.5 }}>
+                {localidad || "No especificada"}
               </Typography>
             </Paper>
           </Box>
@@ -173,67 +210,54 @@ export default function DetalleCandidatoModal({
             <Typography variant="body2" fontWeight="bold">
               Fecha de postulación:
             </Typography>
-            <Typography variant="body2">{fechaPostulacion || "-"}</Typography>
+            <Typography variant="body2">
+              {new Date(fechaPostulacion).toLocaleDateString("es-AR")}
+            </Typography>
           </Box>
 
           <Divider />
 
-          {/* Descripción */}
+          {/* Descripción de oferta */}
           <Box>
             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-              <DescriptionIcon color="action" sx={{ mr: 1, verticalAlign: "middle" }} />
+              <WorkIcon
+                color="action"
+                sx={{ mr: 1, verticalAlign: "middle" }}
+              />
               Descripción del puesto
             </Typography>
-            <Typography variant="body2" sx={{ whiteSpace: "pre-line", color: "text.secondary" }}>
+            <Typography
+              variant="body2"
+              sx={{ whiteSpace: "pre-line", color: "text.secondary" }}
+            >
               {descripcionOferta || "No hay descripción disponible."}
             </Typography>
           </Box>
 
-          {/* Carta de presentación */}
-          {cartaPresentacion && (
+          {/* Perfil del candidato */}
+          {descripcionPerfil && (
             <Box>
               <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                <CartaIcon color="action" sx={{ mr: 1, verticalAlign: "middle" }} />
-                Carta de presentación
+                <DescriptionIcon
+                  color="action"
+                  sx={{ mr: 1, verticalAlign: "middle" }}
+                />
+                Perfil del candidato
               </Typography>
-              <Typography variant="body2" sx={{ whiteSpace: "pre-line", color: "text.secondary" }}>
-                {cartaPresentacion}
+              <Typography
+                variant="body2"
+                sx={{ whiteSpace: "pre-line", color: "text.secondary" }}
+              >
+                {descripcionPerfil}
               </Typography>
             </Box>
           )}
-
-          {/* Observaciones */}
-          {observacion && (
-            <Box>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                <DescriptionIcon color="action" sx={{ mr: 1, verticalAlign: "middle" }} />
-                Observaciones
-              </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {observacion}
-              </Typography>
-            </Box>
-          )}
-
-          
         </Stack>
       </DialogContent>
 
-      {/* Acciones
+      {/* Acciones */}
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Box display="flex" justifyContent="flex-end" gap={2} width="100%">
-          <Button
-            onClick={() => handleVerPerfil(postulacion!)}
-            variant="contained"
-            sx={{
-              textTransform: "none",
-              fontWeight: 600,
-              px: 3,
-              background: "linear-gradient(90deg,#0d6efd,#00b4d8)",
-            }}
-          >
-            Ver perfil
-          </Button>
           <Button
             onClick={onClose}
             variant="outlined"
@@ -243,7 +267,7 @@ export default function DetalleCandidatoModal({
             Cerrar
           </Button>
         </Box>
-      </DialogActions> */}
+      </DialogActions>
     </Dialog>
   );
 }

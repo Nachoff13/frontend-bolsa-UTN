@@ -15,7 +15,8 @@ export default function CandidatosPostulados({
   postulaciones,
   loading,
 }: CandidatosPostuladosProps) {
-  const [selectedPostulacion, setSelectedPostulacion] = useState<PostulacionDTO | null>(null);
+  const [selectedPostulacion, setSelectedPostulacion] =
+    useState<PostulacionDTO | null>(null);
   const [openModal, setOpenModal] = useState(false);
 
   const handleVer = (post: PostulacionDTO) => {
@@ -32,8 +33,6 @@ export default function CandidatosPostulados({
 
   if (loading) return <p>Cargando candidatos...</p>;
 
-  
-
   return (
     <section className="rounded-2xl border border-neutral-200 bg-white p-4">
       <h3 className="mb-3 text-base font-semibold">Candidatos postulados</h3>
@@ -45,25 +44,9 @@ export default function CandidatosPostulados({
       ) : (
         <div className="flex flex-col gap-3">
           {postulaciones.map((p) => (
-            <CandidatoCard
-              key={p.id}
-              postulacion={p}
-              onVer={handleVer}
-              onCambiarEstado={(post: any) =>
-                console.log("Cambiar estado:", post)
-              }
-            />
+            <CandidatoCard key={p.id} postulacion={p} onVer={handleVer} />
           ))}
         </div>
-      )}
-
-      {/*  Modal Detalle del Candidato */}
-      {selectedPostulacion && (
-        <DetalleCandidatoModal
-          open={openModal}
-          onClose={handleCloseModal}
-          postulacion={selectedPostulacion}
-        />
       )}
     </section>
   );
