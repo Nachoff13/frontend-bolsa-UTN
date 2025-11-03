@@ -327,7 +327,7 @@ export default function CandidatosPostuladosPage() {
                     {p.observacion && (
                       <Box sx={{ backgroundColor: "#f1f6ff", borderRadius: "8px", p: 1.5, mt: 1.5 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#0d47a1" }}>
-                          Observaciones de la Empresa
+                          Observaciones
                         </Typography>
                         <Typography variant="body2" sx={{ color: "#444", whiteSpace: "pre-wrap" }}>
                           {p.observacion}
