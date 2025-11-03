@@ -5,53 +5,64 @@ import { ThemeProvider, createTheme, PaletteMode } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { useTheme as useThemeContext } from "./ThemeProvider";
 
+import '@mui/material/styles';
+
+declare module '@mui/material/styles' {
+  interface Palette {
+    customStatus: {
+      iniciada: string;
+      enRevision: string;
+      aprobada: string;
+      rechazada: string;
+      modalidad: string;
+      contrato: string;
+    };
+  }
+
+  interface PaletteOptions {
+    customStatus?: {
+      iniciada?: string;
+      enRevision?: string;
+      aprobada?: string;
+      rechazada?: string;
+      modalidad?: string;
+      contrato?: string;
+    };
+  }
+}
+
 // Función para crear el tema basado en el modo
-const createAppTheme = (mode: PaletteMode) => createTheme({
-  palette: {
-    mode,
-    primary: {
-      main: "#00658f", // Azul UTN
-      contrastText: "#ffffff",
+const createAppTheme = (mode: PaletteMode) =>
+  createTheme({
+    palette: {
+      mode,
+      primary: { main: "#00658f", contrastText: "#ffffff" },
+      secondary: { main: "#c2185b" },
+      info: { main: "#00bcd4" },
+      warning: { main: "#ffa726" },
+      error: { main: "#ef5350" },
+      success: { main: "#4caf50" },
+      // 🎨 NUEVOS COLORES PERSONALIZADOS PARA ESTADOS
+      customStatus: {
+        iniciada: "#0ea5e9",    // Celeste UTN
+        enRevision: "#0284c7",  // Azul medio
+        aprobada: "#00796b",    // Verde-azulado éxito
+        rechazada: "#607d8b",   // Gris azulado neutro
+        modalidad: "#00658f",   // Azul UTN base
+        contrato: "#004c6d",    // Azul profundo
+      },
+      ...(mode === "light"
+        ? {
+            background: { default: "#f9fafa", paper: "#f0f8f9" },
+            text: { primary: "#222", secondary: "#555" },
+          }
+        : {
+            background: { default: "#121212", paper: "#1e1e1e" },
+            text: { primary: "#ffffff", secondary: "#b0b0b0" },
+          }),
     },
-    secondary: {
-      main: "#c2185b", 
-    },
-    info: {
-      main: "#00bcd4", 
-    },
-    warning: {
-      main: "#ffa726", 
-    },
-    error: {
-      main: "#ef5350",
-    },
-    success: {
-      main: "#4caf50",
-    },
-    ...(mode === "light"
-      ? {
-          // Modo Claro
-          background: {
-            default: "#f9fafa", 
-            paper: "#f0f8f9", 
-          },
-          text: {
-            primary: "#222",
-            secondary: "#555",
-          },
-        }
-      : {
-          // Modo Oscuro - Negro/Gris
-          background: {
-            default: "#121212", // Negro suave
-            paper: "#1e1e1e",   // Gris oscuro
-          },
-          text: {
-            primary: "#ffffff",  // Blanco puro para mejor contraste
-            secondary: "#b0b0b0", // Gris claro
-          },
-        }),
-  },
+
+
   typography: {
     fontFamily: `"Roboto", "Helvetica", "Arial", sans-serif`,
     fontSize: 16, // Aumentar tamaño base de 14px a 16px
