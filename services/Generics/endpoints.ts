@@ -46,6 +46,9 @@ export const ENDPOINTS = {
       `${CONTROLLERS.PUBLICACION}/get_postulaciones_empresa?email=${emailEmpresa}`,
 
     GET_POSTULACIONES_CANDIDATOS_EMPRESA: `${CONTROLLERS.POSTULACION}/get_postulaciones_candidatos_empresa`,
+
+     CAMBIAR_ESTADO: (idPostulacion: number | string) =>
+      `${CONTROLLERS.POSTULACION}/${idPostulacion}/estado`,
   },
 
 

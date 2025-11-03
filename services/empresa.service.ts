@@ -155,6 +155,26 @@ class EmpresaService extends GenericService {
     }
   }
 
+  async cambiarEstadoPostulacion(
+    idPostulacion: number,
+    nombreEstado: string
+  ): Promise<ApiResponse<void>> {
+    try {
+      const res = await api.put<ApiResponse<void>>(
+        ENDPOINTS.POSTULACIONES.CAMBIAR_ESTADO(idPostulacion),
+        JSON.stringify(nombreEstado), // 👈 se envía un string puro
+        {
+          headers: { "Content-Type": "application/json" }, // 👈 se especifica aquí
+        }
+      );
+
+      return res.data;
+    } catch (e) {
+      const err = e as ResponseError;
+      console.error("Error al cambiar el estado de la postulación:", err.message);
+      throw err;
+    }
+  }
 }
 
 export const empresaService = new EmpresaService();
