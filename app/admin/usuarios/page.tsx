@@ -1,8 +1,6 @@
 "use client";
 
 import { adminService } from "@/services/admin.service";
-import { genericService } from "@/services/generic.service";
-import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { UsuarioDTO } from "@/types/dto/usuarioDTO";
 import { SnackbarType } from "@/types/enums/snackbar";
 import { ResponseError } from "@/types/Generics/responseError";
@@ -14,15 +12,15 @@ import { esES } from "@mui/x-data-grid/locales";
 import {
   showConfirmDialog,
   showError,
-  showSuccess,
 } from "@/components/shared/swalHelper";
 
 import AccionMenu from "@/components/shared/AccionMenu";
 import LoadingModal from "@/components/shared/LoadingModal";
-import { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
-import { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 import { PerfilCompletoDTO } from "@/types/dto/perfilCompleetoDTO";
 import ModalDetalleUsuario from "@/components/admin/ModalDetalleUsuario";
+import { IconButton, Switch } from "@mui/material";
+
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 export default function GestionUsuarios() {
   const [loading, setLoading] = useState(true);
@@ -64,24 +62,39 @@ export default function GestionUsuarios() {
     { field: "fechaAlta", headerName: "Fecha de Alta", flex: 1 },
     { field: "fechaBaja", headerName: "Fecha de Baja", flex: 1 },
     { field: "activo", headerName: "Activo", flex: 0.7 },
+
     {
-      field: "acciones",
+      field: "accion2",
       headerName: "Acciones",
-      flex: 0.7,
+      flex: 1,
       sortable: false,
       filterable: false,
-      headerAlign: "right",
-      align: "right",
-      renderCell: (params) => (
-        <AccionMenu
-          opciones={[
-            { label: "Ver detalle", onClick: () => verDetalle(params.row) },
-            params.row.activo == "Sí"
-              ? { label: "Dar de baja", onClick: () => bajaUsuario(params.row) }
-              : { label: "Activar", onClick: () => altaUsuario(params.row) },
-          ]}
-        />
-      ),
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        const activo = params.row.activo === "Sí";
+
+        return (
+          <>
+            {/* Ver detalle */}
+            <IconButton
+              onClick={() => verDetalle(params.row)}
+              title="Ver información"
+            >
+              <VisibilityOutlinedIcon />
+            </IconButton>
+
+            {/* Toggle habilitar/deshabilitar */}
+            <Switch
+              checked={activo}
+              onChange={() =>
+                activo ? bajaUsuario(params.row) : altaUsuario(params.row)
+              }
+              title={activo ? "Deshabilitar empresa" : "Habilitar empresa"}
+            />
+          </>
+        );
+      },
     },
   ];
   //Defino las filas
