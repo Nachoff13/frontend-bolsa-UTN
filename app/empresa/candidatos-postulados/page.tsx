@@ -9,17 +9,16 @@ import {
   Divider,
   Stack,
   Avatar,
+  Button,
   Menu,
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Button,
 } from "@mui/material";
 import {
   Visibility as VisibilityIcon,
   Download as DownloadIcon,
   CalendarToday as CalendarTodayIcon,
-  LocationOn as LocationOnIcon,
 } from "@mui/icons-material";
 
 import Titulo from "@/components/shared/Titulo";
@@ -28,7 +27,6 @@ import CardFiltros from "@/components/shared/CardFiltro";
 import LoadingModal from "@/components/shared/LoadingModal";
 import EmptyState from "@/components/shared/EmptyState";
 import { useSnackbar } from "@/components/providers/snackbar";
-
 import { empresaService } from "@/services/empresa.service";
 import { PostulacionCandidatoDTO } from "@/types/dto/postulacionCandidatoDTO";
 import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
@@ -38,33 +36,21 @@ import {
   SnackbarType,
 } from "@/types/enums/snackbar";
 
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 
-// 🟢 Colores dinámicos adaptados al tema global
+// 🎨 Colores dinámicos según estado
 const getEstadoChipColor = (estado: string) => {
   switch (estado.toLowerCase()) {
     case "aprobada":
-      return {
-        bg: "hsl(var(--chart-2)) / 0.15",
-        color: "hsl(var(--chart-2))",
-      };
+      return { bg: "#E8F5E9", color: "#2E7D32" };
     case "rechazada":
-      return {
-        bg: "hsl(var(--destructive)) / 0.15",
-        color: "hsl(var(--destructive))",
-      };
+      return { bg: "#FFEBEE", color: "#C62828" };
     case "en revisión":
-      return {
-        bg: "hsl(var(--chart-4)) / 0.15",
-        color: "hsl(var(--chart-4))",
-      };
+      return { bg: "#FFF3CD", color: "#856404" };
     default:
-      return {
-        bg: "hsl(var(--chart-1)) / 0.15",
-        color: "hsl(var(--chart-1))",
-      };
+      return { bg: "#E3F2FD", color: "#0D47A1" };
   }
 };
 
@@ -73,25 +59,62 @@ const ESTADOS = ["Iniciada", "En revisión", "Aprobada", "Rechazada"];
 export default function CandidatosPostuladosPage() {
   const { showMessage } = useSnackbar();
   const [loading, setLoading] = useState(true);
-  const [postulaciones, setPostulaciones] = useState<PostulacionCandidatoDTO[]>(
-    []
-  );
+  const [postulaciones, setPostulaciones] = useState<PostulacionCandidatoDTO[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [postulacionSeleccionada, setPostulacionSeleccionada] =
     useState<PostulacionCandidatoDTO | null>(null);
 
   const [busquedaInputFiltro, setBusquedaInputFiltro] = useState("");
   const [inputBusquedaFinal, setInputBusquedaFinal] = useState("");
-  const [estadosSeleccionados, setEstadosSeleccionados] = useState<string[]>(
-    []
-  );
+  const [estadosSeleccionados, setEstadosSeleccionados] = useState<string[]>([]);
   const [fechasSeleccionadas, setFechasSeleccionadas] = useState<string[]>([]);
 
   const [anchorMenu, setAnchorMenu] = useState<null | HTMLElement>(null);
   const [postulacionEnCambio, setPostulacionEnCambio] =
     useState<PostulacionCandidatoDTO | null>(null);
 
-  // 🟢 Background y tipografía adaptados al tema base
+  // 🔹 Abre el menú contextual
+  const abrirMenuCambiarEstado = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    postulacion: PostulacionCandidatoDTO
+  ) => {
+    setAnchorMenu(event.currentTarget);
+    setPostulacionEnCambio(postulacion);
+  };
+
+  // 🔹 Cierra menú y cambia el estado (llamando al backend)
+  const cerrarMenuCambiarEstado = async (nuevoEstado?: string) => {
+    setAnchorMenu(null);
+
+    if (!nuevoEstado || !postulacionEnCambio) return;
+
+    try {
+      // 🔄 Llamada al backend
+      await empresaService.cambiarEstadoPostulacion(
+        postulacionEnCambio.idPostulacion,
+        nuevoEstado
+      );
+
+      // ✅ Actualiza la UI localmente
+      setPostulaciones((prev) =>
+        prev.map((p) =>
+          p.idPostulacion === postulacionEnCambio.idPostulacion
+            ? { ...p, estadoPostulacion: nuevoEstado }
+            : p
+        )
+      );
+
+      showMessage(`✅ Estado cambiado a "${nuevoEstado}"`, SnackbarType.Success);
+    } catch (err) {
+      console.error(err);
+      showMessage(
+        "❌ Error al cambiar el estado de la postulación",
+        SnackbarType.Error
+      );
+    }
+  };
+
+
   useEffect(() => {
     cargarPostulaciones();
   }, []);
@@ -112,43 +135,28 @@ export default function CandidatosPostuladosPage() {
     }
   };
 
-  const abrirMenuCambiarEstado = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    postulacion: PostulacionCandidatoDTO
-  ) => {
-    setAnchorMenu(event.currentTarget);
-    setPostulacionEnCambio(postulacion);
-  };
-
-  const cerrarMenuCambiarEstado = (nuevoEstado?: string) => {
-    setAnchorMenu(null);
-    if (nuevoEstado && postulacionEnCambio) {
-      const actualizadas = postulaciones.map((p) =>
-        p.idPostulacion === postulacionEnCambio.idPostulacion
-          ? { ...p, estadoPostulacion: nuevoEstado }
-          : p
-      );
-      setPostulaciones(actualizadas);
-      showMessage(`Estado cambiado a "${nuevoEstado}"`, SnackbarType.Success);
+  const handleVerCV = (cvBase64: string | null | undefined) => {
+    if (!cvBase64) {
+      showMessage("Este candidato no tiene CV disponible", SnackbarType.Warning);
+      return;
     }
+    const byteCharacters = atob(cvBase64);
+    const byteNumbers = Array.from(byteCharacters, (c) => c.charCodeAt(0));
+    const blob = new Blob([new Uint8Array(byteNumbers)], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
   };
 
-  // 🧮 Filtros
   const postulacionesFiltradas = useMemo(() => {
     return postulaciones.filter((p) => {
       const fecha = new Date(p.fechaPostulacion);
       const hoy = new Date();
-      const diasDiferencia =
-        (hoy.getTime() - fecha.getTime()) / (1000 * 3600 * 24);
+      const diasDiferencia = (hoy.getTime() - fecha.getTime()) / (1000 * 3600 * 24);
 
       const coincideBusqueda =
         inputBusquedaFinal.trim() === "" ||
-        p.nombreCandidato
-          ?.toLowerCase()
-          .includes(inputBusquedaFinal.toLowerCase()) ||
-        p.tituloOferta
-          ?.toLowerCase()
-          .includes(inputBusquedaFinal.toLowerCase());
+        p.nombreCandidato?.toLowerCase().includes(inputBusquedaFinal.toLowerCase()) ||
+        p.tituloOferta?.toLowerCase().includes(inputBusquedaFinal.toLowerCase());
 
       const coincideEstado =
         estadosSeleccionados.length === 0 ||
@@ -158,27 +166,17 @@ export default function CandidatosPostuladosPage() {
         fechasSeleccionadas.length === 0 ||
         fechasSeleccionadas.some((f) => {
           switch (f) {
-            case "ultimaSemana":
-              return diasDiferencia <= 7;
-            case "ultimoMes":
-              return diasDiferencia <= 30;
-            case "ultimos3Meses":
-              return diasDiferencia <= 90;
-            case "mas3Meses":
-              return diasDiferencia > 90;
-            default:
-              return true;
+            case "ultimaSemana": return diasDiferencia <= 7;
+            case "ultimoMes": return diasDiferencia <= 30;
+            case "ultimos3Meses": return diasDiferencia <= 90;
+            case "mas3Meses": return diasDiferencia > 90;
+            default: return true;
           }
         });
 
       return coincideBusqueda && coincideEstado && coincideFecha;
     });
-  }, [
-    postulaciones,
-    inputBusquedaFinal,
-    estadosSeleccionados,
-    fechasSeleccionadas,
-  ]);
+  }, [postulaciones, inputBusquedaFinal, estadosSeleccionados, fechasSeleccionadas]);
 
   if (loading) return <LoadingModal open={loading} />;
 
@@ -187,15 +185,7 @@ export default function CandidatosPostuladosPage() {
     postulaciones.filter((p) => p.estadoPostulacion === estado).length;
 
   return (
-    <Box
-      className="bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors"
-      sx={{
-        minHeight: "100vh",
-        padding: "2rem",
-        borderRadius: "var(--radius)",
-      }}
-    >
-      {/* 🟢 Título principal */}
+    <Box sx={{ backgroundColor: "#f9fafb", minHeight: "100vh", p: 3 }}>
       <Titulo
         titulo="Candidatos Postulados"
         subtitulo="Revisá los perfiles y estados de las postulaciones recibidas"
@@ -217,71 +207,27 @@ export default function CandidatosPostuladosPage() {
         }}
       />
 
-      {/* 🧮 Resumen con diseño Tailwind + theme vars */}
       <Box display="flex" gap={2} mt={3}>
-        <Card
-          className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] shadow-sm"
-          sx={{
-            flex: 1,
-            textAlign: "center",
-            borderRadius: "var(--radius)",
-            padding: "1rem",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            },
-          }}
-        >
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            sx={{ color: "hsl(var(--primary))" }}
-          >
+        <Card sx={{ flex: 1, p: 2, textAlign: "center", borderRadius: 3, boxShadow: 1 }}>
+          <Typography variant="h5" fontWeight={700} color="primary">
             {total}
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "hsl(var(--muted-foreground))" }}
-          >
+          <Typography variant="body2" color="text.secondary">
             Total de postulaciones
           </Typography>
         </Card>
-
         {ESTADOS.map((estado) => (
-          <Card
-            key={estado}
-            className="bg-[hsl(var(--card))] border border-[hsl(var(--border))]"
-            sx={{
-              flex: 1,
-              textAlign: "center",
-              borderRadius: "var(--radius)",
-              padding: "1rem",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              },
-            }}
-          >
-            <Typography
-              variant="h5"
-              fontWeight={700}
-              sx={{ color: "hsl(var(--primary))" }}
-            >
+          <Card key={estado} sx={{ flex: 1, p: 2, textAlign: "center", borderRadius: 3, boxShadow: 1 }}>
+            <Typography variant="h5" fontWeight={700} color="primary">
               {totalPorEstado(estado)}
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "hsl(var(--muted-foreground))" }}
-            >
+            <Typography variant="body2" color="text.secondary">
               {estado}
             </Typography>
           </Card>
         ))}
       </Box>
 
-      {/* 🧭 Filtros y contenido */}
       <Box display="flex" gap={3} mt={4}>
         <Box flex={1} maxWidth={300}>
           <CardFiltros
@@ -297,159 +243,257 @@ export default function CandidatosPostuladosPage() {
               },
             ]}
             onSeleccionCambio={(id, nuevos) =>
-              id === "estado"
-                ? setEstadosSeleccionados(nuevos)
-                : setFechasSeleccionadas(nuevos)
+              id === "estado" ? setEstadosSeleccionados(nuevos) : setFechasSeleccionadas(nuevos)
             }
           />
         </Box>
 
-        {/* 🟢 Listado con colores y sombras suaves */}
         <Box flex={3}>
           {postulacionesFiltradas.length > 0 ? (
-            <Card
-              className="bg-[hsl(var(--card))] border border-[hsl(var(--border))]"
-              sx={{
-                borderRadius: "var(--radius)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                p: 3,
-              }}
-            >
-              <Titulo
-                titulo="Postulaciones recibidas"
-                subtitulo="Revisá el estado y los detalles de cada candidato"
-                variantTitulo="h5"
-                variantSubtitulo="body2"
-              />
-              <Divider sx={{ my: 2 }} />
-
-              <Stack spacing={2}>
-                {postulacionesFiltradas.map((p) => {
-                  const estadoColor = getEstadoChipColor(p.estadoPostulacion);
-                  return (
-                    <Card
-                      key={p.idPostulacion}
-                      className="bg-[hsl(var(--background))] border border-[hsl(var(--border))]"
-                      sx={{
-                        p: 3,
-                        borderRadius: "var(--radius)",
-                        transition: "all 0.25s ease",
-                        "&:hover": {
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                          transform: "translateY(-2px)",
-                        },
-                      }}
-                    >
-                      <Box display="flex" alignItems="center">
+            <Stack spacing={2}>
+              {postulacionesFiltradas.map((p) => {
+                const estadoColor = getEstadoChipColor(p.estadoPostulacion);
+                return (
+                  <Card
+                    key={p.idPostulacion}
+                    sx={{
+                      p: 3,
+                      borderRadius: "16px",
+                      border: "1px solid #E0E0E0",
+                      backgroundColor: "#f8fbfc",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        transform: "translateY(-2px)",
+                      },
+                    }}
+                  >
+                    {/* Header */}
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Box display="flex" alignItems="center" gap={2}>
                         <Avatar
                           sx={{
-                            bgcolor: "hsl(var(--chart-3))",
-                            mr: 2,
+                            bgcolor: "#0d47a1",
                             color: "white",
+                            width: 48,
+                            height: 48,
+                            fontWeight: 600,
                           }}
                         >
                           {p.nombreCandidato?.[0] ?? "?"}
                         </Avatar>
-
-                        <Box flexGrow={1}>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              color: "hsl(var(--primary))",
-                              fontWeight: 600,
-                            }}
-                          >
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
                             {p.nombreCandidato ?? "Candidato desconocido"}
                           </Typography>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{
-                              color: "hsl(var(--muted-foreground))",
-                            }}
-                          >
-                            {p.tituloOferta ?? "Sin título"}
+                          <Typography variant="body2" sx={{ color: "#555", fontSize: "0.9rem" }}>
+                            {p.tituloOferta ?? "Sin puesto asociado"}
                           </Typography>
                         </Box>
+                      </Box>
+                      <Chip
+                        label={p.estadoPostulacion}
+                        sx={{
+                          backgroundColor: estadoColor.bg,
+                          color: estadoColor.color,
+                          fontWeight: 600,
+                          borderRadius: "6px",
+                          fontSize: "0.8rem",
+                          height: "26px",
+                        }}
+                      />
+                    </Box>
 
-                        <Stack direction="row" spacing={1}>
+                    {/* Descripción */}
+                    {p.descripcionPerfil && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "#444",
+                          mt: 2,
+                          mb: 1,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {p.descripcionPerfil}
+                      </Typography>
+                    )}
+
+                    {/* Observaciones */}
+                    {p.observacion && (
+                      <Box sx={{ backgroundColor: "#f1f6ff", borderRadius: "8px", p: 1.5, mt: 1.5 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#0d47a1" }}>
+                          Observaciones de la Empresa
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: "#444", whiteSpace: "pre-wrap" }}>
+                          {p.observacion}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {/* Footer */}
+                    <Box display="flex" alignItems="center" justifyContent="space-between" mt={3}>
+                      <Box display="flex" alignItems="center" gap={2}>
+                        {p.carreraNombre && (
                           <Chip
-                            label={p.estadoPostulacion}
+                            label={p.carreraNombre}
+                            size="small"
                             sx={{
-                              backgroundColor: estadoColor.bg,
-                              color: estadoColor.color,
-                              fontWeight: 600,
+                              backgroundColor: "#e3f2fd",
+                              color: "#0d47a1",
+                              fontWeight: 500,
                             }}
                           />
-                        </Stack>
+                        )}
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <CalendarTodayIcon fontSize="small" sx={{ color: "#888", width: 16, height: 16 }} />
+                          <Typography variant="caption" sx={{ color: "#666", fontSize: "0.8rem" }}>
+                            Publicado el{" "}
+                            {new Date(p.fechaPostulacion).toLocaleDateString("es-AR", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </Typography>
+                        </Box>
                       </Box>
 
-                      <Box display="flex" alignItems="center" gap={2} mt={2}>
-                        <LocationOnIcon
-                          fontSize="small"
-                          sx={{ color: "hsl(var(--muted-foreground))" }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "hsl(var(--muted-foreground))" }}
-                        >
-                          {p.localidad ?? "-"}
-                        </Typography>
-                        <CalendarTodayIcon
-                          fontSize="small"
-                          sx={{ color: "hsl(var(--muted-foreground))" }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "hsl(var(--muted-foreground))" }}
-                        >
-                          {new Date(p.fechaPostulacion).toLocaleDateString(
-                            "es-AR"
-                          )}
-                        </Typography>
-                      </Box>
-
-                      <Box
-                        display="flex"
-                        justifyContent="flex-end"
-                        gap={1}
-                        mt={3}
-                      >
+                      <Box display="flex" gap={1}>
+                        {/* 🔹 Ver CV */}
                         <Button
                           variant="outlined"
+                          size="small"  
                           startIcon={<DownloadIcon />}
+                          onClick={async () => {
+                            handleVerCV(p.cv); // 👈 Lógica actual
+
+                            // 🧩 Si está en estado "Iniciada", cambiar a "En revisión"
+                            if (p.estadoPostulacion?.toLowerCase() === "iniciada") {
+                              try {
+                                await empresaService.cambiarEstadoPostulacion(p.idPostulacion, "En revisión");
+                                setPostulaciones((prev) =>
+                                  prev.map((post) =>
+                                    post.idPostulacion === p.idPostulacion
+                                      ? { ...post, estadoPostulacion: "En revisión" }
+                                      : post
+                                  )
+                                );
+                                showMessage(`Estado cambiado a "En revisión"`, SnackbarType.Info);
+                              } catch (err) {
+                                console.error(err);
+                                showMessage("Error al actualizar estado", SnackbarType.Error);
+                              }
+                            }
+                          }}
                           sx={{
-                            color: "hsl(var(--primary))",
-                            borderColor: "hsl(var(--border))",
                             textTransform: "none",
+                            fontWeight: 600,
+                            borderRadius: "8px",
+                            borderColor: "#0d47a1",
+                            color: "#0d47a1",
+                            "&:hover": {
+                              borderColor: "#1565c0",
+                              backgroundColor: "#e3f2fd",
+                            },
                           }}
                         >
                           Ver CV
                         </Button>
+
+                        {/* 🔹 Ver detalles */}
                         <Button
                           variant="contained"
+                          size="small"
                           startIcon={<VisibilityIcon />}
+                          onClick={async () => {
+                            setPostulacionSeleccionada(p);
+                            setOpenModal(true);
+
+                            // 🧩 Si está en estado "Iniciada", cambiar a "En revisión"
+                            if (p.estadoPostulacion?.toLowerCase() === "iniciada") {
+                              try {
+                                await empresaService.cambiarEstadoPostulacion(p.idPostulacion, "En revisión");
+                                setPostulaciones((prev) =>
+                                  prev.map((post) =>
+                                    post.idPostulacion === p.idPostulacion
+                                      ? { ...post, estadoPostulacion: "En revisión" }
+                                      : post
+                                  )
+                                );
+                                showMessage(`Estado cambiado a "En revisión"`, SnackbarType.Info);
+                              } catch (err) {
+                                console.error(err);
+                                showMessage("Error al actualizar estado", SnackbarType.Error);
+                              }
+                            }
+                          }}
                           sx={{
-                            backgroundColor: "hsl(var(--chart-3))",
-                            color: "hsl(var(--primary-foreground))",
+                            backgroundColor: "#0d47a1",
+                            color: "white",
                             textTransform: "none",
-                            "&:hover": {
-                              backgroundColor: "hsl(var(--chart-2))",
-                            },
+                            borderRadius: "8px",
+                            fontWeight: 600,
+                            "&:hover": { backgroundColor: "#1565c0" },
                           }}
                         >
-                          Ver Detalles
+                          Ver detalles
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={(e) => abrirMenuCambiarEstado(e, p)}
+                          sx={{
+                            backgroundColor: "#469ff3e0",
+                            color: "white",
+                            fontWeight: 600,
+                            textTransform: "none",
+                            borderRadius: "8px",
+                            "&:hover": { backgroundColor: "#1e40af" },
+                          }}
+                        >
+                          Cambiar estado
                         </Button>
                       </Box>
-                    </Card>
-                  );
-                })}
-              </Stack>
-            </Card>
+                    </Box>
+                  </Card>
+                );
+              })}
+            </Stack>
           ) : (
             <EmptyState mensaje="No hay postulaciones que coincidan con tu búsqueda" />
           )}
         </Box>
       </Box>
+      <Menu
+        anchorEl={anchorMenu}
+        open={Boolean(anchorMenu)}
+        onClose={() => cerrarMenuCambiarEstado()}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <MenuItem onClick={() => cerrarMenuCambiarEstado("Aprobada")}>
+          <ListItemIcon>
+            <CheckCircleOutlineIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Aprobada</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => cerrarMenuCambiarEstado("Rechazada")}>
+          <ListItemIcon>
+            <ErrorOutlineIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Rechazada</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      <DetalleCandidatoModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        postulacion={postulacionSeleccionada || undefined}
+      />
     </Box>
   );
 }
