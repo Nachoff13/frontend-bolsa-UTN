@@ -67,13 +67,13 @@ export default function DashboardEmpresaPage() {
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 p-4 md:p-6">
-        {/* Encabezado */}
+        {/* Encabezado
         <div className="mb-4">
           <h1 className="text-2xl font-semibold">Dashboard de la empresa</h1>
           <p className="text-sm text-neutral-600">
             Bienvenido al portal de empleos de la UTN FRLP
           </p>
-        </div>
+        </div> */}
 
         {/* Métricas */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4 mb-4">
@@ -88,7 +88,25 @@ export default function DashboardEmpresaPage() {
             subtitle="en total"
           />
           <StatCard label="Perfil completado" value="85%" />
-          <StatCard label="Entrevistas concretadas" value="3" subtitle="este mes" />
+          <StatCard
+            label="Postulaciones Aprobadas"
+            value={
+              postulaciones.filter((p) => {
+                if (!p.fechaPostulacion) return false; // evitar errores si es null
+                
+                const fecha = new Date(p.fechaPostulacion);
+                const hoy = new Date();
+
+                // Coincide año y mes, y está aprobada
+                const mismoMes =
+                  fecha.getMonth() === hoy.getMonth() &&
+                  fecha.getFullYear() === hoy.getFullYear();
+
+                return p.estadoPostulacion === "Aprobada" && mismoMes;
+              }).length
+            }
+            subtitle="de este mes"
+          />
         </div>
 
         {/* Contenido principal */}
