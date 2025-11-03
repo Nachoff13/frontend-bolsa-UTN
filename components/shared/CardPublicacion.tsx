@@ -13,6 +13,8 @@ import {
 import { Button, Chip, Divider, Tooltip } from "@mui/material";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 
+import { useTheme } from "@mui/material/styles";
+
 interface CardPublicacionProps {
   oferta: OfertaDTO;
   onVerDetalle?: (oferta: OfertaDTO) => void;
@@ -24,6 +26,23 @@ export default function CardPublicacion({
   onVerDetalle,
   calcularTiempoTranscurrido,
 }: CardPublicacionProps) {
+  const theme = useTheme();
+
+  const getEstadoColor = (estado?: string) => {
+    const lower = estado?.toLowerCase();
+    switch (lower) {
+      case "iniciada":
+        return theme.palette.customStatus.iniciada;
+      case "en revisión":
+        return theme.palette.customStatus.enRevision;
+      case "aprobada":
+        return theme.palette.customStatus.aprobada;
+      case "rechazada":
+        return theme.palette.customStatus.rechazada;
+      default:
+        return theme.palette.info.main;
+    }
+  };
   return (
     <div
       className="rounded-2xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 
@@ -34,11 +53,10 @@ export default function CardPublicacion({
         {oferta.modalidad && (
           <Chip
             label={oferta.modalidad}
-            color="secondary"
             size="small"
             sx={{
-              backgroundColor: "#be185d",
-              color: "white",
+              backgroundColor: `${theme.palette.customStatus.modalidad}22`,
+              color: theme.palette.customStatus.modalidad,
               fontWeight: 600,
             }}
           />
@@ -46,11 +64,10 @@ export default function CardPublicacion({
         {oferta.tipoContrato && (
           <Chip
             label={oferta.tipoContrato}
-            color="info"
             size="small"
             sx={{
-              backgroundColor: "#0ea5e9",
-              color: "white",
+              backgroundColor: `${theme.palette.customStatus.contrato}22`,
+              color: theme.palette.customStatus.contrato,
               fontWeight: 600,
             }}
           />

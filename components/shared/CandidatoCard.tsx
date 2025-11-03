@@ -8,6 +8,7 @@ import {
 import { Button, Chip, Divider } from "@mui/material";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@mui/material/styles";
 
 interface CandidatoPostuladoCardProps {
   postulacion: PostulacionDTO;
@@ -22,18 +23,21 @@ export default function CandidatoPostuladoCard({
     postulacion;
 
   const router = useRouter();
+  const theme = useTheme();
 
   const getEstadoColor = (estado?: string) => {
-    switch (estado?.toLowerCase()) {
+  const lower = estado?.toLowerCase();
+    switch (lower) {
       case "iniciada":
+        return theme.palette.customStatus.iniciada;
       case "en revisión":
-        return "info";
-      case "aceptada":
-        return "success";
+        return theme.palette.customStatus.enRevision;
+      case "aprobada":
+        return theme.palette.customStatus.aprobada;
       case "rechazada":
-        return "error";
+        return theme.palette.customStatus.rechazada;
       default:
-        return "default";
+        return theme.palette.info.main;
     }
   };
 
@@ -46,9 +50,12 @@ export default function CandidatoPostuladoCard({
       <div className="absolute top-3 right-4 flex gap-2">
         <Chip
           label={estadoPostulacion ?? "Sin estado"}
-          color={getEstadoColor(estadoPostulacion) as any}
           size="small"
-          sx={{ fontWeight: 600 }}
+          sx={{
+            fontWeight: 600,
+            backgroundColor: `${getEstadoColor(estadoPostulacion)}22`, // fondo suave
+            color: getEstadoColor(estadoPostulacion),
+          }}
         />
       </div>
 
@@ -77,22 +84,7 @@ export default function CandidatoPostuladoCard({
       <Divider sx={{ mb: 2 }} />
 
       {/* 🔘 Botones */}
-      <div className="flex justify-end gap-2">
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => router.push("/empresa/candidatos-postulados")}
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            borderColor: "#d1d5db",
-            color: "#374151",
-            px: 2.5,
-          }}
-        >
-          Ver Postulaciones
-        </Button>
-      </div>
+
     </div>
   );
 }
