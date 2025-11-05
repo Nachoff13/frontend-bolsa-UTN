@@ -16,6 +16,13 @@ import {
   Stack,
   Avatar,
   Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  IconButton,
 } from "@mui/material";
 import Titulo from "@/components/shared/Titulo";
 import {
@@ -29,6 +36,9 @@ import {
   Article,
   VerifiedUser,
   PhotoCamera,
+  Edit,
+  Close,
+  Save,
 } from "@mui/icons-material";
 
 export default function PerfilEmpresaPage() {
@@ -40,12 +50,22 @@ export default function PerfilEmpresaPage() {
 
   // Estados para foto de perfil
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  
+  // Estados para edición de descripción
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editedDescripcion, setEditedDescripcion] = useState("");
+  const [savingChanges, setSavingChanges] = useState(false);
 
   // Obtener el perfilId de los parámetros de la ruta
-  const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 1;
+  const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : authPerfilId;
 
   // Determinar si el usuario actual es dueño del perfil
   const isOwner = authPerfilId === perfilId;
+
+  console.log("🔍 PerfilEmpresaPage - authPerfilId:", authPerfilId);
+  console.log("🔍 PerfilEmpresaPage - perfilId (from URL):", params?.perfilId);
+  console.log("🔍 PerfilEmpresaPage - perfilId (final):", perfilId);
+  console.log("🔍 PerfilEmpresaPage - isOwner:", isOwner);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -87,6 +107,45 @@ export default function PerfilEmpresaPage() {
       showMessage(errorMessage, SnackbarType.Error);
     } finally {
       setUploadingFoto(false);
+    }
+  };
+
+  const handleOpenEditModal = () => {
+    setEditedDescripcion(perfil?.descripcion || "");
+    setEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setEditedDescripcion("");
+  };
+
+  const handleSaveDescripcion = async () => {
+    try {
+      setSavingChanges(true);
+      
+      if (!perfil) {
+        throw new Error("Perfil no disponible");
+      }
+
+      const updatedPerfil: PerfilEmpresaDTO = {
+        ...perfil,
+        descripcion: editedDescripcion,
+      };
+
+      await empresaService.updatePerfil(updatedPerfil);
+      
+      showMessage("Descripción actualizada exitosamente", SnackbarType.Success);
+      
+      // Recargar el perfil
+      const data = await empresaService.getPerfilById(perfil.id);
+      setPerfil(data);
+      
+      handleCloseEditModal();
+    } catch (error: any) {
+      showMessage(error?.message || "Error al actualizar descripción", SnackbarType.Error);
+    } finally {
+      setSavingChanges(false);
     }
   };
 
@@ -232,18 +291,33 @@ export default function PerfilEmpresaPage() {
         <Box sx={{ flex: "0 0 33.333%", minWidth: { xs: "100%", md: "33.333%" } }}>
           <Stack spacing={3}>
             {/* Sobre Nosotros */}
-            {perfil.descripcion && (
-              <Card>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                  <Typography variant="h6" fontWeight={600}>
                     Sobre Nosotros
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                    {perfil.descripcion}
-                  </Typography>
-                </CardContent>
-              </Card>
-            )}
+                  {isOwner && (
+                    <IconButton 
+                      size="small" 
+                      onClick={handleOpenEditModal}
+                      sx={{ 
+                        color: 'primary.main',
+                        '&:hover': { 
+                          color: 'primary.dark',
+                          bgcolor: 'transparent'
+                        }
+                      }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
+                </Stack>
+                <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  {perfil.descripcion || "No hay descripción disponible"}
+                </Typography>
+              </CardContent>
+            </Card>
 
             {/* Información de la Empresa */}
             <Card>
@@ -395,6 +469,51 @@ export default function PerfilEmpresaPage() {
           </Card>
         </Box>
       </Stack>
+
+      {/* Modal de Edición de Descripción */}
+      <Dialog 
+        open={editModalOpen} 
+        onClose={handleCloseEditModal} 
+        maxWidth="md" 
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h6" fontWeight={600}>
+              Editar Sobre Nosotros
+            </Typography>
+            <IconButton onClick={handleCloseEditModal} size="small">
+              <Close />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={8}
+            label="Descripción"
+            placeholder="Describe tu empresa, misión, valores, etc..."
+            value={editedDescripcion}
+            onChange={(e) => setEditedDescripcion(e.target.value)}
+            sx={{ mt: 2 }}
+            helperText={`${editedDescripcion.length} caracteres`}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={handleCloseEditModal} variant="outlined">
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleSaveDescripcion} 
+            variant="contained" 
+            startIcon={<Save />}
+            disabled={savingChanges}
+          >
+            {savingChanges ? "Guardando..." : "Guardar Cambios"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
