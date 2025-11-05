@@ -87,5 +87,6 @@ export const ENDPOINTS = {
     ALTA_USUARIO: `${CONTROLLERS.ADMIN}/alta_usuario`,
     VER_DETALLE_USUARIO: `${CONTROLLERS.ADMIN}/ver_detalle_usuario`,
     ACTUALIZAR_ROL_USUARIO: `${CONTROLLERS.ADMIN}/actualizar_rol_usuario`,
+    DASHBOARD: `${CONTROLLERS.ADMIN}/get_dashboard_empresa`,
   }
 } as const;

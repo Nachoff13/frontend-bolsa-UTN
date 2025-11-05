@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import React from "react";
 
 type Props = {

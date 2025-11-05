@@ -8,6 +8,8 @@ import { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 import { UsuarioDTO } from "@/types/dto/usuarioDTO";
 import { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
 import { PerfilCompletoDTO } from "@/types/dto/perfilCompleetoDTO";
+import type { DashboardAdminDTO } from "@/types/dto/dashboardAdminDTO";
+import { ResponseError } from "@/types/Generics/responseError";
 
 class AdminService extends GenericService {
   async cambiarEstadoValidacion(body: object): Promise<void> {
@@ -77,7 +79,7 @@ class AdminService extends GenericService {
   }
 
 
-    async actualizarRolUsuario(idUsuarioRegistrado: number, idRolEditado: number | null) {
+  async actualizarRolUsuario(idUsuarioRegistrado: number, idRolEditado: number | null) {
     try {
       await http.post(ENDPOINTS.ADMIN.ACTUALIZAR_ROL_USUARIO, {
         idUsuario: idUsuarioRegistrado,
@@ -85,6 +87,22 @@ class AdminService extends GenericService {
       });
     } catch (error) {
       throw error;
+    }
+  }
+
+  async dashboardAdmin(): Promise<DashboardAdminDTO> {
+    try {
+      const res = await http.get<DashboardAdminDTO>(
+        ENDPOINTS.ADMIN.DASHBOARD
+      );
+
+      console.log("📡 DashboardAdmin - respuesta cruda:", res);
+
+      return res;
+    } catch (e) {
+      const err = e as ResponseError;
+      console.error("Error al obtener el dashboard del administrador:", err.message);
+      throw err;
     }
   }
 }

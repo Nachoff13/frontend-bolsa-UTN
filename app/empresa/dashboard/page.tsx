@@ -2,30 +2,18 @@
 
 import { useEffect, useState } from "react";
 import StatCard from "@/components/shared/StatCard";
-import CardGenerica from "@/components/shared/CardGenerica";
-import DetalleModal from "@/components/shared/DetalleModal";
 
 import { empresaService } from "@/services/empresa.service";
 
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
-import { useSnackbar } from "@/components/providers/snackbar";
-import { SnackbarPosition, SnackbarSize, SnackbarType } from "@/types/enums/snackbar";
-import { ResponseError } from "@/types/Generics/responseError";
 
-import {
-  LocationOn as LocationOnIcon,
-  CalendarToday as CalendarTodayIcon,
-  Event as EventIcon,
-} from "@mui/icons-material";
-import Button from "@mui/material/Button";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
-import SkeletonLoader from "@/components/shared/SkeletonLoader";
-import EmptyState from "@/components/shared/EmptyState";
+
 import PublicacionesEmpresa from "@/components/shared/PublicacionEmpresa";
 import CandidatosPostulados from "@/components/shared/CandidatosPostulados"; 
 
-import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
+
 
 // ⚠️ Reemplazar cuando se use sesión real
 
