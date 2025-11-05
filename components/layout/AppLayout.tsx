@@ -34,7 +34,7 @@ import {
 import { USER_ROLES } from "@/lib/constants";
 import { useAuth } from "@/components/providers/AuthProvider";
 import UserMenu from "@/components/shared/UserMenu";
-import { number } from "zod";
+import NotificationBell from "@/components/shared/NotificationBell";
 
 const drawerWidth = 280;
 
@@ -45,7 +45,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
   const { rol, perfilId, user } = useAuth();
 
-  const navItems = [
+  const navItems: Array<{
+    href: string;
+    label: string;
+    icon: React.ReactNode;
+    roles: number[];
+  }> = [
     {
       href: "/empresa/dashboard",
       label: "Menú Principal",
@@ -100,7 +105,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  const footerItems = [
+  const footerItems: Array<{
+    href: string;
+    label: string;
+    icon: React.ReactNode;
+    roles: number[];
+  }> = [
     {
       href: perfilId ? `/estudiante/perfil/${perfilId}` : "/estudiante/perfil",
       label: "Mi Perfil",
@@ -229,7 +239,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Box>
 
           {/* Acciones (derecha) */}
-          <Box sx={{ ml: 2 }}>
+          <Box sx={{ ml: 2, display: "flex", alignItems: "center", gap: 1 }}>
+            <NotificationBell />
             <UserMenu />
           </Box>
         </Toolbar>

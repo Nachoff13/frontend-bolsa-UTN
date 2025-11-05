@@ -10,6 +10,7 @@ export const CONTROLLERS = {
   CANDIDATO: "/candidato",
   EMPRESA: "/empresa",
   ADMIN: "/admin",
+  NOTIFICACION: "/notificacion",
 } as const;
 
 export const ENDPOINTS = {
@@ -87,5 +88,13 @@ export const ENDPOINTS = {
     ALTA_USUARIO: `${CONTROLLERS.ADMIN}/alta_usuario`,
     VER_DETALLE_USUARIO: `${CONTROLLERS.ADMIN}/ver_detalle_usuario`,
     ACTUALIZAR_ROL_USUARIO: `${CONTROLLERS.ADMIN}/actualizar_rol_usuario`,
+  },
+  NOTIFICACION: {
+    MIS_NOTIFICACIONES: `${CONTROLLERS.NOTIFICACION}/mis_notificaciones`,
+    CONTADOR: `${CONTROLLERS.NOTIFICACION}/contador`,
+    MARCAR_LEIDA: (id: number) => `${CONTROLLERS.NOTIFICACION}/${id}/marcar_leida`,
+    MARCAR_TODAS_LEIDAS: `${CONTROLLERS.NOTIFICACION}/marcar_todas_leidas`,
+    ELIMINAR: (id: number) => `${CONTROLLERS.NOTIFICACION}/${id}`,
+    CREAR: `${CONTROLLERS.NOTIFICACION}/crear`,
   }
 } as const;
