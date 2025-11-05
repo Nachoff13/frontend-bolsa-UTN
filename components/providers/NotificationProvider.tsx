@@ -51,14 +51,21 @@ export function NotificationProvider({
     try {
       setError(null);
       const [notifs, count] = await Promise.all([
-        notificacionService.getMisNotificaciones(),
-        notificacionService.getContador()
+        notificacionService.getMisNotificaciones().catch(err => {
+          console.warn("Error al obtener notificaciones:", err);
+          return [];
+        }),
+        notificacionService.getContador().catch(err => {
+          console.warn("Error al obtener contador:", err);
+          return { noLeidas: 0, total: 0 };
+        })
       ]);
       setNotificaciones(notifs);
       setContador(count);
     } catch (err) {
       console.error("Error al cargar notificaciones:", err);
       setError("Error al cargar las notificaciones");
+      // No propagar el error para evitar que rompa otros componentes
     } finally {
       setLoading(false);
     }

@@ -14,7 +14,12 @@ export class NotificacionService {
       
       const res = await http.get<NotificacionDTO[]>(url);
       return res;
-    } catch (error) {
+    } catch (error: any) {
+      // Si es un error 404, devolver array vacío en lugar de lanzar error
+      if (error?.status === 404) {
+        console.warn("No se encontraron notificaciones (404)");
+        return [];
+      }
       console.error("Error al obtener notificaciones:", error);
       throw error;
     }
@@ -27,7 +32,12 @@ export class NotificacionService {
     try {
       const res = await http.get<NotificacionCountDTO>(ENDPOINTS.NOTIFICACION.CONTADOR);
       return res;
-    } catch (error) {
+    } catch (error: any) {
+      // Si es un error 404, devolver contador en 0 en lugar de lanzar error
+      if (error?.status === 404) {
+        console.warn("No se encontró contador de notificaciones (404)");
+        return { noLeidas: 0, total: 0 };
+      }
       console.error("Error al obtener contador de notificaciones:", error);
       throw error;
     }

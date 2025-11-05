@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   IconButton,
   Badge,
@@ -28,6 +29,7 @@ import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function NotificationBell() {
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const {
     notificaciones,
@@ -44,6 +46,31 @@ export default function NotificationBell() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleNotificationClick = async (notificacion: any) => {
+    // Marcar como leída si no lo está
+    if (!notificacion.leido) {
+      try {
+        await marcarComoLeida(notificacion.id);
+      } catch (error) {
+        console.error("Error al marcar como leída:", error);
+      }
+    }
+
+    // Determinar a dónde navegar según el tipo de notificación
+    const asunto = notificacion.asunto.toLowerCase();
+    
+    if (asunto.includes("perfil") || asunto.includes("edición") || asunto.includes("datos")) {
+      // Navegar al perfil del estudiante
+      router.push("/estudiante/perfil");
+    } else if (asunto.includes("postulación") || asunto.includes("estado") || notificacion.idPostulacion) {
+      // Navegar a "Mis postulaciones"
+      router.push("/estudiante/postulaciones");
+    }
+
+    // Cerrar el popover
+    handleClose();
   };
 
   const open = Boolean(anchorEl);
@@ -177,7 +204,7 @@ export default function NotificationBell() {
                     </Stack>
                   }
                 >
-                  <ListItemButton>
+                  <ListItemButton onClick={() => handleNotificationClick(notif)}>
                     <ListItemText
                       primary={
                         <Stack direction="row" spacing={1} alignItems="center">
@@ -209,15 +236,6 @@ export default function NotificationBell() {
                           >
                             {formatFecha(notif.fechaEnvio)}
                           </Typography>
-                          {notif.tituloOferta && (
-                            <Typography
-                              variant="caption"
-                              color="primary"
-                              sx={{ mt: 0.5, display: "block" }}
-                            >
-                              Oferta: {notif.tituloOferta}
-                            </Typography>
-                          )}
                         </>
                       }
                       secondaryTypographyProps={{
