@@ -7,6 +7,7 @@ import { ThemeContextProvider } from "@/components/providers/ThemeProvider";
 import AppLayout from "@/components/layout/AppLayout";
 import { SnackbarProvider } from "@/components/providers/snackbar";
 import AuthGuard from "@/components/providers/AuthGuard";
+import { NotificationProvider } from "@/components/providers/NotificationProvider";
 
 export const metadata: Metadata = {
   title: "Bolsa de Trabajo UTN",
@@ -45,7 +46,9 @@ export default async function RootLayout({
           <MuiThemeProvider>
             <SnackbarProvider>
               <AuthGuard>
-                <AppLayout>{children}</AppLayout>
+                <NotificationProvider>
+                  <AppLayout>{children}</AppLayout>
+                </NotificationProvider>
               </AuthGuard>
             </SnackbarProvider>
           </MuiThemeProvider>
