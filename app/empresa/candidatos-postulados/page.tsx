@@ -14,6 +14,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  CircularProgress,
 } from "@mui/material";
 import {
   Visibility as VisibilityIcon,
@@ -72,30 +73,27 @@ export default function CandidatosPostuladosPage() {
   const [anchorMenu, setAnchorMenu] = useState<null | HTMLElement>(null);
   const [postulacionEnCambio, setPostulacionEnCambio] =
     useState<PostulacionCandidatoDTO | null>(null);
+  const [loadingEstado, setLoadingEstado] = useState(false);
 
-  // 🔹 Abre el menú contextual
-  const abrirMenuCambiarEstado = (
-    event: React.MouseEvent<HTMLButtonElement>,
-    postulacion: PostulacionCandidatoDTO
-  ) => {
+  const abrirMenu = (event: React.MouseEvent<HTMLElement>, postulacion: PostulacionCandidatoDTO) => {
     setAnchorMenu(event.currentTarget);
     setPostulacionEnCambio(postulacion);
   };
 
-  // 🔹 Cierra menú y cambia el estado (llamando al backend)
-  const cerrarMenuCambiarEstado = async (nuevoEstado?: string) => {
+  const cerrarMenu = () => {
     setAnchorMenu(null);
+  };
 
-    if (!nuevoEstado || !postulacionEnCambio) return;
-
+  const cambiarEstado = async (nuevoEstado: string) => {
+    if (!postulacionEnCambio) return;
+    cerrarMenu();
     try {
-      // 🔄 Llamada al backend
+      setLoadingEstado(true);
       await empresaService.cambiarEstadoPostulacion(
         postulacionEnCambio.idPostulacion,
         nuevoEstado
       );
 
-      // ✅ Actualiza la UI localmente
       setPostulaciones((prev) =>
         prev.map((p) =>
           p.idPostulacion === postulacionEnCambio.idPostulacion
@@ -107,13 +105,11 @@ export default function CandidatosPostuladosPage() {
       showMessage(`✅ Estado cambiado a "${nuevoEstado}"`, SnackbarType.Success);
     } catch (err) {
       console.error(err);
-      showMessage(
-        "❌ Error al cambiar el estado de la postulación",
-        SnackbarType.Error
-      );
+      showMessage("❌ Error al cambiar el estado", SnackbarType.Error);
+    } finally {
+      setLoadingEstado(false);
     }
   };
-
 
   useEffect(() => {
     cargarPostulaciones();
@@ -269,7 +265,6 @@ export default function CandidatosPostuladosPage() {
                       },
                     }}
                   >
-                    {/* Header */}
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                       <Box display="flex" alignItems="center" gap={2}>
                         <Avatar
@@ -292,8 +287,17 @@ export default function CandidatosPostuladosPage() {
                           </Typography>
                         </Box>
                       </Box>
+
+                      {/* CHIP INTERACTIVO */}
                       <Chip
-                        label={p.estadoPostulacion}
+                        label={
+                          loadingEstado && postulacionEnCambio?.idPostulacion === p.idPostulacion ? (
+                            <CircularProgress size={16} color="inherit" />
+                          ) : (
+                            p.estadoPostulacion
+                          )
+                        }
+                        onClick={(e) => abrirMenu(e, p)}
                         sx={{
                           backgroundColor: estadoColor.bg,
                           color: estadoColor.color,
@@ -301,6 +305,8 @@ export default function CandidatosPostuladosPage() {
                           borderRadius: "6px",
                           fontSize: "0.8rem",
                           height: "26px",
+                          cursor: "pointer",
+                          "&:hover": { opacity: 0.9 },
                         }}
                       />
                     </Box>
@@ -442,21 +448,7 @@ export default function CandidatosPostuladosPage() {
                         >
                           Ver detalles
                         </Button>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={(e) => abrirMenuCambiarEstado(e, p)}
-                          sx={{
-                            backgroundColor: "#469ff3e0",
-                            color: "white",
-                            fontWeight: 600,
-                            textTransform: "none",
-                            borderRadius: "8px",
-                            "&:hover": { backgroundColor: "#1e40af" },
-                          }}
-                        >
-                          Cambiar estado
-                        </Button>
+                        
                       </Box>
                     </Box>
                   </Card>
@@ -471,17 +463,19 @@ export default function CandidatosPostuladosPage() {
       <Menu
         anchorEl={anchorMenu}
         open={Boolean(anchorMenu)}
-        onClose={() => cerrarMenuCambiarEstado()}
+        onClose={cerrarMenu}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <MenuItem onClick={() => cerrarMenuCambiarEstado("Aprobada")}>
+        >
+
+        <MenuItem onClick={() => cambiarEstado("Aprobada")}>
           <ListItemIcon>
             <CheckCircleOutlineIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>Aprobada</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => cerrarMenuCambiarEstado("Rechazada")}>
+
+        <MenuItem onClick={() => cambiarEstado("Rechazada")}>
           <ListItemIcon>
             <ErrorOutlineIcon fontSize="small" />
           </ListItemIcon>
