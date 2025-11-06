@@ -22,6 +22,7 @@ import {
   CalendarToday as CalendarTodayIcon,
 } from "@mui/icons-material";
 
+import { showConfirmDialog } from "@/components/shared/swalHelper";
 import Titulo from "@/components/shared/Titulo";
 import FilterSearch from "@/components/shared/FilterSearch";
 import CardFiltros from "@/components/shared/CardFiltro";
@@ -84,32 +85,6 @@ export default function CandidatosPostuladosPage() {
     setAnchorMenu(null);
   };
 
-  const cambiarEstado = async (nuevoEstado: string) => {
-    if (!postulacionEnCambio) return;
-    cerrarMenu();
-    try {
-      setLoadingEstado(true);
-      await empresaService.cambiarEstadoPostulacion(
-        postulacionEnCambio.idPostulacion,
-        nuevoEstado
-      );
-
-      setPostulaciones((prev) =>
-        prev.map((p) =>
-          p.idPostulacion === postulacionEnCambio.idPostulacion
-            ? { ...p, estadoPostulacion: nuevoEstado }
-            : p
-        )
-      );
-
-      showMessage(`✅ Estado cambiado a "${nuevoEstado}"`, SnackbarType.Success);
-    } catch (err) {
-      console.error(err);
-      showMessage("❌ Error al cambiar el estado", SnackbarType.Error);
-    } finally {
-      setLoadingEstado(false);
-    }
-  };
 
   useEffect(() => {
     cargarPostulaciones();
@@ -179,6 +154,41 @@ export default function CandidatosPostuladosPage() {
   const total = postulaciones.length;
   const totalPorEstado = (estado: string) =>
     postulaciones.filter((p) => p.estadoPostulacion === estado).length;
+
+  const cambiarEstado = async (nuevoEstado: string) => {
+    if (!postulacionEnCambio) return;
+    cerrarMenu();
+
+    const confirmado = await showConfirmDialog(
+      "¿Desea cambiar el estado de la postulación?",
+      `Esta acción actualizará el estado a "${nuevoEstado}".`
+    );
+
+    if (!confirmado) return;
+
+    try {
+      setLoadingEstado(true);
+      await empresaService.cambiarEstadoPostulacion(
+        postulacionEnCambio.idPostulacion,
+        nuevoEstado
+      );
+
+      setPostulaciones((prev) =>
+        prev.map((p) =>
+          p.idPostulacion === postulacionEnCambio.idPostulacion
+            ? { ...p, estadoPostulacion: nuevoEstado }
+            : p
+        )
+      );
+
+      showMessage(`✅ Estado cambiado a "${nuevoEstado}"`, SnackbarType.Success);
+    } catch (err) {
+      console.error(err);
+      showMessage("❌ Error al cambiar el estado", SnackbarType.Error);
+    } finally {
+      setLoadingEstado(false);
+    }
+  };
 
   return (
     <Box sx={{ backgroundColor: "#f9fafb", minHeight: "100vh", p: 3 }}>
