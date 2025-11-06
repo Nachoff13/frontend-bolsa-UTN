@@ -23,6 +23,8 @@ import {
   Check as CheckIcon,
   Delete as DeleteIcon,
   DoneAll as DoneAllIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
 } from "@mui/icons-material";
 import { useNotifications } from "@/components/providers/NotificationProvider";
 import { formatDistanceToNow } from "date-fns";
@@ -31,6 +33,7 @@ import { es } from "date-fns/locale";
 export default function NotificationBell() {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [expandedNotifs, setExpandedNotifs] = useState<Set<number>>(new Set());
   const {
     notificaciones,
     contador,
@@ -46,6 +49,18 @@ export default function NotificationBell() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const toggleExpanded = (notifId: number) => {
+    setExpandedNotifs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(notifId)) {
+        newSet.delete(notifId);
+      } else {
+        newSet.add(notifId);
+      }
+      return newSet;
+    });
   };
 
   const handleNotificationClick = async (notificacion: any) => {
@@ -151,8 +166,15 @@ export default function NotificationBell() {
             {contador.noLeidas > 0 && (
               <Button
                 size="small"
+                variant="outlined"
                 startIcon={<DoneAllIcon />}
                 onClick={handleMarcarTodasLeidas}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontSize: "0.75rem",
+                  px: 1.5,
+                }}
               >
                 Marcar todas leídas
               </Button>
@@ -207,39 +229,86 @@ export default function NotificationBell() {
                   <ListItemButton onClick={() => handleNotificationClick(notif)}>
                     <ListItemText
                       primary={
-                        <Stack direction="row" spacing={1} alignItems="center">
+                        <>
                           <Typography
                             variant="subtitle2"
-                            fontWeight={notif.leido ? 400 : 600}
-                            sx={{ flex: 1 }}
+                            fontWeight={600}
+                            sx={{ 
+                              maxWidth: 'calc(100% - 80px)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              wordBreak: 'break-word',
+                              mb: !notif.leido ? 0.5 : 0,
+                            }}
                           >
                             {notif.asunto || "Notificación"}
                           </Typography>
                           {!notif.leido && (
-                            <Chip label="Nueva" size="small" color="primary" />
+                            <Chip 
+                              label="Nueva" 
+                              size="small" 
+                              color="primary"
+                              sx={{ 
+                                position: 'absolute',
+                                top: 8,
+                                right: 80,
+                              }}
+                            />
                           )}
-                        </Stack>
+                        </>
                       }
                       secondary={
                         <>
                           <Typography
                             variant="body2"
                             color="text.primary"
-                            sx={{ mt: 0.5 }}
+                            sx={{ 
+                              mt: 0.5,
+                              maxWidth: 'calc(100% - 80px)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitLineClamp: expandedNotifs.has(notif.id) ? 'unset' : 2,
+                              WebkitBoxOrient: 'vertical',
+                              wordBreak: 'break-word',
+                            }}
                           >
                             {notif.mensaje}
                           </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ mt: 0.5, display: "block" }}
-                          >
-                            {formatFecha(notif.fechaEnvio)}
-                          </Typography>
+                          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.5 }}>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {formatFecha(notif.fechaEnvio)}
+                            </Typography>
+                            {notif.mensaje && notif.mensaje.length > 100 && (
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleExpanded(notif.id);
+                                }}
+                                sx={{ p: 0, ml: 0.5 }}
+                              >
+                                {expandedNotifs.has(notif.id) ? (
+                                  <ExpandLessIcon fontSize="small" />
+                                ) : (
+                                  <ExpandMoreIcon fontSize="small" />
+                                )}
+                              </IconButton>
+                            )}
+                          </Stack>
                         </>
                       }
                       secondaryTypographyProps={{
                         component: "div",
+                      }}
+                      sx={{
+                        pr: 1,
                       }}
                     />
                   </ListItemButton>
