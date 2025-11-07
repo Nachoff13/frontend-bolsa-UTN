@@ -19,6 +19,9 @@ import {
   Work as WorkIcon,
 } from "@mui/icons-material";
 
+import StatCard from "@/components/shared/StatCard";
+import { Briefcase, FilePlus2, Percent, Search } from "lucide-react";
+
 import { empresaService } from "@/services/empresa.service";
 import { candidatoService } from "@/services/estudiante.service";
 import { postulanteService } from "@/services/postulacion.service";
@@ -38,6 +41,8 @@ import DetalleModal from "@/components/shared/DetalleModal";
 import EmptyState from "@/components/shared/EmptyState";
 import LoadingModal from "@/components/shared/LoadingModal";
 import Titulo from "@/components/shared/Titulo";
+import PublicacionesCandidato from "@/components/shared/PuclicacionesCandidato";
+import MisPostulacionesCandidato from "@/components/shared/MisPostulacionCandidato";
 
 /* 🎨 Paleta institucional */
 const COLOR_PRIMARY = "#0d47a1";
@@ -72,6 +77,8 @@ export default function DashboardPage() {
     useState<OfertaDTO | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [porcentajePerfil, setPorcentajePerfil] = useState<number>(0);
+
   const { showMessage } = useSnackbar();
 
   useEffect(() => {
@@ -102,291 +109,92 @@ export default function DashboardPage() {
     }
   };
 
-  async function onClickPostularse(id: number): Promise<void> {
-    try {
-      const postulacion = new PostulacionDTO();
-      postulacion.idOferta = id;
-      postulacion.cartaPresentacion = "Carta de presentación de prueba";
-      postulacion.observacion = "Observación de prueba";
-
-      const response: string = await postulanteService.postularseOferta(
-        postulacion
-      );
-      showMessage(response, SnackbarType.Success, {
-        position: SnackbarPosition.BottomCenter,
-        size: SnackbarSize.Medium,
-      });
-      await fetchData();
-    } catch (e) {
-      const error = e as ResponseError;
-      showMessage(error.message, SnackbarType.Error);
-    }
-  }
+  useEffect(() => {
+    const fetchPorcentaje = async () => {
+      try {
+        const porcentaje = await candidatoService.getPorcentaje();
+        setPorcentajePerfil(porcentaje);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchPorcentaje();
+  }, []);
 
   if (loading) return <LoadingModal open={true} />;
 
   return (
-    <Box sx={{ backgroundColor: COLOR_BG, minHeight: "100vh", p: 3 }}>
-      <Titulo
-        titulo="Dashboard del Candidato"
-        subtitulo="Seguimiento de tus postulaciones y ofertas recientes"
-      />
+    <div className="flex min-h-screen">
+      <main className="flex-1 p-4 md:p-6">
+        {/* 🔹 Métricas principales */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4 mb-6">
+          <StatCard
+            label="Postulaciones activas"
+            value={postulacionesActivas}
+            subtitle="Vigentes"
+            icono={<Briefcase size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+          <StatCard
+            label="Ofertas nuevas"
+            value={ofertasNuevas}
+            subtitle="Este mes"
+            icono={<FilePlus2 size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+          <StatCard
+            label="Perfil completado"
+            value={`${porcentajePerfil}%`}
+            subtitle="Avance del perfil"
+            icono={<Percent size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+          <StatCard
+            label="En revisión"
+            value={entrevistasMes}
+            subtitle="Postulaciones"
+            icono={<Search size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+        </div>
 
-      {/* 🔹 Métricas */}
-      <Box display="flex" gap={2} flexWrap="wrap" mt={2}>
-        {[
-          { label: "Postulaciones activas", value: postulacionesActivas },
-          { label: "Ofertas nuevas", value: ofertasNuevas },
-          { label: "Perfil completado", value: `${perfilCompletado}%` },
-          { label: "En revisión", value: entrevistasMes },
-        ].map((m, i) => (
-          <Card
-            key={i}
-            sx={{
-              flex: 1,
-              p: 2,
-              borderRadius: 3,
-              backgroundColor: "#fff",
-              border: `1px solid ${BORDER_COLOR}`,
-              textAlign: "center",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-              minWidth: 220,
-            }}
-          >
-            <Typography
-              variant="h5"
-              fontWeight={700}
-              color={COLOR_PRIMARY}
-              sx={{ mb: 0.5 }}
-            >
-              {m.value}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {m.label}
-            </Typography>
-          </Card>
-        ))}
-      </Box>
+        {/* 🔹 Publicaciones y postulaciones */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+          {/* 🧾 Publicaciones */}
+          <div className="flex flex-col h-full">
+           <PublicacionesCandidato
+              ofertas={publicaciones.ofertas}
+              loading={loading}
+              onPostulacionExitosa={fetchData}
+              postulaciones={postulaciones}
+            />
+          </div>
+          <div className="flex flex-col h-full">
+            <MisPostulacionesCandidato postulaciones={postulaciones} loading={loading} />
+          </div>
+        </div>
 
-      <Divider sx={{ my: 3 }} />
 
-      {/* 🔹 Publicaciones y postulaciones */}
-      <Box display="flex" flexWrap="wrap" gap={3}>
-        {/* 🧾 Publicaciones */}
-        <Box flex={1} minWidth={400}>
-          <Card
-            sx={{
-              borderRadius: 3,
-              p: 3,
-              backgroundColor: "#fff",
-              border: `1px solid ${BORDER_COLOR}`,
-              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-            }}
-          >
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              color={COLOR_PRIMARY}
-              sx={{ mb: 2 }}
-            >
-              Publicaciones recientes
-            </Typography>
-
-            {publicaciones.ofertas.length > 0 ? (
-              <Stack spacing={2}>
-                {publicaciones.ofertas.slice(0, 3).map((oferta) => {
-                  const modalidadColor = getChipColor(oferta.modalidad ?? "");
-                  const contratoColor = getChipColor(oferta.tipoContrato ?? "");
-                  return (
-                    <Card
-                      key={oferta.id}
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        border: `1px solid ${BORDER_COLOR}`,
-                        backgroundColor: "#f9fbff",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                        },
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        color={COLOR_PRIMARY}
-                      >
-                        {oferta.titulo}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {oferta.nombreEmpresa}
-                      </Typography>
-
-                      <Box display="flex" gap={1} mt={1}>
-                        <Chip
-                          label={oferta.modalidad}
-                          size="small"
-                          sx={{
-                            backgroundColor: modalidadColor.bg,
-                            color: modalidadColor.color,
-                            fontWeight: 500,
-                          }}
-                        />
-                        <Chip
-                          label={oferta.tipoContrato}
-                          size="small"
-                          sx={{
-                            backgroundColor: contratoColor.bg,
-                            color: contratoColor.color,
-                            fontWeight: 500,
-                          }}
-                        />
-                      </Box>
-
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "#555",
-                          mt: 1.5,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {oferta.descripcion}
-                      </Typography>
-
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        mt={2}
-                      >
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <LocationOnIcon
-                            fontSize="small"
-                            sx={{ color: "#888" }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {oferta.nombreLocalidad}
-                          </Typography>
-                        </Box>
-
-                        <Button
-                          variant="contained"
-                          size="small"
-                          sx={{
-                            backgroundColor: COLOR_PRIMARY,
-                            borderRadius: 2,
-                            textTransform: "none",
-                            fontWeight: 600,
-                            "&:hover": { backgroundColor: "#1565c0" },
-                          }}
-                          onClick={() => {
-                            setOfertaSeleccionada(oferta);
-                            setOpenDetalle(true);
-                          }}
-                        >
-                          Ver detalles
-                        </Button>
-                      </Box>
-                    </Card>
-                  );
-                })}
-              </Stack>
-            ) : (
-              <EmptyState mensaje="No hay publicaciones recientes" />
-            )}
-          </Card>
-        </Box>
-
-        {/* 🧍 Postulaciones */}
-        <Box flex={1} minWidth={400}>
-          <Card
-            sx={{
-              borderRadius: 3,
-              p: 3,
-              backgroundColor: "#fff",
-              border: `1px solid ${BORDER_COLOR}`,
-              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-            }}
-          >
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              color={COLOR_PRIMARY}
-              sx={{ mb: 2 }}
-            >
-              Mis postulaciones
-            </Typography>
-
-            {postulaciones.length > 0 ? (
-              <Stack spacing={2}>
-                {postulaciones.slice(0, 4).map((p) => (
-                  <Card
-                    key={p.id}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: `1px solid ${BORDER_COLOR}`,
-                      backgroundColor: "#f9fbff",
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight={600}
-                      color={COLOR_PRIMARY}
-                    >
-                      {p.tituloOferta}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {p.estadoPostulacion}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ mt: 0.5, display: "block" }}
-                    >
-                      Postulado el{" "}
-                      {new Date(p.fechaPostulacion).toLocaleDateString("es-AR")}
-                    </Typography>
-                  </Card>
-                ))}
-              </Stack>
-            ) : (
-              <EmptyState mensaje="No tenés postulaciones todavía" />
-            )}
-          </Card>
-        </Box>
-      </Box>
-
-      {/* 🪟 Modal Detalle */}
-      {ofertaSeleccionada && (
-        <DetalleModal
-          open={openDetalle}
-          onClose={() => setOpenDetalle(false)}
-          title={ofertaSeleccionada.titulo}
-          fields={[
-            { label: "Empresa", value: ofertaSeleccionada.nombreEmpresa },
-            { label: "Carrera", value: ofertaSeleccionada.nombreCarrera },
-            { label: "Modalidad", value: ofertaSeleccionada.modalidad },
-            {
-              label: "Tipo de contrato",
-              value: ofertaSeleccionada.tipoContrato,
-            },
-            { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
-            { label: "Descripción", value: ofertaSeleccionada.descripcion },
-          ]}
-          chips={[
-            {
-              label: `${ofertaSeleccionada.cantidadPostulantes ?? 0} Postulante/s`,
-              color: "info",
-            },
-          ]}
-        />
-      )}
-    </Box>
+        {/* 🪟 Modal Detalle */}
+        {ofertaSeleccionada && (
+          <DetalleModal
+            open={openDetalle}
+            onClose={() => setOpenDetalle(false)}
+            title={ofertaSeleccionada.titulo}
+            fields={[
+              { label: "Empresa", value: ofertaSeleccionada.nombreEmpresa },
+              { label: "Carrera", value: ofertaSeleccionada.nombreCarrera },
+              { label: "Modalidad", value: ofertaSeleccionada.modalidad },
+              { label: "Tipo de contrato", value: ofertaSeleccionada.tipoContrato },
+              { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
+              { label: "Descripción", value: ofertaSeleccionada.descripcion },
+            ]}
+            chips={[
+              {
+                label: `${ofertaSeleccionada.cantidadPostulantes ?? 0} Postulante/s`,
+                color: "info",
+              },
+            ]}
+          />
+        )}
+      </main>
+    </div>
   );
+
 }
