@@ -92,15 +92,10 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
             color: "info",
           },
         ]}
-        actions={
-          <Button
-            onClick={() => setOpenDetalle(false)}
-            variant="contained"
-            color="primary"
-          >
-            Cerrar
-          </Button>
-        }
+        onVerPublicacion={() =>
+          console.log("Abrir publicación en nueva pestaña")
+       //   window.open(`/empresa/oferta/${ofertaSeleccionada.id}`, "_blank")
+        } // 👈 abre la publicación en nueva pestaña
       />
     )}
   </section>

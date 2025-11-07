@@ -2,15 +2,19 @@
 
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Typography,
   Box,
   Chip,
   Button,
+  Paper,
+  Stack,
+  Avatar,
+  Divider,
 } from "@mui/material";
 import { ReactNode } from "react";
+import { Info as InfoIcon } from "@mui/icons-material";
 
 interface Field {
   label: string;
@@ -37,6 +41,7 @@ interface DetalleModalProps {
   fields: Field[];
   chips?: ChipItem[];
   actions?: ReactNode;
+  onVerPublicacion?: () => void; // 👈 Nueva prop opcional
 }
 
 export default function DetalleModal({
@@ -46,82 +51,123 @@ export default function DetalleModal({
   fields,
   chips = [],
   actions,
+  onVerPublicacion,
 }: DetalleModalProps) {
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md" // Cambiado de sm a md para más espacio
+      maxWidth="md"
       fullWidth
-      PaperProps={{ sx: { borderRadius: 3, p: 2 } }} // Aumentado padding
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          overflow: "hidden",
+          boxShadow: 10,
+          backgroundColor: "#f9fafc",
+        },
+      }}
     >
-      {/* 🔹 Encabezado con título y chip a la derecha */}
-      <DialogTitle
+      {/* 🔹 Header estilizado */}
+      <Box
         sx={{
-          fontWeight: "bold",
-          fontSize: "1.75rem", // Aumentado de 1.4rem
+          background: "linear-gradient(135deg, #5395d6ff 0%, #2276a3ff 100%)",
+          color: "white",
+          py: 3,
+          px: 3,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          pb: 2,
+          gap: 2,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold" }}> {/* Cambiado de h6 a h5 */}
-          {title}
-        </Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Avatar sx={{ bgcolor: "white", color: "#1976d2", width: 56, height: 56 }}>
+            <InfoIcon fontSize="large" />
+          </Avatar>
+          <Typography variant="h6" fontWeight="bold">
+            {title}
+          </Typography>
+        </Box>
 
         {chips.length > 0 && (
-          <Box display="flex" gap={1.5}> {/* Aumentado gap */}
+          <Box display="flex" gap={1.5}>
             {chips.map((chip, idx) => (
               <Chip
                 key={idx}
                 label={chip.label}
                 color={chip.color ?? "default"}
-                sx={{ fontWeight: 600 }} // Removido size="small" para usar tamaño default
+                sx={{
+                  fontWeight: 600,
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 2,
+                  fontSize: "0.85rem",
+                  backgroundColor:
+                    chip.color === "info"
+                      ? "#82d5ffff"
+                      : chip.color === "success"
+                      ? "#15803d"
+                      : undefined,
+                }}
               />
             ))}
           </Box>
         )}
-      </DialogTitle>
+      </Box>
 
-      {/* 📋 Contenido principal */}
-      <DialogContent dividers sx={{ py: 3 }}> {/* Añadido padding vertical */}
-        <Box display="flex" flexDirection="column" gap={2.5}> {/* Aumentado gap */}
+      {/* 📋 Contenido con campos */}
+      <DialogContent sx={{ mt: 2 }}>
+        <Stack spacing={2}>
           {fields.map((f, idx) => (
-            <Box key={idx} display="flex" alignItems="center" gap={1.5}> {/* Aumentado gap */}
-              {f.icon && (
-                <Box sx={{ fontSize: "1.5rem" }}> {/* Hacer iconos más grandes */}
-                  {f.icon}
-                </Box>
-              )}
-              <Typography variant="body1" fontWeight="bold"> {/* Cambiado de body2 a body1 */}
-                {f.label}:
-              </Typography>
-              <Typography variant="body1">{f.value}</Typography> {/* Cambiado de body2 a body1 */}
-            </Box>
+            <Paper
+              key={idx}
+              variant="outlined"
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                backgroundColor: "white",
+              }}
+            >
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                {f.icon && <Box sx={{ color: "text.secondary" }}>{f.icon}</Box>}
+                <Typography variant="body1" fontWeight="bold">
+                  {f.label}:
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {f.value}
+                </Typography>
+              </Stack>
+            </Paper>
           ))}
-        </Box>
+        </Stack>
+
+        <Divider sx={{ my: 3 }} />
       </DialogContent>
 
       {/* 🔘 Acciones */}
-      <DialogActions sx={{ px: 3, py: 2.5, gap: 1.5 }}> {/* Aumentado padding y gap */}
-        <Button
-          onClick={() => console.log("Ver publicación")}
-          variant="outlined"
-          color="secondary"
-          sx={{ textTransform: "none", fontWeight: 600 }}
-        >
-          Ver Publicación
-        </Button>
-
-        <Button
-          onClick={onClose}
-          variant="contained"
-          color="primary"
-          sx={{ textTransform: "none", fontWeight: 600 }}
-        >
-          Cerrar
-        </Button>
+      <DialogActions sx={{ px: 3, pb: 3 }}>
+        <Box display="flex" justifyContent="flex-end" gap={2} width="100%">
+          {onVerPublicacion && (
+            <Button
+              onClick={onVerPublicacion}
+              variant="outlined"
+              color="primary"
+              sx={{ textTransform: "none", fontWeight: 600, px: 3 }}
+            >
+              Ver Publicación
+            </Button>
+          )}
+          {actions}
+          <Button
+            onClick={onClose}
+            variant="outlined"
+            color="secondary"
+            sx={{ textTransform: "none", fontWeight: 600, px: 3 }}
+          >
+            Cerrar
+          </Button>
+        </Box>
       </DialogActions>
     </Dialog>
   );
