@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { empresaService } from "@/services/empresa.service";
 import type { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 import LoadingModal from "@/components/shared/LoadingModal";
+import PhotoEditor from "@/components/shared/PhotoEditor";
 import { useSnackbar } from "@/components/providers/snackbar";
 import { SnackbarType } from "@/types/enums/snackbar";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -50,6 +51,8 @@ export default function PerfilEmpresaPage() {
 
   // Estados para foto de perfil
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   
   // Estados para edición de descripción
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -86,28 +89,67 @@ export default function PerfilEmpresaPage() {
     fetchPerfil();
   }, [perfilId, showMessage]);
 
-  const handleFotoUpload = async (file: File) => {
+  const handleFotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      showMessage("Por favor selecciona una imagen válida", SnackbarType.Error);
+      return;
+    }
+
+    // Validar tamaño máximo (2MB)
+    const maxSize = 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showMessage("La imagen no debe superar los 2MB", SnackbarType.Error);
+      return;
+    }
+
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+      setPhotoEditorOpen(true);
+    };
+    reader.readAsDataURL(file);
+    
+    // Limpiar el input para permitir seleccionar la misma imagen de nuevo
+    event.target.value = '';
+  };
+
+  const handleConfirmPhoto = async (croppedImageBlob: Blob) => {
+    if (!perfil?.id) return;
+
     try {
       setUploadingFoto(true);
       
-      if (!perfil?.id) {
-        throw new Error("ID de perfil inválido");
-      }
+      // Convertir blob a File
+      const croppedFile = new File([croppedImageBlob], 'profile-photo.jpg', { 
+        type: 'image/jpeg' 
+      });
       
-      await empresaService.uploadFotoPerfil(file, perfil.id);
+      await empresaService.uploadFotoPerfil(croppedFile, perfil.id);
       
-      showMessage("Foto de perfil subida exitosamente", SnackbarType.Success);
+      showMessage("Foto de perfil actualizada exitosamente", SnackbarType.Success);
       
-      // Recargar el perfil
+      // Recargar el perfil para mostrar la nueva foto
       const data = await empresaService.getPerfilById(perfil.id);
       setPerfil(data);
       
+      // Cerrar el diálogo y limpiar estados
+      setPhotoEditorOpen(false);
+      setPhotoPreview(null);
     } catch (error: any) {
-      const errorMessage = error?.message || "Error al subir la foto de perfil";
-      showMessage(errorMessage, SnackbarType.Error);
+      showMessage(error?.message || "Error al subir la foto de perfil", SnackbarType.Error);
     } finally {
       setUploadingFoto(false);
     }
+  };
+
+  const handleCancelPhoto = () => {
+    setPhotoEditorOpen(false);
+    setPhotoPreview(null);
   };
 
   const handleOpenEditModal = () => {
@@ -213,12 +255,7 @@ export default function PerfilEmpresaPage() {
                     type="file"
                     hidden
                     accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleFotoUpload(file);
-                      }
-                    }}
+                    onChange={handleFotoChange}
                   />
                 </Box>
               )}
@@ -514,6 +551,17 @@ export default function PerfilEmpresaPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Editor de Foto de Perfil */}
+      {photoPreview && (
+        <PhotoEditor
+          open={photoEditorOpen}
+          imageSrc={photoPreview}
+          onCancel={handleCancelPhoto}
+          onConfirm={handleConfirmPhoto}
+          uploading={uploadingFoto}
+        />
+      )}
     </Box>
   );
 }

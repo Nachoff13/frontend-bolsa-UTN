@@ -27,6 +27,8 @@ import {
   ExpandLess as ExpandLessIcon,
 } from "@mui/icons-material";
 import { useNotifications } from "@/components/providers/NotificationProvider";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { USER_ROLES } from "@/lib/constants";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -34,6 +36,7 @@ export default function NotificationBell() {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [expandedNotifs, setExpandedNotifs] = useState<Set<number>>(new Set());
+  const { rol } = useAuth();
   const {
     notificaciones,
     contador,
@@ -80,8 +83,12 @@ export default function NotificationBell() {
       // Navegar al perfil del estudiante
       router.push("/estudiante/perfil");
     } else if (asunto.includes("postulación") || asunto.includes("estado") || notificacion.idPostulacion) {
-      // Navegar a "Mis postulaciones"
-      router.push("/estudiante/postulaciones");
+      // Si es empresa, navegar a candidatos postulados, si es estudiante a sus postulaciones
+      if (rol === USER_ROLES.EMPRESA) {
+        router.push("/empresa/candidatos-postulados");
+      } else {
+        router.push("/estudiante/postulaciones");
+      }
     }
 
     // Cerrar el popover
@@ -202,9 +209,13 @@ export default function NotificationBell() {
                   disablePadding
                   sx={{
                     bgcolor: notif.leido ? "transparent" : "action.hover",
+                    position: 'relative',
                   }}
                   secondaryAction={
-                    <Stack direction="row" spacing={0.5}>
+                    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+                      {!notif.leido && (
+                        <Box />
+                      )}
                       {!notif.leido && (
                         <IconButton
                           edge="end"
@@ -226,39 +237,39 @@ export default function NotificationBell() {
                     </Stack>
                   }
                 >
-                  <ListItemButton onClick={() => handleNotificationClick(notif)}>
+                  {!notif.leido && (
+                    <FiberManualRecordIcon
+                      sx={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        color: 'error.main',
+                        fontSize: 10,
+                        zIndex: 10,
+                      }}
+                    />
+                  )}
+                  <ListItemButton 
+                    onClick={() => handleNotificationClick(notif)}
+                    sx={{ position: 'relative', pr: 10 }}
+                  >
                     <ListItemText
                       primary={
-                        <>
-                          <Typography
-                            variant="subtitle2"
-                            fontWeight={600}
-                            sx={{ 
-                              maxWidth: 'calc(100% - 80px)',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              wordBreak: 'break-word',
-                              mb: !notif.leido ? 0.5 : 0,
-                            }}
-                          >
-                            {notif.asunto || "Notificación"}
-                          </Typography>
-                          {!notif.leido && (
-                            <Chip 
-                              label="Nueva" 
-                              size="small" 
-                              color="primary"
-                              sx={{ 
-                                position: 'absolute',
-                                top: 8,
-                                right: 80,
-                              }}
-                            />
-                          )}
-                        </>
+                        <Typography
+                          variant="subtitle2"
+                          fontWeight={600}
+                          sx={{ 
+                            maxWidth: 'calc(100% - 20px)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            wordBreak: 'break-word',
+                          }}
+                        >
+                          {notif.asunto || "Notificación"}
+                        </Typography>
                       }
                       secondary={
                         <>
@@ -268,17 +279,26 @@ export default function NotificationBell() {
                             sx={{ 
                               mt: 0.5,
                               maxWidth: 'calc(100% - 80px)',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              display: '-webkit-box',
-                              WebkitLineClamp: expandedNotifs.has(notif.id) ? 'unset' : 2,
-                              WebkitBoxOrient: 'vertical',
                               wordBreak: 'break-word',
+                              ...(expandedNotifs.has(notif.id) 
+                                ? {
+                                    // Expandido: mostrar todo el texto
+                                    whiteSpace: 'normal',
+                                  }
+                                : {
+                                    // Colapsado: limitar a 2 líneas
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                  }
+                              ),
                             }}
                           >
                             {notif.mensaje}
                           </Typography>
-                          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.5 }}>
+                          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 0.5 }}>
                             <Typography
                               variant="caption"
                               color="text.secondary"
@@ -286,20 +306,22 @@ export default function NotificationBell() {
                               {formatFecha(notif.fechaEnvio)}
                             </Typography>
                             {notif.mensaje && notif.mensaje.length > 100 && (
-                              <IconButton
+                              <Button
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleExpanded(notif.id);
                                 }}
-                                sx={{ p: 0, ml: 0.5 }}
+                                sx={{ 
+                                  textTransform: 'none',
+                                  fontSize: '0.7rem',
+                                  minWidth: 'auto',
+                                  p: 0.5,
+                                }}
+                                endIcon={expandedNotifs.has(notif.id) ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                               >
-                                {expandedNotifs.has(notif.id) ? (
-                                  <ExpandLessIcon fontSize="small" />
-                                ) : (
-                                  <ExpandMoreIcon fontSize="small" />
-                                )}
-                              </IconButton>
+                                {expandedNotifs.has(notif.id) ? 'Ver menos' : 'Ver más'}
+                              </Button>
                             )}
                           </Stack>
                         </>
