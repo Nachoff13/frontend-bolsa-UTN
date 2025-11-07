@@ -117,13 +117,15 @@ export default function CardPublicacion({
 
         <div className="flex items-center">
           <CalendarTodayIcon fontSize="small" className="mr-1 text-neutral-500" />
-          Inicio {oferta.fechaInicio ?? "-"}
+          Publicada {oferta.fechaInicio ?? "-"}
         </div>
 
-        <div className="flex items-center">
-          <EventIcon fontSize="small" className="mr-1 text-neutral-500" />
-          Fin {oferta.fechaFin ?? "-"}
-        </div>
+        {oferta.fechaFin && (
+          <div className="flex items-center">
+            <EventIcon fontSize="small" className="mr-1 text-neutral-500" />
+            Fin {oferta.fechaFin}
+          </div>
+        )}
       </div>
 
       <Divider sx={{ my: 1 }} />
