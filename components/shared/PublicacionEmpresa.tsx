@@ -14,21 +14,42 @@ interface Props {
   loading: boolean;
 }
 
-// 🕒 Función auxiliar para calcular tiempo transcurrido
-function calcularTiempoTranscurrido(fechaInicio: string | undefined): string {
-  if (!fechaInicio) return "-";
+function parseFechaLatam(fechaStr: string): Date {
+  // Soporta "dd/MM/yyyy"
+  const [dd, mm, yyyy] = fechaStr.split("/").map(Number);
+  return new Date(yyyy, mm - 1, dd);
+}
 
-  const fecha = new Date(fechaInicio);
+// 🕒 Función auxiliar para calcular tiempo transcurrido
+function calcularTiempoTranscurrido(fechaStr?: string): string {
+  if (!fechaStr) return "";
+
+  // Si viene en formato dd/MM/yyyy la parseamos manualmente.
+  const fecha = fechaStr.includes("/")
+    ? parseFechaLatam(fechaStr)
+    : new Date(fechaStr);
+
+  if (isNaN(fecha.getTime())) return "";
+
   const ahora = new Date();
   const diffMs = ahora.getTime() - fecha.getTime();
+
+  // Si es una fecha futura
+  if (diffMs < 0) return "próximamente";
+
   const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
   if (diffDias < 1) return "hoy";
   if (diffDias === 1) return "hace 1 día";
   if (diffDias < 7) return `hace ${diffDias} días`;
+
   const semanas = Math.floor(diffDias / 7);
-  return semanas === 1 ? "hace 1 semana" : `hace ${semanas} semanas`;
+  if (semanas < 4) return semanas === 1 ? "hace 1 semana" : `hace ${semanas} semanas`;
+
+  const meses = Math.floor(diffDias / 30);
+  return meses === 1 ? "hace 1 mes" : `hace ${meses} meses`;
 }
+
 
 export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
   const [openDetalle, setOpenDetalle] = useState(false);
