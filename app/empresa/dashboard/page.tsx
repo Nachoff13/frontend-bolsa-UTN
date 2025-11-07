@@ -14,10 +14,8 @@ import PublicacionesEmpresa from "@/components/shared/PublicacionEmpresa";
 import CandidatosPostulados from "@/components/shared/CandidatosPostulados"; 
 import { set } from "zod";
 
-
-
-// ⚠️ Reemplazar cuando se use sesión real
-
+import { Briefcase, Users, Check, Percent } from "lucide-react";
+import { People } from "@mui/icons-material";
 
 export default function DashboardEmpresaPage() {
   const { user } = useAuth(); // 👈 si el AuthProvider ya te da el usuario logueado
@@ -82,34 +80,38 @@ export default function DashboardEmpresaPage() {
           <StatCard
             label="Ofertas publicadas"
             value={ofertas.length}
-            subtitle="activas"
+            subtitle="Activas"
+            icono={<Briefcase size={24} strokeWidth={1.8} color="#6b7280" />} // gris suave
           />
           <StatCard
             label="Postulaciones recibidas"
             value={postulaciones.length}
-            subtitle="en total"
+            subtitle="En total"
+            icono={<Users size={24} strokeWidth={1.8} color="#6b7280" />}
           />
-          <StatCard label="Perfil completado" value={`${porcentajePerfil}%`} />
           <StatCard
-            label="Postulaciones Aprobadas"
-            value={
-              postulaciones.filter((p) => {
-                if (!p.fechaPostulacion) return false; // evitar errores si es null
-                
-                const fecha = new Date(p.fechaPostulacion);
-                const hoy = new Date();
-
-                // Coincide año y mes, y está aprobada
-                const mismoMes =
-                  fecha.getMonth() === hoy.getMonth() &&
-                  fecha.getFullYear() === hoy.getFullYear();
-
-                return p.estadoPostulacion === "Aprobada" && mismoMes;
-              }).length
-            }
-            subtitle="de este mes"
+            label="Perfil completado"
+            value={`${porcentajePerfil}%`}
+            subtitle="Progreso del perfil"
+            icono={<Percent size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+          <StatCard
+            label="Postulaciones aprobadas"
+            value={postulaciones.filter((p) => {
+              if (!p.fechaPostulacion) return false;
+              const fecha = new Date(p.fechaPostulacion);
+              const hoy = new Date();
+              return (
+                p.estadoPostulacion === "Aprobada" &&
+                fecha.getMonth() === hoy.getMonth() &&
+                fecha.getFullYear() === hoy.getFullYear()
+              );
+            }).length}
+            subtitle="De este mes"
+            icono={<Check size={24} strokeWidth={2.2}/>} // tilde verde ✅
           />
         </div>
+
 
         {/* Contenido principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">

@@ -42,6 +42,8 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
+import { useTheme } from "@mui/material/styles";
+
 // 🎨 Colores dinámicos según estado
 const getEstadoChipColor = (estado: string) => {
   switch (estado.toLowerCase()) {
@@ -56,9 +58,13 @@ const getEstadoChipColor = (estado: string) => {
   }
 };
 
+
+
 const ESTADOS = ["Iniciada", "En revisión", "Aprobada", "Rechazada"];
 
 export default function CandidatosPostuladosPage() {
+  const theme = useTheme();
+  
   const { showMessage } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [postulaciones, setPostulaciones] = useState<PostulacionCandidatoDTO[]>([]);
@@ -218,7 +224,7 @@ export default function CandidatosPostuladosPage() {
           </Typography>
         </Card>
         {ESTADOS.map((estado) => (
-          <Card key={estado} sx={{ flex: 1, p: 2, textAlign: "center", borderRadius: 3, boxShadow: 1 }}>
+           <Card key={estado} sx={{ flex: 1, p: 2, textAlign: "center", borderRadius: 3, boxShadow: 1 }}>
             <Typography variant="h5" fontWeight={700} color="primary">
               {totalPorEstado(estado)}
             </Typography>
@@ -251,7 +257,7 @@ export default function CandidatosPostuladosPage() {
 
         <Box flex={3}>
           {postulacionesFiltradas.length > 0 ? (
-            <Stack spacing={2}>
+             <Stack spacing={2}>
               {postulacionesFiltradas.map((p) => {
                 const estadoColor = getEstadoChipColor(p.estadoPostulacion);
                 return (
@@ -260,14 +266,14 @@ export default function CandidatosPostuladosPage() {
                     sx={{
                       p: 3,
                       borderRadius: "16px",
-                      border: "1px solid #E0E0E0",
-                      backgroundColor: "#f8fbfc",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                      transition: "all 0.2s ease",
+                      border: `1px solid ${theme.palette.divider}`,
+                      backgroundColor: theme.palette.background.paper,
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                      transition: "all 0.2s ease-in-out",
                       "&:hover": {
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                        transform: "translateY(-2px)",
-                      },
+                        boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                        transform: "translateY(-3px)",
+                      }
                     }}
                   >
                     <Box display="flex" alignItems="center" justifyContent="space-between">

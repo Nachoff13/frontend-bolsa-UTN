@@ -40,9 +40,14 @@ export default function CandidatoPostuladoCard({
 
   return (
     <div
-      className="relative rounded-2xl border border-neutral-200 bg-neutral-50 
-                 hover:bg-neutral-100 transition-all shadow-sm hover:shadow-md 
-                 p-4 min-h-[210px] flex flex-col justify-between"
+      style={{
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: "16px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        transition: "all 0.2s ease-in-out",
+      }}
+      className="relative p-4 min-h-[210px] flex flex-col justify-between hover:shadow-md hover:-translate-y-[1px]"
     >
       {/* 🔹 Chip de estado */}
       <div className="absolute top-3 right-3 flex gap-2">

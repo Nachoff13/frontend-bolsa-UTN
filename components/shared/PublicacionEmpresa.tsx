@@ -5,17 +5,8 @@ import CardGenerica from "@/components/shared/CardGenerica";
 import DetalleModal from "@/components/shared/DetalleModal";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 
-import {
-  LocationOn as LocationOnIcon,
-  CalendarToday as CalendarTodayIcon,
-  Event as EventIcon,
-  Group as GroupIcon,
-  School as SchoolIcon,
-  AccessTime as AccessTimeIcon,
-  Description as DescriptionIcon,
-  Business as BusinessIcon,
-} from "@mui/icons-material";
-import { Button } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
 import CardPublicacion from "./CardPublicacion";
 
 interface Props {
@@ -48,10 +39,22 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
     setOpenDetalle(true);
   };
 
+  const theme = useTheme();
+
   if (loading) return <p>Cargando publicaciones...</p>;
 
   return (
-  <section className="rounded-2xl border border-neutral-200 bg-white p-4 h-full flex flex-col">
+  <section
+    style={{
+      backgroundColor: theme.palette.background.paper,
+      border: `1px solid ${theme.palette.divider}`,
+      borderRadius: "12px",
+      padding: "24px",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+      transition: "all 0.2s ease-in-out",
+    }}
+    className="h-full flex flex-col"
+  >
     <h3 className="mb-3 text-base font-semibold text-gray-800">
       Publicaciones de empleo recientes
     </h3>

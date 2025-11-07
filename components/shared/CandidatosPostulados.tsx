@@ -6,6 +6,8 @@ import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import CandidatoCard from "./CandidatoCard";
 import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
 import { Button } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+
 
 interface CandidatosPostuladosProps {
   postulaciones: PostulacionDTO[];
@@ -31,11 +33,23 @@ export default function CandidatosPostulados({
   };
 
   const router = useRouter();
+  const theme = useTheme();
+
 
   if (loading) return <p className="text-neutral-500">Cargando candidatos...</p>;
 
   return (
-    <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm h-full flex flex-col">
+    <section
+      style={{
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: "12px",
+        padding: "16px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        transition: "all 0.2s ease-in-out",
+      }}
+      className="h-full flex flex-col"
+    >
       {/* 🧭 Header con título y botón */}
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-semibold text-gray-800">

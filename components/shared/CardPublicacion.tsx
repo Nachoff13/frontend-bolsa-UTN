@@ -12,7 +12,6 @@ import {
 } from "@mui/icons-material";
 import { Button, Chip, Divider, Tooltip } from "@mui/material";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
-
 import { useTheme } from "@mui/material/styles";
 
 interface CardPublicacionProps {
@@ -43,10 +42,17 @@ export default function CardPublicacion({
         return theme.palette.info.main;
     }
   };
+
   return (
     <div
-      className="rounded-2xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 
-                 transition-all shadow-sm hover:shadow-md p-5 relative"
+      style={{
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: "16px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        transition: "all 0.2s ease-in-out",
+      }}
+      className="hover:shadow-md hover:-translate-y-[1px] p-5 relative"
     >
       {/* 🔹 Chips (Modalidad y Contrato) */}
       <div className="absolute top-4 right-4 flex gap-2">

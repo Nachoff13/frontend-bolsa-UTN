@@ -7,6 +7,12 @@ import LoadingModal from "@/components/shared/LoadingModal";
 import EmptyState from "@/components/shared/EmptyState";
 import { DashboardAdminDTO } from "@/types/dto/dashboardAdminDTO";
 
+import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
+import BusinessIcon from "@mui/icons-material/Business";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -278,37 +284,39 @@ export default function DashboardAdminPage() {
     <div className="flex min-h-screen bg-[#f9fafa]">
       <main className="flex-1 p-4 md:p-6">
         {/* 🔹 Métricas principales */}
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-5 mb-6">
-          <StatCard
-            label="Ofertas publicadas"
-            value={counts.ofertasPublicadas}
-            subtitle="totales"
-            rightSlot={<WorkIcon sx={{ color: "#00658f", fontSize: 40 }} />}
-          />
-          <StatCard
-            label="Empresas Registradas"
-            value={data.metricas.empresasRegistradas}
-            rightSlot={<AssignmentIcon sx={{ color: "#388e3c", fontSize: 40 }} />}
-          />
-          <StatCard
-            label="Postulaciones recibidas"
-            value={counts.postulacionesRecibidas}
-            subtitle="en total"
-            rightSlot={<SendIcon sx={{ color: "#f57c00", fontSize: 40 }} />}
-          />
-          <StatCard
-            label="Candidatos registrados"
-            value={counts.candidatosRegistrados}
-            subtitle="activos"
-            rightSlot={<PersonIcon sx={{ color: "#6a1b9a", fontSize: 40 }} />}
-          />
-          <StatCard
-            label="Candidatos con postulaciones"
-            value={counts.candidatosConPostulaciones}
-            subtitle="únicos"
-            rightSlot={<PersonIcon sx={{ color: "#1976d2", fontSize: 40 }} />}
-          />
-        </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-5 mb-6">
+            <StatCard
+              label="Ofertas publicadas"
+              value={counts.ofertasPublicadas}
+              subtitle="totales"
+              icono={<WorkOutlineIcon sx={{fontSize: 26 }} />}
+            />
+            <StatCard
+              label="Empresas registradas"
+              value={data.metricas.empresasRegistradas}
+              subtitle="activas"
+              icono={<BusinessIcon sx={{fontSize: 26 }} />}
+            />
+            <StatCard
+              label="Postulaciones recibidas"
+              value={counts.postulacionesRecibidas}
+              subtitle="en total"
+              icono={<MailOutlineIcon sx={{fontSize: 26 }} />}
+            />
+            <StatCard
+              label="Candidatos registrados"
+              value={counts.candidatosRegistrados}
+              subtitle="activos"
+              icono={<PersonOutlineIcon sx={{fontSize: 26 }} />}
+            />
+            <StatCard
+              label="Candidatos con postulaciones"
+              value={counts.candidatosConPostulaciones}
+              subtitle="únicos"
+              icono={<GroupOutlinedIcon sx={{fontSize: 26 }} />}
+            />
+          </div>
+
 
         {/* 🔹 Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -339,7 +347,7 @@ export default function DashboardAdminPage() {
           <Card sx={{ borderRadius: 3, boxShadow: 2, backgroundColor: theme.palette.background.paper }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} mb={2}>
-                Candidatos vs Ofertas por Carrera
+                Por Carrera
               </Typography>
 
               {carreras.length === 0 ? (
