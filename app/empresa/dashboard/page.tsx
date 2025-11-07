@@ -12,10 +12,9 @@ import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 
 import PublicacionesEmpresa from "@/components/shared/PublicacionEmpresa";
 import CandidatosPostulados from "@/components/shared/CandidatosPostulados"; 
-import { set } from "zod";
 
 import { Briefcase, Users, Check, Percent } from "lucide-react";
-import { People } from "@mui/icons-material";
+
 
 export default function DashboardEmpresaPage() {
   const { user } = useAuth(); // 👈 si el AuthProvider ya te da el usuario logueado
@@ -26,8 +25,8 @@ export default function DashboardEmpresaPage() {
   const [selectedPostulacion, setSelectedPostulacion] = useState<PostulacionDTO | null>(null);
   const [porcentajePerfil, setPorcentajePerfil] = useState<number>(0);
 
-  // Fallback temporal (si no está conectado useAuth)
-  const emailEmpresa = user?.email || "gezbaez@gmail.com";
+
+  const emailEmpresa = user?.email;
 
   useEffect(() => {
     const fetchData = async () => {
