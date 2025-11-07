@@ -192,11 +192,6 @@ export default function CandidatosPostuladosPage() {
 
   return (
     <Box sx={{ backgroundColor: "#f9fafb", minHeight: "100vh", p: 3 }}>
-      <Titulo
-        titulo="Candidatos Postulados"
-        subtitulo="Revisá los perfiles y estados de las postulaciones recibidas"
-      />
-
       <FilterSearch
         titulo="Buscar candidatos"
         subtitulo="Filtrá por nombre o título de la oferta"

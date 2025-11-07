@@ -51,7 +51,8 @@ export default function DetalleCandidatoModal({
     estadoPostulacion,
     fechaPostulacion,
     localidad,
-    descripcionPerfil,
+    cartaPresentacion,
+    observacion,
   } = postulacion;
 
   const getEstadoColor = (estado?: string) => {
@@ -235,7 +236,7 @@ export default function DetalleCandidatoModal({
           </Box>
 
           {/* Perfil del candidato */}
-          {descripcionPerfil && (
+          {cartaPresentacion && (
             <Box>
               <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
                 <DescriptionIcon
@@ -248,7 +249,7 @@ export default function DetalleCandidatoModal({
                 variant="body2"
                 sx={{ whiteSpace: "pre-line", color: "text.secondary" }}
               >
-                {descripcionPerfil}
+                {cartaPresentacion}
               </Typography>
             </Box>
           )}
