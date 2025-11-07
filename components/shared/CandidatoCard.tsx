@@ -7,7 +7,6 @@ import {
 } from "@mui/icons-material";
 import { Button, Chip, Divider } from "@mui/material";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
-import { useRouter } from "next/navigation";
 import { useTheme } from "@mui/material/styles";
 
 interface CandidatoPostuladoCardProps {
@@ -21,12 +20,10 @@ export default function CandidatoPostuladoCard({
 }: CandidatoPostuladoCardProps) {
   const { nombreCandidato, tituloOferta, fechaPostulacion, estadoPostulacion } =
     postulacion;
-
-  const router = useRouter();
   const theme = useTheme();
 
   const getEstadoColor = (estado?: string) => {
-  const lower = estado?.toLowerCase();
+    const lower = estado?.toLowerCase();
     switch (lower) {
       case "iniciada":
         return theme.palette.customStatus.iniciada;
@@ -43,48 +40,51 @@ export default function CandidatoPostuladoCard({
 
   return (
     <div
-      className="relative border border-neutral-200 rounded-xl bg-white shadow-sm 
-                 hover:shadow-md transition-all duration-200 p-5"
+      className="relative rounded-2xl border border-neutral-200 bg-neutral-50 
+                 hover:bg-neutral-100 transition-all shadow-sm hover:shadow-md 
+                 p-4 min-h-[210px] flex flex-col justify-between"
     >
       {/* 🔹 Chip de estado */}
-      <div className="absolute top-3 right-4 flex gap-2">
+      <div className="absolute top-3 right-3 flex gap-2">
         <Chip
           label={estadoPostulacion ?? "Sin estado"}
           size="small"
           sx={{
             fontWeight: 600,
-            backgroundColor: `${getEstadoColor(estadoPostulacion)}22`, // fondo suave
+            backgroundColor: `${getEstadoColor(estadoPostulacion)}22`,
             color: getEstadoColor(estadoPostulacion),
           }}
         />
       </div>
 
       {/* 🧑 Nombre del candidato */}
-      <div className="flex items-center mb-2">
-        <PersonIcon fontSize="small" className="text-sky-700 mr-1" />
-        <h3 className="text-lg font-semibold text-sky-800">
-          {nombreCandidato || "Candidato sin nombre"}
-        </h3>
+      <div>
+        <div className="flex items-center mb-1">
+          <PersonIcon fontSize="medium" className="text-sky-700 mr-1" />
+          <h3 className="text-base font-semibold text-sky-800 leading-tight">
+            {nombreCandidato || "Candidato sin nombre"}
+          </h3>
+        </div>
+
+        <Divider sx={{ my: 1 }} />
+
+      {/* 💼 Puesto + Fecha centrados verticalmente, alineados a la izquierda */}
+      <div className="flex flex-col justify-center items-start text-left h-full mt-1">
+        <div className="flex items-center text-sm text-neutral-700 mb-1">
+          <WorkIcon fontSize="medium" className="mr-1 text-neutral-500" />
+          <span>{tituloOferta || "Sin puesto asociado"}</span>
+        </div>
+
+        <div className="flex items-center text-sm text-neutral-500">
+          <CalendarIcon fontSize="medium" className="mr-1 text-neutral-400" />
+          <span>Postulado el {fechaPostulacion ?? "-"}</span>
+        </div>
       </div>
 
-      <Divider sx={{ mb: 1 }} />
 
-      {/* 💼 Puesto */}
-      <div className="flex items-center text-sm text-neutral-700 mb-2">
-        <WorkIcon fontSize="small" className="mr-1 text-neutral-500" />
-        <span className="font-medium">{tituloOferta || "Sin puesto"}</span>
       </div>
 
-      {/* 📅 Fecha */}
-      <div className="flex items-center text-sm text-neutral-500 mb-3">
-        <CalendarIcon fontSize="small" className="mr-1 text-neutral-400" />
-        <span>Postulado el {fechaPostulacion ?? "-"}</span>
-      </div>
-
-      <Divider sx={{ mb: 2 }} />
-
-      {/* 🔘 Botones */}
-
+      <Divider sx={{ my: 1 }} />
     </div>
   );
 }

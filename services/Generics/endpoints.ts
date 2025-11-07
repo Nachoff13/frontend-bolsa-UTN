@@ -78,6 +78,7 @@ export const ENDPOINTS = {
     GET_PERFIL: `/Empresa/get_perfil`,
     UPDATE_PERFIL: `/Empresa/update_perfil`,
     UPLOAD_FOTO_PERFIL: `/Empresa/upload_foto_perfil`,
+    GET_PORCENTAJE_PERFIL: `/Empresa/get_porcentaje_perfil`,
   },
   ADMIN: {
     GET_EMPRESAS: `${CONTROLLERS.ADMIN}/get_empresas_por_verificar`,

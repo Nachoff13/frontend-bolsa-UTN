@@ -51,20 +51,17 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
   if (loading) return <p>Cargando publicaciones...</p>;
 
   return (
-  <section className="rounded-2xl border border-neutral-200 bg-white p-4">
-    <h3 className="mb-3 text-base font-semibold">
+  <section className="rounded-2xl border border-neutral-200 bg-white p-4 h-full flex flex-col">
+    <h3 className="mb-3 text-base font-semibold text-gray-800">
       Publicaciones de empleo recientes
     </h3>
-    <p className="text-sm text-neutral-500 mb-4">
-      Revisá el estado de tus publicaciones
-    </p>
 
     {ofertas.length === 0 ? (
       <p className="text-sm text-neutral-500">
         No hay publicaciones registradas todavía.
       </p>
     ) : (
-      <div className="flex flex-col gap-4">  {/* 💡 agrega separación uniforme */}
+      <div className="flex flex-col gap-4">
         {ofertas.map((oferta) => (
           <CardPublicacion
             key={oferta.id}
@@ -76,7 +73,6 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
       </div>
     )}
 
-    {/* 📄 Modal de detalle */}
     {ofertaSeleccionada && (
       <DetalleModal
         open={openDetalle}
@@ -108,4 +104,5 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
       />
     )}
   </section>
+
 );}

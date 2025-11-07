@@ -35,7 +35,7 @@ export default function CandidatosPostulados({
   if (loading) return <p className="text-neutral-500">Cargando candidatos...</p>;
 
   return (
-    <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm h-full flex flex-col">
       {/* 🧭 Header con título y botón */}
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-semibold text-gray-800">

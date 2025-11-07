@@ -12,6 +12,7 @@ import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 
 import PublicacionesEmpresa from "@/components/shared/PublicacionEmpresa";
 import CandidatosPostulados from "@/components/shared/CandidatosPostulados"; 
+import { set } from "zod";
 
 
 
@@ -25,6 +26,7 @@ export default function DashboardEmpresaPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPostulacion, setSelectedPostulacion] = useState<PostulacionDTO | null>(null);
+  const [porcentajePerfil, setPorcentajePerfil] = useState<number>(0);
 
   // Fallback temporal (si no está conectado useAuth)
   const emailEmpresa = user?.email || "gezbaez@gmail.com";
@@ -52,6 +54,18 @@ export default function DashboardEmpresaPage() {
     fetchData();
   }, [emailEmpresa]);
 
+  useEffect(() => {
+    const fetchPorcentaje = async () => {
+      try {
+        const porcentaje = await empresaService.getPorcentaje();
+        setPorcentajePerfil(porcentaje);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchPorcentaje();
+  }, []);
+
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 p-4 md:p-6">
@@ -75,7 +89,7 @@ export default function DashboardEmpresaPage() {
             value={postulaciones.length}
             subtitle="en total"
           />
-          <StatCard label="Perfil completado" value="85%" />
+          <StatCard label="Perfil completado" value={`${porcentajePerfil}%`} />
           <StatCard
             label="Postulaciones Aprobadas"
             value={
@@ -98,9 +112,13 @@ export default function DashboardEmpresaPage() {
         </div>
 
         {/* Contenido principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <PublicacionesEmpresa ofertas={ofertas} loading={loading} />
-          <CandidatosPostulados postulaciones={postulaciones} loading={loading} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+          <div className="flex flex-col h-full">
+            <PublicacionesEmpresa ofertas={ofertas} loading={loading} />
+          </div>
+          <div className="flex flex-col h-full">
+            <CandidatosPostulados postulaciones={postulaciones} loading={loading} />
+          </div>
         </div>
       </main>
     </div>
