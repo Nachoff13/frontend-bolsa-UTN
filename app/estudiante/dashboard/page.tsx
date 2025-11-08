@@ -1,10 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  Typography,
+  Chip,
+  Stack,
+  Button,
+  Divider,
+  Avatar,
+  CircularProgress,
+} from "@mui/material";
+import {
+  LocationOn as LocationOnIcon,
+  CalendarToday as CalendarTodayIcon,
+  Event as EventIcon,
+  Work as WorkIcon,
+} from "@mui/icons-material";
+
 import StatCard from "@/components/shared/StatCard";
-import MyApplications from "@/components/shared/MyApplications";
-import CardGenerica from "@/components/shared/CardGenerica";
-import DetalleModal from "@/components/shared/DetalleModal";
+import { Briefcase, FilePlus2, Percent, Search } from "lucide-react";
 
 import { empresaService } from "@/services/empresa.service";
 import { candidatoService } from "@/services/estudiante.service";
@@ -14,204 +30,171 @@ import { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 
-import {
-  LocationOn as LocationOnIcon,
-  CalendarToday as CalendarTodayIcon,
-  Event as EventIcon,
-} from "@mui/icons-material";
-import Button from "@mui/material/Button";
-
 import { useSnackbar } from "@/components/providers/snackbar";
-import { SnackbarPosition, SnackbarSize, SnackbarType } from "@/types/enums/snackbar";
+import {
+  SnackbarPosition,
+  SnackbarSize,
+  SnackbarType,
+} from "@/types/enums/snackbar";
 import { ResponseError } from "@/types/Generics/responseError";
+import DetalleModal from "@/components/shared/DetalleModal";
+import EmptyState from "@/components/shared/EmptyState";
+import LoadingModal from "@/components/shared/LoadingModal";
+import Titulo from "@/components/shared/Titulo";
+import PublicacionesCandidato from "@/components/shared/PuclicacionesCandidato";
+import MisPostulacionesCandidato from "@/components/shared/MisPostulacionCandidato";
 
-// ⚠️ Reemplazar por el id real desde sesión/auth
-const ID_ESTUDIANTE = 1;
+/* 🎨 Paleta institucional */
+const COLOR_PRIMARY = "#0d47a1";
+const COLOR_BG = "#f9fafb";
+const BORDER_COLOR = "#e5eaf1";
+
+/* 🎯 Chips consistentes con los de la vista empresarial */
+const getChipColor = (tipo: string) => {
+  const lower = tipo?.toLowerCase() ?? "";
+  if (lower.includes("full")) return { bg: "#e0f7fa", color: "#00796b" };
+  if (lower.includes("part")) return { bg: "#ede7f6", color: "#5e35b1" };
+  if (lower.includes("híbrido")) return { bg: "#e3f2fd", color: "#1565c0" };
+  if (lower.includes("presencial")) return { bg: "#fff3e0", color: "#ef6c00" };
+  if (lower.includes("remoto")) return { bg: "#e8f5e9", color: "#2e7d32" };
+  return { bg: "#f1f3f4", color: "#444" };
+};
 
 export default function DashboardPage() {
-  // Estados métricas
   const [postulacionesActivas, setPostulacionesActivas] = useState(0);
   const [ofertasNuevas, setOfertasNuevas] = useState(0);
   const [perfilCompletado, setPerfilCompletado] = useState(0);
   const [entrevistasMes, setEntrevistasMes] = useState(0);
 
-  // Estados listas
   const [publicaciones, setPublicaciones] = useState<OfertaRecienteDTO>({
     ofertas: [],
     cantidadOfertas: 0,
   });
   const [postulaciones, setPostulaciones] = useState<PostulacionDTO[]>([]);
 
-  const { showMessage } = useSnackbar();
+  const [openDetalle, setOpenDetalle] = useState(false);
+  const [ofertaSeleccionada, setOfertaSeleccionada] =
+    useState<OfertaDTO | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // modal detalle
-  const [openDetalle, setOpenDetalle] = useState(false);
-  const [ofertaSeleccionada, setOfertaSeleccionada] = useState<OfertaDTO | null>(null);
-  const handleOpenDetalle = (oferta: OfertaDTO) => {
-    setOfertaSeleccionada(oferta);
-    setOpenDetalle(true);
-  };
+  const [porcentajePerfil, setPorcentajePerfil] = useState<number>(0);
+
+  const { showMessage } = useSnackbar();
 
   useEffect(() => {
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     try {
-      // 1) Publicaciones
-      const pubs = await empresaService.getPublicaciones(); // <- Promise<OfertaRecienteDTO>
-      console.log("Publicaciones cargadas:", pubs);
+      setLoading(true);
+      const pubs = await empresaService.getPublicaciones();
       setPublicaciones(pubs);
-
-      // 2) Postulaciones
       const posts = await candidatoService.getPostulaciones();
       setPostulaciones(posts);
 
-      // Métricas
-      setPostulacionesActivas(posts.filter(p => p.estadoPostulacion !== "Rechazada").length);
-      setOfertasNuevas(pubs.cantidadOfertas); // ✅ ya no rompe
+      setPostulacionesActivas(
+        posts.filter((p) => p.estadoPostulacion !== "Rechazada").length
+      );
+      setOfertasNuevas(pubs.cantidadOfertas);
       setPerfilCompletado(85);
-      setEntrevistasMes(posts.filter(p => p.estadoPostulacion === "En revisión").length);
+      setEntrevistasMes(
+        posts.filter((p) => p.estadoPostulacion === "En revisión").length
+      );
     } catch (err) {
-      console.error("Error cargando dashboard", err);
+      console.error(err);
+      showMessage("Error al cargar datos del dashboard", SnackbarType.Error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const fetchPorcentaje = async () => {
+      try {
+        const porcentaje = await candidatoService.getPorcentaje();
+        setPorcentajePerfil(porcentaje);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchPorcentaje();
+  }, []);
 
-
-   async function onClickPostularse(id: number): Promise<void> {
-    try {
-      const postulacion = new PostulacionDTO();
-      // postulacion.idPerfilCandidato = 1; //a futuro traer del perfil del usuario logueado
-      postulacion.idOferta = id;
-      postulacion.cartaPresentacion = "Carta de presentación de prueba";
-      postulacion.observacion = "Observación de prueba";
-
-      const response: string = await postulanteService.postularseOferta(
-        postulacion
-      );
-      showMessage(response, SnackbarType.Success, {
-        size: SnackbarSize.Medium,
-        position: SnackbarPosition.BottomCenter,
-      });
-      await fetchData();
-    } catch (e) {
-      const error = e as ResponseError;
-      showMessage(error.message, SnackbarType.Error, {
-        size: SnackbarSize.Medium,
-        position: SnackbarPosition.BottomCenter,
-      });
-    }
-  }
+  if (loading) return <LoadingModal open={true} />;
 
   return (
-  <div className="flex min-h-screen">
-    <main className="flex-1 p-4 md:p-6">
-      {/* Header */}
-      <div className="mb-2">
-        <h1 className="text-2xl font-semibold">Dashboard del Candidato</h1>
-        <p className="text-sm text-neutral-600">
-          Bienvenido al portal de empleos de la UTN FRLP
-        </p>
-      </div>
-
-      {/* Métricas */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-        <StatCard
-          label="Postulaciones activas"
-          value={postulacionesActivas}
-          subtitle="sin rechazar"
-        />
-        <StatCard
-          label="Ofertas nuevas"
-          value={ofertasNuevas}
-          subtitle="este mes"
-        />
-        <StatCard label="Perfil completado" value={`${perfilCompletado}%`} />
-        <StatCard
-          label="Postulaciones en Revisión"
-          value={entrevistasMes}
-          subtitle=""
-        />
-      </div>
-
-      {/* Columnas principales */}
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl border border-neutral-200 bg-white p-4">
-          <h3 className="mb-3 text-base font-semibold">
-            Publicaciones de empleo recientes
-          </h3>
-
-          {publicaciones?.ofertas.slice(0, 3).map((oferta) => (
-            <CardGenerica
-              key={oferta.id}
-              titulo={oferta.titulo}
-              subtitulo={`🏢 ${oferta.nombreEmpresa ?? "Empresa"}`}
-              descripcion={oferta.descripcion}
-              chips={[
-                { label: oferta.modalidad ?? "Modalidad", color: "secondary" },
-                { label: oferta.tipoContrato ?? "Contrato", color: "info" },
-              ]}
-              infoExtra={[
-                {
-                  icon: <LocationOnIcon fontSize="small" />,
-                  texto: oferta.nombreLocalidad ?? "Ubicación no especificada",
-                },
-                {
-                  icon: <CalendarTodayIcon fontSize="small" />,
-                  texto: `Publicado el ${oferta.fechaInicio ?? "-"}`,
-                },
-                {
-                  icon: <EventIcon fontSize="small" />,
-                  texto: `Cierra el ${oferta.fechaFin ?? "-"}`,
-                },
-              ]}
-              onAccion1={() => handleOpenDetalle(oferta)}
-              textoAccion1="Ver detalles"
-
-              onAccion2={() => onClickPostularse(oferta.id)}
-              textoAccion2="Postularme"
-            />
-          ))}
-        </section>
-
-        <section className="rounded-2xl border border-neutral-200 bg-white p-4">
-          <h3 className="mb-3 text-base font-semibold">Mis postulaciones</h3>
-          <MyApplications 
-            key={postulaciones.length} 
-            studentId={ID_ESTUDIANTE} 
-            limit={5} 
+    <div className="flex min-h-screen">
+      <main className="flex-1 p-4 md:p-6">
+        {/* 🔹 Métricas principales */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4 mb-6">
+          <StatCard
+            label="Postulaciones activas"
+            value={postulacionesActivas}
+            subtitle="Vigentes"
+            icono={<Briefcase size={24} strokeWidth={1.8} color="#6b7280" />}
           />
+          <StatCard
+            label="Ofertas nuevas"
+            value={ofertasNuevas}
+            subtitle="Este mes"
+            icono={<FilePlus2 size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+          <StatCard
+            label="Perfil completado"
+            value={`${porcentajePerfil}%`}
+            subtitle="Avance del perfil"
+            icono={<Percent size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+          <StatCard
+            label="En revisión"
+            value={entrevistasMes}
+            subtitle="Postulaciones"
+            icono={<Search size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+        </div>
 
-        </section>
-      </div>
-      <DetalleModal
-        open={openDetalle}
-        onClose={() => setOpenDetalle(false)}
-        title={ofertaSeleccionada?.titulo ?? ""}
-        fields={[
-          { label: "Empresa", value: ofertaSeleccionada?.nombreEmpresa ?? "-" },
-          { label: "Localidad", value: ofertaSeleccionada?.nombreLocalidad ?? "-" },
-          { label: "Descripción", value: ofertaSeleccionada?.descripcion ?? "-" },
-          { label: "Fecha inicio", value: ofertaSeleccionada?.fechaInicio ?? "-" },
-          { label: "Fecha fin", value: ofertaSeleccionada?.fechaFin || "No especificada" },
-        ]}
-        chips={[
-          { label: ofertaSeleccionada?.modalidad ?? "Modalidad", color: "secondary" },
-          { label: ofertaSeleccionada?.tipoContrato ?? "Contrato", color: "info" },
-        ]}
-        actions={
-          <Button
-            variant="contained"
-            onClick={() => ofertaSeleccionada && onClickPostularse(ofertaSeleccionada.id)}
-          >
-            Postularme
-          </Button>
-        }
-      />
-    </main> 
-  </div>
-);
+        {/* 🔹 Publicaciones y postulaciones */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+          {/* 🧾 Publicaciones */}
+          <div className="flex flex-col h-full">
+           <PublicacionesCandidato
+              ofertas={publicaciones.ofertas}
+              loading={loading}
+              onPostulacionExitosa={fetchData}
+              postulaciones={postulaciones}
+            />
+          </div>
+          <div className="flex flex-col h-full">
+            <MisPostulacionesCandidato postulaciones={postulaciones} loading={loading} />
+          </div>
+        </div>
+
+
+        {/* 🪟 Modal Detalle */}
+        {ofertaSeleccionada && (
+          <DetalleModal
+            open={openDetalle}
+            onClose={() => setOpenDetalle(false)}
+            title={ofertaSeleccionada.titulo}
+            fields={[
+              { label: "Empresa", value: ofertaSeleccionada.nombreEmpresa },
+              { label: "Carrera", value: ofertaSeleccionada.nombreCarrera },
+              { label: "Modalidad", value: ofertaSeleccionada.modalidad },
+              { label: "Tipo de contrato", value: ofertaSeleccionada.tipoContrato },
+              { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
+              { label: "Descripción", value: ofertaSeleccionada.descripcion },
+            ]}
+            chips={[
+              {
+                label: `${ofertaSeleccionada.cantidadPostulantes ?? 0} Postulante/s`,
+                color: "info",
+              },
+            ]}
+          />
+        )}
+      </main>
+    </div>
+  );
 
 }

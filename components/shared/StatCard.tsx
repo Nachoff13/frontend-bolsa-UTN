@@ -1,48 +1,69 @@
 "use client";
 
-import { Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import React from "react";
 
 type Props = {
   label: string;
   value: string | number;
   subtitle?: string;
-  rightSlot?: React.ReactNode; // opcional: icono o acción
+  icono?: React.ReactNode; // 👈 nuevo prop
 };
 
-export default function StatCard({ label, value, subtitle, rightSlot }: Props) {
+export default function StatCard({ label, value, subtitle, icono }: Props) {
   return (
     <Card
       variant="outlined"
-      sx={{ 
-        borderWidth: 2, 
-        borderColor: "primary.divider", 
+      sx={{
+        borderWidth: 2,
+        borderColor: "divider",
         borderRadius: 2,
         transition: "all 0.2s ease-in-out",
+        backgroundColor: "background.paper",
         "&:hover": {
-          boxShadow: 2,
-          transform: "translateY(-2px)",
+          boxShadow: 4,
+          transform: "translateY(-3px)",
         },
       }}
     >
-      <CardContent sx={{ p: 3 }}> {/* Aumentado de 2 a 3 */}
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-          <Stack spacing={1}> {/* Aumentado de 0.5 a 1 */}
-            <Typography variant="body1" color="text.secondary" fontWeight={500}> {/* Cambiado de subtitle2 a body1 */}
+      <CardContent sx={{ p: 3 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          sx={{ mb: 1 }}
+        >
+          {/* 🔹 Texto a la izquierda */}
+          <Stack spacing={0.5}>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              fontWeight={500}
+            >
               {label}
             </Typography>
-            <Typography variant="h4" fontWeight={700}> {/* Cambiado de h5 a h4 */}
+            <Typography variant="h4" fontWeight={700} color="text.primary">
               {value}
             </Typography>
             {subtitle && (
-              <Typography variant="body2" color="text.secondary"> {/* Cambiado de caption a body2 */}
+              <Typography variant="body2" color="text.secondary">
                 {subtitle}
               </Typography>
             )}
           </Stack>
-          {rightSlot && (
-            <Box sx={{ fontSize: "2rem" }}> {/* Hacer iconos más grandes */}
-              {rightSlot}
+
+          {/* 🔹 Ícono opcional a la derecha */}
+          {icono && (
+            <Box
+              sx={{
+                color: "text.secondary",
+                fontSize: "2rem",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+              }}
+            >
+              {icono}
             </Box>
           )}
         </Stack>

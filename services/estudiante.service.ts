@@ -3,6 +3,7 @@ import { ENDPOINTS } from "@/services/Generics/endpoints";
 import type { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import type { OfertaRecienteDTO } from "@/types/dto/responses/OfertaRecienteDTO";
 import { GenericService } from "./generic.service";
+import { ResponseError } from "@/types/Generics/responseError";
 
 class CandidatoService extends GenericService {
   async getPostulaciones() {
@@ -51,6 +52,21 @@ class CandidatoService extends GenericService {
       return res; // 👈 mantenemos AxiosResponse
     } catch (error) {
       throw error;
+    }
+  }
+
+  async getPorcentaje(): Promise<number> {
+    try {
+      const res = await http.get<number>(
+        ENDPOINTS.CANDIDATO.GET_PORCENTAJE_PERFIL,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      return res;
+    } catch (e) {
+      const err = e as ResponseError;
+      console.error("Error al obtener el porcentaje del perfil:", err.message);
+      throw err;
     }
   }
 

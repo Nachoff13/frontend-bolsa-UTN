@@ -2,32 +2,18 @@
 
 import { useEffect, useState } from "react";
 import StatCard from "@/components/shared/StatCard";
-import CardGenerica from "@/components/shared/CardGenerica";
-import DetalleModal from "@/components/shared/DetalleModal";
 
 import { empresaService } from "@/services/empresa.service";
 
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
-import { useSnackbar } from "@/components/providers/snackbar";
-import { SnackbarPosition, SnackbarSize, SnackbarType } from "@/types/enums/snackbar";
-import { ResponseError } from "@/types/Generics/responseError";
 
-import {
-  LocationOn as LocationOnIcon,
-  CalendarToday as CalendarTodayIcon,
-  Event as EventIcon,
-} from "@mui/icons-material";
-import Button from "@mui/material/Button";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
-import SkeletonLoader from "@/components/shared/SkeletonLoader";
-import EmptyState from "@/components/shared/EmptyState";
+
 import PublicacionesEmpresa from "@/components/shared/PublicacionEmpresa";
 import CandidatosPostulados from "@/components/shared/CandidatosPostulados"; 
 
-import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
-
-// ⚠️ Reemplazar cuando se use sesión real
+import { Briefcase, Users, Check, Percent } from "lucide-react";
 
 
 export default function DashboardEmpresaPage() {
@@ -37,9 +23,10 @@ export default function DashboardEmpresaPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPostulacion, setSelectedPostulacion] = useState<PostulacionDTO | null>(null);
+  const [porcentajePerfil, setPorcentajePerfil] = useState<number>(0);
 
-  // Fallback temporal (si no está conectado useAuth)
-  const emailEmpresa = user?.email || "gezbaez@gmail.com";
+
+  const emailEmpresa = user?.email;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,6 +51,18 @@ export default function DashboardEmpresaPage() {
     fetchData();
   }, [emailEmpresa]);
 
+  useEffect(() => {
+    const fetchPorcentaje = async () => {
+      try {
+        const porcentaje = await empresaService.getPorcentaje();
+        setPorcentajePerfil(porcentaje);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchPorcentaje();
+  }, []);
+
   return (
     <div className="flex min-h-screen">
       <main className="flex-1 p-4 md:p-6">
@@ -80,39 +79,47 @@ export default function DashboardEmpresaPage() {
           <StatCard
             label="Ofertas publicadas"
             value={ofertas.length}
-            subtitle="activas"
+            subtitle="Activas"
+            icono={<Briefcase size={24} strokeWidth={1.8} color="#6b7280" />} // gris suave
           />
           <StatCard
             label="Postulaciones recibidas"
             value={postulaciones.length}
-            subtitle="en total"
+            subtitle="En total"
+            icono={<Users size={24} strokeWidth={1.8} color="#6b7280" />}
           />
-          <StatCard label="Perfil completado" value="85%" />
           <StatCard
-            label="Postulaciones Aprobadas"
-            value={
-              postulaciones.filter((p) => {
-                if (!p.fechaPostulacion) return false; // evitar errores si es null
-                
-                const fecha = new Date(p.fechaPostulacion);
-                const hoy = new Date();
-
-                // Coincide año y mes, y está aprobada
-                const mismoMes =
-                  fecha.getMonth() === hoy.getMonth() &&
-                  fecha.getFullYear() === hoy.getFullYear();
-
-                return p.estadoPostulacion === "Aprobada" && mismoMes;
-              }).length
-            }
-            subtitle="de este mes"
+            label="Perfil completado"
+            value={`${porcentajePerfil}%`}
+            subtitle="Progreso del perfil"
+            icono={<Percent size={24} strokeWidth={1.8} color="#6b7280" />}
+          />
+          <StatCard
+            label="Postulaciones aprobadas"
+            value={postulaciones.filter((p) => {
+              if (!p.fechaPostulacion) return false;
+              const fecha = new Date(p.fechaPostulacion);
+              const hoy = new Date();
+              return (
+                p.estadoPostulacion === "Aprobada" &&
+                fecha.getMonth() === hoy.getMonth() &&
+                fecha.getFullYear() === hoy.getFullYear()
+              );
+            }).length}
+            subtitle="De este mes"
+            icono={<Check size={24} strokeWidth={2.2}/>} // tilde verde ✅
           />
         </div>
 
+
         {/* Contenido principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <PublicacionesEmpresa ofertas={ofertas} loading={loading} />
-          <CandidatosPostulados postulaciones={postulaciones} loading={loading} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+          <div className="flex flex-col h-full">
+            <PublicacionesEmpresa ofertas={ofertas} loading={loading} />
+          </div>
+          <div className="flex flex-col h-full">
+            <CandidatosPostulados postulaciones={postulaciones} loading={loading} />
+          </div>
         </div>
       </main>
     </div>
