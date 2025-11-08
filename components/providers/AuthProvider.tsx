@@ -37,6 +37,8 @@ export default function AuthProvider({
 
   // sincronizar con backend
   useEffect(() => {
+    let mounted = true;
+    
     const syncUser = async () => {
       if (!user || !token) {
         setLoading(false);
@@ -44,8 +46,11 @@ export default function AuthProvider({
       }
 
       try {
-        // debugger;
+        console.log("🔄 Sincronizando usuario con backend...");
         const res: UsuarioDTO = await genericService.cargarUsuario();
+        
+        if (!mounted) return; // Evitar actualizar estado si el componente se desmontó
+        
         console.log("✅ Usuario cargado:", res);
         
         // Guardar el UsuarioDTO completo en el contexto
@@ -58,6 +63,9 @@ export default function AuthProvider({
           try {
             // Obtener el perfil del candidato usando el usuarioId
             const perfil: any = await candidatoService.getPerfilByUsuarioId(res.id);
+            
+            if (!mounted) return;
+            
             console.log("📋 Perfil cargado:", perfil);
             
             // Guardar el perfilId en el contexto
@@ -79,31 +87,83 @@ export default function AuthProvider({
             } else {
               console.log("✅ Perfil completo");
             }
-          } catch (error) {
-            console.error("❌ Error al obtener perfil:", error);
+          } catch (error: any) {
+            console.error("❌ Error al obtener perfil del candidato:", error);
+            // No cerrar sesión por error en perfil, solo loguear
+          }
+        }
+        
+        // Si es empresa (rol 2), obtener su perfilId usando el JWT del backend
+        if (res.idRol === 2) {
+          console.log("🏢 Usuario es empresa, obteniendo perfilId...");
+          try {
+            // Obtener el perfilId de empresa usando el endpoint que consume JWT
+            const idPerfilEmpresa = await genericService.getPerfilEmpresaUsuario();
+            
+            if (!mounted) return;
+            
+            console.log("📋 PerfilId de empresa obtenido:", idPerfilEmpresa);
+            
+            // Guardar el perfilId en el contexto
+            if (idPerfilEmpresa) {
+              setPerfilId(idPerfilEmpresa);
+              console.log("✅ PerfilId de empresa guardado:", idPerfilEmpresa);
+            }
+          } catch (error: any) {
+            console.error("❌ Error al obtener perfil de empresa:", error);
+            // No cerrar sesión por error en perfil, solo loguear
           }
         }
       } catch (e) {
         const err = e as ResponseError;
         console.error("❌ Error al sincronizar usuario:", err);
-        showMessage(
-          "Ha ocurrido un problema con el servidor. Cerrando sesión…",
-          SnackbarType.Error,
-          {
-            size: SnackbarSize.Medium,
-            position: SnackbarPosition.BottomCenter,
-          }
-        );
-
-        // Logout global
-        window.location.href = "/auth/logout";
+        
+        if (!mounted) return;
+        
+        // Solo cerrar sesión si es error 401 (no autorizado) o 403 (forbidden)
+        // Para otros errores (500, red, etc), solo mostrar mensaje pero mantener sesión
+        if (err.status === 401 || err.status === 403) {
+          console.log("🔒 Token inválido o expirado, cerrando sesión...");
+          showMessage(
+            "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+            SnackbarType.Error,
+            {
+              size: SnackbarSize.Medium,
+              position: SnackbarPosition.BottomCenter,
+            }
+          );
+          // Esperar un poco para que el usuario vea el mensaje
+          setTimeout(() => {
+            window.location.href = "/auth/logout";
+          }, 1500);
+        } else {
+          // Error del servidor o de red - no cerrar sesión
+          console.log("⚠️ Error temporal del servidor, manteniendo sesión...");
+          showMessage(
+            "Hubo un problema al cargar tu perfil. Por favor, recarga la página.",
+            SnackbarType.Warning,
+            {
+              size: SnackbarSize.Medium,
+              position: SnackbarPosition.BottomCenter,
+            }
+          );
+          // Establecer loading false para que la app sea usable
+          setLoading(false);
+        }
         return;
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
     syncUser();
+    
+    // Cleanup function para evitar memory leaks
+    return () => {
+      mounted = false;
+    };
   }, [user, token]);
 
   if (loading || (user && token && rol === null)) {

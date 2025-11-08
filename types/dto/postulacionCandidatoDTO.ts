@@ -19,6 +19,7 @@ export interface PostulacionCandidatoDTO {
   idOferta: number;
   tituloOferta?: string | null;
   descripcionOferta?: string | null;
+  cartaPresentacion?: string | null;
 
   // 🔹 Información complementaria
   modalidad?: string | null;

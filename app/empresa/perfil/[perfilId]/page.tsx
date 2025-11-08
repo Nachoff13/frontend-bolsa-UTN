@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { empresaService } from "@/services/empresa.service";
 import type { PerfilEmpresaDTO } from "@/types/dto/perfilEmpresaDTO";
 import LoadingModal from "@/components/shared/LoadingModal";
+import PhotoEditor from "@/components/shared/PhotoEditor";
 import { useSnackbar } from "@/components/providers/snackbar";
 import { SnackbarType } from "@/types/enums/snackbar";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -16,6 +17,13 @@ import {
   Stack,
   Avatar,
   Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  IconButton,
 } from "@mui/material";
 import Titulo from "@/components/shared/Titulo";
 import {
@@ -29,6 +37,9 @@ import {
   Article,
   VerifiedUser,
   PhotoCamera,
+  Edit,
+  Close,
+  Save,
 } from "@mui/icons-material";
 
 export default function PerfilEmpresaPage() {
@@ -40,12 +51,24 @@ export default function PerfilEmpresaPage() {
 
   // Estados para foto de perfil
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
+  
+  // Estados para edición de descripción
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editedDescripcion, setEditedDescripcion] = useState("");
+  const [savingChanges, setSavingChanges] = useState(false);
 
   // Obtener el perfilId de los parámetros de la ruta
-  const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 1;
+  const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : authPerfilId;
 
   // Determinar si el usuario actual es dueño del perfil
   const isOwner = authPerfilId === perfilId;
+
+  console.log("🔍 PerfilEmpresaPage - authPerfilId:", authPerfilId);
+  console.log("🔍 PerfilEmpresaPage - perfilId (from URL):", params?.perfilId);
+  console.log("🔍 PerfilEmpresaPage - perfilId (final):", perfilId);
+  console.log("🔍 PerfilEmpresaPage - isOwner:", isOwner);
 
   useEffect(() => {
     const fetchPerfil = async () => {
@@ -66,27 +89,105 @@ export default function PerfilEmpresaPage() {
     fetchPerfil();
   }, [perfilId, showMessage]);
 
-  const handleFotoUpload = async (file: File) => {
+  const handleFotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      showMessage("Por favor selecciona una imagen válida", SnackbarType.Error);
+      return;
+    }
+
+    // Validar tamaño máximo (2MB)
+    const maxSize = 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showMessage("La imagen no debe superar los 2MB", SnackbarType.Error);
+      return;
+    }
+
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+      setPhotoEditorOpen(true);
+    };
+    reader.readAsDataURL(file);
+    
+    // Limpiar el input para permitir seleccionar la misma imagen de nuevo
+    event.target.value = '';
+  };
+
+  const handleConfirmPhoto = async (croppedImageBlob: Blob) => {
+    if (!perfil?.id) return;
+
     try {
       setUploadingFoto(true);
       
-      if (!perfil?.id) {
-        throw new Error("ID de perfil inválido");
+      // Convertir blob a File
+      const croppedFile = new File([croppedImageBlob], 'profile-photo.jpg', { 
+        type: 'image/jpeg' 
+      });
+      
+      await empresaService.uploadFotoPerfil(croppedFile, perfil.id);
+      
+      showMessage("Foto de perfil actualizada exitosamente", SnackbarType.Success);
+      
+      // Recargar el perfil para mostrar la nueva foto
+      const data = await empresaService.getPerfilById(perfil.id);
+      setPerfil(data);
+      
+      // Cerrar el diálogo y limpiar estados
+      setPhotoEditorOpen(false);
+      setPhotoPreview(null);
+    } catch (error: any) {
+      showMessage(error?.message || "Error al subir la foto de perfil", SnackbarType.Error);
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
+
+  const handleCancelPhoto = () => {
+    setPhotoEditorOpen(false);
+    setPhotoPreview(null);
+  };
+
+  const handleOpenEditModal = () => {
+    setEditedDescripcion(perfil?.descripcion || "");
+    setEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    setEditedDescripcion("");
+  };
+
+  const handleSaveDescripcion = async () => {
+    try {
+      setSavingChanges(true);
+      
+      if (!perfil) {
+        throw new Error("Perfil no disponible");
       }
+
+      const updatedPerfil: PerfilEmpresaDTO = {
+        ...perfil,
+        descripcion: editedDescripcion,
+      };
+
+      await empresaService.updatePerfil(updatedPerfil);
       
-      await empresaService.uploadFotoPerfil(file, perfil.id);
-      
-      showMessage("Foto de perfil subida exitosamente", SnackbarType.Success);
+      showMessage("Descripción actualizada exitosamente", SnackbarType.Success);
       
       // Recargar el perfil
       const data = await empresaService.getPerfilById(perfil.id);
       setPerfil(data);
       
+      handleCloseEditModal();
     } catch (error: any) {
-      const errorMessage = error?.message || "Error al subir la foto de perfil";
-      showMessage(errorMessage, SnackbarType.Error);
+      showMessage(error?.message || "Error al actualizar descripción", SnackbarType.Error);
     } finally {
-      setUploadingFoto(false);
+      setSavingChanges(false);
     }
   };
 
@@ -154,12 +255,7 @@ export default function PerfilEmpresaPage() {
                     type="file"
                     hidden
                     accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleFotoUpload(file);
-                      }
-                    }}
+                    onChange={handleFotoChange}
                   />
                 </Box>
               )}
@@ -232,18 +328,33 @@ export default function PerfilEmpresaPage() {
         <Box sx={{ flex: "0 0 33.333%", minWidth: { xs: "100%", md: "33.333%" } }}>
           <Stack spacing={3}>
             {/* Sobre Nosotros */}
-            {perfil.descripcion && (
-              <Card>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                  <Typography variant="h6" fontWeight={600}>
                     Sobre Nosotros
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                    {perfil.descripcion}
-                  </Typography>
-                </CardContent>
-              </Card>
-            )}
+                  {isOwner && (
+                    <IconButton 
+                      size="small" 
+                      onClick={handleOpenEditModal}
+                      sx={{ 
+                        color: 'primary.main',
+                        '&:hover': { 
+                          color: 'primary.dark',
+                          bgcolor: 'transparent'
+                        }
+                      }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
+                </Stack>
+                <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  {perfil.descripcion || "No hay descripción disponible"}
+                </Typography>
+              </CardContent>
+            </Card>
 
             {/* Información de la Empresa */}
             <Card>
@@ -395,6 +506,62 @@ export default function PerfilEmpresaPage() {
           </Card>
         </Box>
       </Stack>
+
+      {/* Modal de Edición de Descripción */}
+      <Dialog 
+        open={editModalOpen} 
+        onClose={handleCloseEditModal} 
+        maxWidth="md" 
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h6" fontWeight={600}>
+              Editar Sobre Nosotros
+            </Typography>
+            <IconButton onClick={handleCloseEditModal} size="small">
+              <Close />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={8}
+            label="Descripción"
+            placeholder="Describe tu empresa, misión, valores, etc..."
+            value={editedDescripcion}
+            onChange={(e) => setEditedDescripcion(e.target.value)}
+            sx={{ mt: 2 }}
+            helperText={`${editedDescripcion.length} caracteres`}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={handleCloseEditModal} variant="outlined">
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleSaveDescripcion} 
+            variant="contained" 
+            startIcon={<Save />}
+            disabled={savingChanges}
+          >
+            {savingChanges ? "Guardando..." : "Guardar Cambios"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Editor de Foto de Perfil */}
+      {photoPreview && (
+        <PhotoEditor
+          open={photoEditorOpen}
+          imageSrc={photoPreview}
+          onCancel={handleCancelPhoto}
+          onConfirm={handleConfirmPhoto}
+          uploading={uploadingFoto}
+        />
+      )}
     </Box>
   );
 }

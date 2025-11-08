@@ -10,6 +10,7 @@ export const CONTROLLERS = {
   CANDIDATO: "/candidato",
   EMPRESA: "/empresa",
   ADMIN: "/admin",
+  NOTIFICACION: "/notificacion",
 } as const;
 
 export const ENDPOINTS = {
@@ -75,12 +76,14 @@ export const ENDPOINTS = {
     UPLOAD_CV: `/Candidato/upload_cv`,
     UPLOAD_FOTO_PERFIL: `/Candidato/upload_foto_perfil`,
     VERIFICAR_PERFIL: `/Candidato/verificar_perfil`,
+    GET_PORCENTAJE_PERFIL: `/Candidato/get_porcentaje_perfil`,
     COMPLETAR_PERFIL: `/Candidato/completar_perfil`,
   },
   EMPRESA: {
     GET_PERFIL: `/Empresa/get_perfil`,
     UPDATE_PERFIL: `/Empresa/update_perfil`,
     UPLOAD_FOTO_PERFIL: `/Empresa/upload_foto_perfil`,
+    GET_PORCENTAJE_PERFIL: `/Empresa/get_porcentaje_perfil`,
   },
   ADMIN: {
     GET_EMPRESAS: `${CONTROLLERS.ADMIN}/get_empresas_por_verificar`,
@@ -90,5 +93,14 @@ export const ENDPOINTS = {
     ALTA_USUARIO: `${CONTROLLERS.ADMIN}/alta_usuario`,
     VER_DETALLE_USUARIO: `${CONTROLLERS.ADMIN}/ver_detalle_usuario`,
     ACTUALIZAR_ROL_USUARIO: `${CONTROLLERS.ADMIN}/actualizar_rol_usuario`,
+    DASHBOARD: `${CONTROLLERS.ADMIN}/get_dashboard_empresa`,
+  },
+  NOTIFICACION: {
+    MIS_NOTIFICACIONES: `${CONTROLLERS.NOTIFICACION}/mis_notificaciones`,
+    CONTADOR: `${CONTROLLERS.NOTIFICACION}/contador`,
+    MARCAR_LEIDA: (id: number) => `${CONTROLLERS.NOTIFICACION}/${id}/marcar_leida`,
+    MARCAR_TODAS_LEIDAS: `${CONTROLLERS.NOTIFICACION}/marcar_todas_leidas`,
+    ELIMINAR: (id: number) => `${CONTROLLERS.NOTIFICACION}/${id}`,
+    CREAR: `${CONTROLLERS.NOTIFICACION}/crear`,
   }
 } as const;

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   AppBar,
   Box,
@@ -19,6 +20,7 @@ import {
   Typography,
   TextField,
   Stack,
+  useTheme,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -34,18 +36,24 @@ import {
 import { USER_ROLES } from "@/lib/constants";
 import { useAuth } from "@/components/providers/AuthProvider";
 import UserMenu from "@/components/shared/UserMenu";
-import { number } from "zod";
+import NotificationBell from "@/components/shared/NotificationBell";
 
 const drawerWidth = 280;
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const theme = useTheme();
 
   const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
   const { rol, perfilId, user } = useAuth();
 
-  const navItems = [
+  const navItems: Array<{
+    href: string;
+    label: string;
+    icon: React.ReactNode;
+    roles: number[];
+  }> = [
     {
       href: "/empresa/dashboard",
       label: "Menú Principal",
@@ -100,7 +108,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  const footerItems = [
+  const footerItems: Array<{
+    href: string;
+    label: string;
+    icon: React.ReactNode;
+    roles: number[];
+  }> = [
     {
       href: perfilId ? `/estudiante/perfil/${perfilId}` : "/estudiante/perfil",
       label: "Mi Perfil",
@@ -120,26 +133,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const DrawerContent = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Branding */}
-      <Toolbar sx={{ px: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              bgcolor: "primary.main",
-              borderRadius: 1,
-            }}
+      {/* Branding: imagen centrada (reemplaza texto) */}
+      <Toolbar sx={{ px: 2, justifyContent: "center" }}>
+        <Box
+          sx={{
+            position: "relative",
+            width: 160,
+            height: 64,
+            mx: "auto",
+            mb: 1,
+            filter: theme.palette.mode === "dark" ? "brightness(0) invert(1)" : "none",
+          }}
+        >
+          <Image
+            src="/logo-utn.png"
+            alt="UTN FRLP Logo"
+            fill
+            style={{ objectFit: "contain" }}
+            priority
           />
-          <Box>
-            <Typography variant="subtitle1" fontWeight={700}>
-              UTN FRLP
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Bolsa de Trabajo
-            </Typography>
-          </Box>
-        </Stack>
+        </Box>
       </Toolbar>
       <Divider />
 
@@ -229,7 +242,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Box>
 
           {/* Acciones (derecha) */}
-          <Box sx={{ ml: 2 }}>
+          <Box sx={{ ml: 2, display: "flex", alignItems: "center", gap: 1 }}>
+            <NotificationBell />
             <UserMenu />
           </Box>
         </Toolbar>

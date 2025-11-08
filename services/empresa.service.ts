@@ -175,6 +175,23 @@ class EmpresaService extends GenericService {
       throw err;
     }
   }
+
+  async getPorcentaje(): Promise<number> {
+    try {
+      const res = await api.get<{ message: string; result: number }>(
+        ENDPOINTS.EMPRESA.GET_PORCENTAJE_PERFIL,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      return res.data.result; 
+    } catch (e) {
+      const err = e as ResponseError;
+      console.error("Error al obtener el porcentaje del perfil:", err.message);
+      throw err;
+    }
+  }
+
+  
 }
 
 export const empresaService = new EmpresaService();
