@@ -25,6 +25,7 @@ import {
   DoneAll as DoneAllIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
+  FiberManualRecord as FiberManualRecordIcon,
 } from "@mui/icons-material";
 import { useNotifications } from "@/components/providers/NotificationProvider";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -305,7 +306,7 @@ export default function NotificationBell() {
                             >
                               {formatFecha(notif.fechaEnvio)}
                             </Typography>
-                            {notif.mensaje && notif.mensaje.length > 100 && (
+                            {notif.mensaje && (
                               <Button
                                 size="small"
                                 onClick={(e) => {
