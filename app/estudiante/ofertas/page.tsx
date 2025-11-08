@@ -3,6 +3,7 @@
 
 //#region IMPORTACIOENS REACT
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Box, Card, Divider, Typography } from "@mui/material";
 import {
   LocationOn as LocationOnIcon,
@@ -34,6 +35,11 @@ import EmptyState from "@/components/shared/EmptyState";
 import { ofertaService } from "@/services/oferta.service";
 import { genericService } from "@/services/generic.service";
 import { postulanteService } from "@/services/postulacion.service";
+import { 
+  getEmpresaChipColor, 
+  getModalidadChipColor, 
+  getTipoContratoChipColor 
+} from "@/lib/chipColors";
 
 //#region Tipos y constantes
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
@@ -57,6 +63,7 @@ import { CampoFormulario } from "@/components/shared/ModalFormulario";
 //#region LOGICA DE LA PAGINA
 export default function EstudianteOfertasPage() {
   //#region SNACKBAR Y MODAL CARGA
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const { showMessage } = useSnackbar();
   //#endregion
@@ -384,16 +391,33 @@ export default function EstudianteOfertasPage() {
                 variantTitulo="h5"
                 variantSubtitulo="body2"
               />
-              {ofertas.map((oferta) => (
+              {ofertas.map((oferta) => {
+                const empresaColor = getEmpresaChipColor();
+                const modalidadColor = getModalidadChipColor(oferta.modalidad);
+                const contratoColor = getTipoContratoChipColor(oferta.tipoContrato);
+                
+                return (
                 <CardGenerica
                   key={oferta.id}
                   titulo={oferta.titulo}
                   subtitulo={`🏢 ${oferta.nombreEmpresa}`}
                   descripcion={oferta.descripcion}
                   chips={[
-                    { label: oferta.nombreEmpresa, color: "success" },
-                    { label: oferta.modalidad, color: "secondary" },
-                    { label: oferta.tipoContrato, color: "info" },
+                    { 
+                      label: oferta.nombreEmpresa, 
+                      backgroundColor: empresaColor.backgroundColor,
+                      textColor: empresaColor.color
+                    },
+                    { 
+                      label: oferta.modalidad, 
+                      backgroundColor: modalidadColor.backgroundColor,
+                      textColor: modalidadColor.color
+                    },
+                    { 
+                      label: oferta.tipoContrato, 
+                      backgroundColor: contratoColor.backgroundColor,
+                      textColor: contratoColor.color
+                    },
                   ]}
                   infoExtra={[
                     {
@@ -412,15 +436,14 @@ export default function EstudianteOfertasPage() {
                       )}`,
                     },
                   ]}
-                  onAccion1={() => {
-                    /* TODO: Implementar ver detalle */
-                  }}
+                  onAccion1={() => router.push(`/estudiante/ofertas/${oferta.id}`)}
                   textoAccion1="Ver detalles"
                   onAccion2={() => onClickPostularse(oferta.id)}
                   textoAccion2="Postularme"
                   disabledAccion2={!oferta.puedePostularse}
                 />
-              ))}
+                );
+              })}
             </Card>
           </Box>
         ) : (

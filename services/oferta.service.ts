@@ -26,6 +26,16 @@ class OfertaService extends GenericService {
     }
   }
 
+  // Obtener una oferta por ID
+  async getOfertaById(id: number): Promise<OfertaDTO> {
+    try {
+      const res = await http.get<OfertaDTO>(ENDPOINTS.PUBLICACION.GET_OFERTA_BY_ID(id));
+      return res;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Obtener ofertas por empresa (para empresas)
   async getOfertasByEmpresa(): Promise<OfertaDTO[]> {
     try {

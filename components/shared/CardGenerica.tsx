@@ -60,7 +60,16 @@ export default function CardGenerica({
                 <Chip
                   key={idx}
                   label={chip.label}
-                  color={chip.color || "default"}
+                  color={chip.backgroundColor || chip.textColor ? undefined : (chip.color || "default")}
+                  sx={chip.backgroundColor || chip.textColor ? {
+                    backgroundColor: chip.backgroundColor,
+                    color: chip.textColor,
+                    fontWeight: 700,
+                    borderRadius: "10px",
+                    fontSize: "1rem",
+                    height: "38px",
+                    padding: "0 16px",
+                  } : undefined}
                 />
               ))}
             </Stack>

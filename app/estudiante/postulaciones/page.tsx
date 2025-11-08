@@ -3,6 +3,7 @@
 
 //#region IMPORTACIOENS REACT
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Box, Card, Divider, Typography } from "@mui/material";
 import {
   LocationOn as LocationOnIcon,
@@ -28,6 +29,11 @@ import ResumenPostulaciones from "@/components/shared/ResumenPostulaciones";
 //Servicio para llamadas a la API
 import { postulanteService } from "@/services/postulacion.service";
 import { genericService } from "@/services/generic.service";
+import { 
+  getEstadoChipColor, 
+  getModalidadChipColor, 
+  getTipoContratoChipColor 
+} from "@/lib/chipColors";
 
 //#region Tipos y constantes
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
@@ -49,6 +55,7 @@ import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 //#region LOGICA DE LA PAGINA
 export default function EstudiantePostulacionesPage() {
   //#region SNACKBAR Y MODAL CARGA
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [postulaciones, setPostulaciones] = useState<PostulacionDTO[]>([]);
   const { showMessage } = useSnackbar();
@@ -394,21 +401,32 @@ export default function EstudiantePostulacionesPage() {
                 }`}
                 variantSubtitulo="subtitle1"
               />
-              {postulacionesFiltradas.map((postulacion) => (
+              {postulacionesFiltradas.map((postulacion) => {
+                const estadoColor = getEstadoChipColor(postulacion.estadoPostulacion);
+                const modalidadColor = getModalidadChipColor(postulacion.descripcionModalidad);
+                const contratoColor = getTipoContratoChipColor(postulacion.descripcionTipoContrato);
+                
+                return (
                 <CardGenerica
                   key={postulacion.id}
                   titulo={postulacion.tituloOferta}
                   subtitulo={postulacion.nombreEmpresa}
                   descripcion={postulacion.descripcionOferta}
                   chips={[
-                    { label: postulacion.estadoPostulacion, color: "primary" },
+                    { 
+                      label: postulacion.estadoPostulacion, 
+                      backgroundColor: estadoColor.backgroundColor,
+                      textColor: estadoColor.color
+                    },
                     {
                       label: postulacion.descripcionModalidad,
-                      color: "secondary",
+                      backgroundColor: modalidadColor.backgroundColor,
+                      textColor: modalidadColor.color
                     },
                     {
                       label: postulacion.descripcionTipoContrato,
-                      color: "info",
+                      backgroundColor: contratoColor.backgroundColor,
+                      textColor: contratoColor.color
                     },
                   ]}
                   infoExtra={[
@@ -425,10 +443,11 @@ export default function EstudiantePostulacionesPage() {
                       texto: `Carta: ${postulacion.cartaPresentacion}`,
                     },
                   ]}
-                  onAccion1={() => {/* TODO: Implementar ver detalle */}}
+                  onAccion1={() => router.push(`/estudiante/ofertas/${postulacion.idOferta}`)}
                   textoAccion1="Ver detalle"
                 />
-              ))}
+                );
+              })}
             </Card>
           </Box>
         ) : (

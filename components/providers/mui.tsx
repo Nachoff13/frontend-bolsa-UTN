@@ -155,17 +155,17 @@ const createAppTheme = (mode: PaletteMode) =>
     MuiChip: {
       styleOverrides: {
         root: {
-          fontWeight: 500,
-          fontSize: "0.875rem", // Aumentado de 0.75rem a 0.875rem (14px)
+          fontWeight: 600,
+          fontSize: "1rem", // 16px - tamaño grande
           textTransform: "capitalize",
-          borderRadius: 8,
-          padding: "0 12px", // Más padding horizontal
-          height: 32, // Aumentado de 24px a 32px
+          borderRadius: 10,
+          padding: "0 16px", // Más padding horizontal
+          height: 38, // Altura mayor
         },
         sizeSmall: {
-          fontSize: "0.8125rem", // 13px
-          height: 28,
-          padding: "0 10px",
+          fontSize: "0.9rem", // 14.4px
+          height: 32,
+          padding: "0 12px",
         },
       },
     },

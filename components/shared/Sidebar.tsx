@@ -28,7 +28,7 @@ export default function Sidebar() {
   // Menú dinámico basado en el rol
   const getMenuItems = () => {
     const baseItems = [
-      { href: '/', label: 'Menú Principal', icon: Home, isActive: true }
+      { href: '/', label: 'Menú Principal', icon: Home }
     ]
 
     if (rol === 1) { // Estudiante
@@ -91,19 +91,20 @@ export default function Sidebar() {
         <nav className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon
+            const active = isActive(item.href)
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`flex items-center space-x-3 px-4 py-3.5 rounded-lg text-base font-medium transition-colors ${
-                  item.isActive
+                  active
                     ? 'bg-teal-500 text-white'
                     : mode === 'dark'
                     ? 'text-gray-100 hover:bg-gray-900'
                     : 'text-black hover:bg-gray-100'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${item.isActive ? 'text-white' : mode === 'dark' ? 'text-gray-100' : 'text-black'}`} />
+                <Icon className={`w-5 h-5 ${active ? 'text-white' : mode === 'dark' ? 'text-gray-100' : 'text-black'}`} />
                 <span>{item.label}</span>
               </Link>
             )
@@ -123,9 +124,9 @@ export default function Sidebar() {
           }`}
         >
           {mode === 'dark' ? (
-            <Sun className={`w-5 h-5 ${mode === 'dark' ? 'text-gray-100' : 'text-black'}`} />
+            <Sun className="w-5 h-5 text-gray-100" />
           ) : (
-            <Moon className={`w-5 h-5 ${mode === 'dark' ? 'text-gray-100' : 'text-black'}`} />
+            <Moon className="w-5 h-5 text-black" />
           )}
           <span>{mode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
         </button>

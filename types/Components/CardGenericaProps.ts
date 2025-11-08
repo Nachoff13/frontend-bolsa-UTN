@@ -5,6 +5,8 @@ interface CardGenericaProps {
   chips?: {
     label: string;
     color?: "primary" | "secondary" | "info" | "warning" | "success" | "error";
+    backgroundColor?: string;
+    textColor?: string;
   }[];
   infoExtra?: {
     icon: React.ReactNode;

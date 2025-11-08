@@ -22,6 +22,9 @@ export const ENDPOINTS = {
     ACTUALIZAR_OFERTA: `${CONTROLLERS.PUBLICACION}/actualizar_oferta`,
     ELIMINAR_OFERTA: `${CONTROLLERS.PUBLICACION}/eliminar_oferta`,
 
+    GET_OFERTA_BY_ID: (id: number) =>
+      `${CONTROLLERS.PUBLICACION}/get_oferta/${id}`,
+
     GET_RECIENTES: (limit: number = 3) =>
       `${CONTROLLERS.PUBLICACION}/get_publicaciones_recientes?limit=${limit}`,
 
