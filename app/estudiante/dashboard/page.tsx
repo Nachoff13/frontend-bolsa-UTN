@@ -44,22 +44,6 @@ import Titulo from "@/components/shared/Titulo";
 import PublicacionesCandidato from "@/components/shared/PuclicacionesCandidato";
 import MisPostulacionesCandidato from "@/components/shared/MisPostulacionCandidato";
 
-/* 🎨 Paleta institucional */
-const COLOR_PRIMARY = "#0d47a1";
-const COLOR_BG = "#f9fafb";
-const BORDER_COLOR = "#e5eaf1";
-
-/* 🎯 Chips consistentes con los de la vista empresarial */
-const getChipColor = (tipo: string) => {
-  const lower = tipo?.toLowerCase() ?? "";
-  if (lower.includes("full")) return { bg: "#e0f7fa", color: "#00796b" };
-  if (lower.includes("part")) return { bg: "#ede7f6", color: "#5e35b1" };
-  if (lower.includes("híbrido")) return { bg: "#e3f2fd", color: "#1565c0" };
-  if (lower.includes("presencial")) return { bg: "#fff3e0", color: "#ef6c00" };
-  if (lower.includes("remoto")) return { bg: "#e8f5e9", color: "#2e7d32" };
-  return { bg: "#f1f3f4", color: "#444" };
-};
-
 export default function DashboardPage() {
   const [postulacionesActivas, setPostulacionesActivas] = useState(0);
   const [ofertasNuevas, setOfertasNuevas] = useState(0);
@@ -184,6 +168,10 @@ export default function DashboardPage() {
               { label: "Tipo de contrato", value: ofertaSeleccionada.tipoContrato },
               { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
               { label: "Descripción", value: ofertaSeleccionada.descripcion },
+              { 
+                label: "Cupos disponibles", 
+                value: `${ofertaSeleccionada.cantidadPostulantes || 0}/${ofertaSeleccionada.cupos || 1}` 
+              },
             ]}
             chips={[
               {

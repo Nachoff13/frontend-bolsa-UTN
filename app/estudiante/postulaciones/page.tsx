@@ -3,12 +3,9 @@
 
 //#region IMPORTACIOENS REACT
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Box, Card, Divider, Typography } from "@mui/material";
+import { Box, Card } from "@mui/material";
 import {
-  LocationOn as LocationOnIcon,
   CalendarToday as CalendarTodayIcon,
-  Event as EventIcon,
 } from "@mui/icons-material";
 import { useMemo } from "react";
 
@@ -55,9 +52,7 @@ import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 //#region LOGICA DE LA PAGINA
 export default function EstudiantePostulacionesPage() {
   //#region SNACKBAR Y MODAL CARGA
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [postulaciones, setPostulaciones] = useState<PostulacionDTO[]>([]);
   const { showMessage } = useSnackbar();
 
   //#region DATOS DE LA API EN VARIABLES
@@ -443,8 +438,6 @@ export default function EstudiantePostulacionesPage() {
                       texto: `Carta: ${postulacion.cartaPresentacion}`,
                     },
                   ]}
-                  onAccion1={() => router.push(`/estudiante/ofertas/${postulacion.idOferta}`)}
-                  textoAccion1="Ver detalle"
                 />
                 );
               })}

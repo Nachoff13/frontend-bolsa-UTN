@@ -36,10 +36,19 @@ export default function CardGenerica({
         },
       }}
     >
-      <CardContent sx={{ p: 3 }}> {/* Aumentado de p: 2 a p: 3 */}
+      <CardContent sx={{ p: 4 }}> {/* Aumentado padding para más aire */}
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={2}>
           <Box flex={1}>
-            <Typography variant="h6" color="primary" fontWeight={600} sx={{ mb: 1 }}>
+            <Typography 
+              variant="h4" 
+              color="primary" 
+              fontWeight={700} 
+              sx={{ 
+                mb: 1.5, 
+                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }, // Responsive
+                lineHeight: 1.2 
+              }}
+            >
               {titulo}
             </Typography>
             {subtitulo && (

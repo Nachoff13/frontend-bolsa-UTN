@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { setAuthToken } from "@/services/Generics/api";
 import { genericService } from "@/services/generic.service";
 import { useSnackbar } from "@/components/providers/snackbar";
@@ -29,6 +30,8 @@ export default function AuthProvider({
   const [loading, setLoading] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { showMessage } = useSnackbar();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // inyectar token en axios
   useEffect(() => {
@@ -165,6 +168,34 @@ export default function AuthProvider({
       mounted = false;
     };
   }, [user, token]);
+
+  // Redirect automático al dashboard correcto según el rol
+  useEffect(() => {
+    // Solo redirigir si:
+    // 1. No estamos cargando
+    // 2. Tenemos un usuario autenticado
+    // 3. Ya tenemos el rol cargado
+    // 4. Estamos en la página raíz "/"
+    if (!loading && user && token && rol !== null && pathname === '/') {
+      console.log("🔀 Redirigiendo automáticamente según rol:", rol);
+      
+      // Rol 3 = Estudiante/Candidato
+      if (rol === 3) {
+        console.log("📚 Redirigiendo a dashboard de estudiante...");
+        router.push('/estudiante/dashboard');
+      }
+      // Rol 2 = Empresa
+      else if (rol === 2) {
+        console.log("🏢 Redirigiendo a dashboard de empresa...");
+        router.push('/empresa/dashboard');
+      }
+      // Rol 1 = Admin
+      else if (rol === 1) {
+        console.log("👑 Redirigiendo a dashboard de admin...");
+        router.push('/admin/dashboard');
+      }
+    }
+  }, [loading, user, token, rol, pathname, router]);
 
   if (loading || (user && token && rol === null)) {
     return <LoadingModal open={true} />;

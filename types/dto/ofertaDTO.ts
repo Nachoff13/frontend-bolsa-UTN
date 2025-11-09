@@ -10,6 +10,7 @@ export class OfertaDTO {
   nombreEmpresa!: string;
   nombreCarrera!: string;
   cantidadPostulantes!: number;
+  cupos!: number;
 
   //datos extra para postularse
   cartaPresentacion!: string;
@@ -26,4 +27,5 @@ export class CrearOfertaDTO {
   idLocalidad?: number;
   fechaInicio?: string;
   fechaFin?: string;
+  cupos?: number;
 }

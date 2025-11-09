@@ -40,6 +40,8 @@ import {
   getModalidadChipColor, 
   getTipoContratoChipColor 
 } from "@/lib/chipColors";
+import { calcularFechaCierre } from "@/lib/dateUtils";
+import { getCuposChip } from "@/lib/cuposUtils";
 
 //#region Tipos y constantes
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
@@ -315,38 +317,6 @@ export default function EstudianteOfertasPage() {
       setLoading(false);
     }
   }
-  // Función para calcular fecha de cierre por defecto (60 días después de fechaInicio)
-  const calcularFechaCierre = (
-    fechaInicio: string,
-    fechaFin?: string
-  ): string => {
-    // Si hay fechaFin específica, la usamos
-    if (fechaFin && fechaFin.trim() !== "") {
-      return fechaFin;
-    }
-
-    // Si no hay fechaFin, calculamos 60 días después de fechaInicio
-    // El formato viene como "dd/MM/yyyy" del backend
-    const partes = fechaInicio.split("/");
-    if (partes.length !== 3) return fechaInicio; // Si el formato es incorrecto, devolvemos la fecha original
-
-    const dia = parseInt(partes[0]);
-    const mes = parseInt(partes[1]) - 1; // Los meses en JavaScript van de 0-11
-    const año = parseInt(partes[2]);
-
-    const fechaInicioDate = new Date(año, mes, dia);
-    const fechaCierreDate = new Date(fechaInicioDate);
-    fechaCierreDate.setDate(fechaInicioDate.getDate() + 60); // Agregar 60 días
-
-    // Formatear de vuelta a "dd/MM/yyyy"
-    const diaCierre = fechaCierreDate.getDate().toString().padStart(2, "0");
-    const mesCierre = (fechaCierreDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0");
-    const añoCierre = fechaCierreDate.getFullYear();
-
-    return `${diaCierre}/${mesCierre}/${añoCierre}`;
-  };
 
   //#endregion
 
@@ -395,6 +365,7 @@ export default function EstudianteOfertasPage() {
                 const empresaColor = getEmpresaChipColor();
                 const modalidadColor = getModalidadChipColor(oferta.modalidad);
                 const contratoColor = getTipoContratoChipColor(oferta.tipoContrato);
+                const cuposChip = getCuposChip(oferta.cantidadPostulantes, oferta.cupos);
                 
                 return (
                 <CardGenerica
@@ -418,6 +389,7 @@ export default function EstudianteOfertasPage() {
                       backgroundColor: contratoColor.backgroundColor,
                       textColor: contratoColor.color
                     },
+                    cuposChip,
                   ]}
                   infoExtra={[
                     {

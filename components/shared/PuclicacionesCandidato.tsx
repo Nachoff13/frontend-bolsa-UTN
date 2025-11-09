@@ -8,7 +8,7 @@ import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import CardPublicacion from "@/components/shared/CardPublicacion";
 import DetalleModal from "@/components/shared/DetalleModal";
 import LoadingModal from "@/components/shared/LoadingModal";
-import ModalFormulario, { CampoFormulario } from "@/components/shared/ModalFormulario"; // 👈 import
+import ModalFormulario, { CampoFormulario } from "@/components/shared/ModalFormulario";
 import { postulanteService } from "@/services/postulacion.service";
 import { useSnackbar } from "@/components/providers/snackbar";
 import {
@@ -17,48 +17,13 @@ import {
   SnackbarType,
 } from "@/types/enums/snackbar";
 import { ResponseError } from "@/types/Generics/responseError";
+import { calcularTiempoTranscurrido } from "@/lib/dateUtils";
 
 interface Props {
   ofertas: OfertaDTO[];
   loading: boolean;
   postulaciones: PostulacionDTO[];
   onPostulacionExitosa?: () => void;
-}
-
-function parseFechaLatam(fechaStr: string): Date {
-  // Soporta "dd/MM/yyyy"
-  const [dd, mm, yyyy] = fechaStr.split("/").map(Number);
-  return new Date(yyyy, mm - 1, dd);
-}
-
-// 🕒 Función auxiliar para calcular tiempo transcurrido
-function calcularTiempoTranscurrido(fechaStr?: string): string {
-  if (!fechaStr) return "";
-
-  // Si viene en formato dd/MM/yyyy la parseamos manualmente.
-  const fecha = fechaStr.includes("/")
-    ? parseFechaLatam(fechaStr)
-    : new Date(fechaStr);
-
-  if (isNaN(fecha.getTime())) return "";
-
-  const ahora = new Date();
-  const diffMs = ahora.getTime() - fecha.getTime();
-
-  // Si es una fecha futura
-  if (diffMs < 0) return "próximamente";
-
-  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDias < 1) return "hoy";
-  if (diffDias === 1) return "hace 1 día";
-  if (diffDias < 7) return `hace ${diffDias} días`;
-
-  const semanas = Math.floor(diffDias / 7);
-  if (semanas < 4) return semanas === 1 ? "hace 1 semana" : `hace ${semanas} semanas`;
-
-  const meses = Math.floor(diffDias / 30);
-  return meses === 1 ? "hace 1 mes" : `hace ${meses} meses`;
 }
 
 export default function PublicacionesCandidato({

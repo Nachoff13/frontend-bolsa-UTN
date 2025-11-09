@@ -3,7 +3,7 @@
 
 //#region IMPORTACIOENS REACT
 import { useEffect, useState } from "react";
-import { Box, Card, Divider, Typography, Button, Chip, Stack, TextField } from "@mui/material";
+import { Box, Card, Divider, Typography, Button, Chip, Stack, TextField, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText } from "@mui/material";
 import {
   LocationOn as LocationOnIcon,
   CalendarToday as CalendarTodayIcon,
@@ -12,6 +12,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Search as SearchIcon,
+  Lock as LockIcon,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
 import { InputAdornment } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -26,6 +28,7 @@ import CardGenerica from "@/components/shared/CardGenerica";
 import { useSnackbar } from "@/components/providers/snackbar";
 import LoadingModal from "@/components/shared/LoadingModal";
 import EmptyState from "@/components/shared/EmptyState";
+import EditarOfertaModal from "@/components/ofertas/EditarOfertaModal";
 
 //#endregion
 
@@ -48,6 +51,8 @@ import {
 import { GrupoFiltroID } from "@/types/constants";
 import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
+import { calcularFechaCierre } from "@/lib/dateUtils";
+import { getCuposChip } from "@/lib/cuposUtils";
 
 //#endregion
 
@@ -58,6 +63,10 @@ export default function EmpresaOfertasPublicadasPage() {
   //#region SNACKBAR Y MODAL CARGA
   const [loading, setLoading] = useState(true);
   const { showMessage } = useSnackbar();
+  const [modalEditarOpen, setModalEditarOpen] = useState(false);
+  const [ofertaSeleccionada, setOfertaSeleccionada] = useState<OfertaDTO | null>(null);
+  const [modalEliminarOpen, setModalEliminarOpen] = useState(false);
+  const [ofertaAEliminar, setOfertaAEliminar] = useState<number | null>(null);
   //#endregion
 
   //#region DATOS DE LA API EN VARIABLES
@@ -263,33 +272,6 @@ export default function EmpresaOfertasPublicadasPage() {
     setTiposContratoSeleccionados([]);
   };
 
-  // Función para calcular fecha de cierre por defecto (60 días después de fechaInicio)
-  const calcularFechaCierre = (fechaInicio: string, fechaFin?: string): string => {
-    // Si hay fechaFin específica, la usamos
-    if (fechaFin && fechaFin.trim() !== '') {
-      return fechaFin;
-    }
-    
-    // Si no hay fechaFin, calculamos 60 días después de fechaInicio
-    // El formato viene como "dd/MM/yyyy" del backend
-    const partes = fechaInicio.split('/');
-    if (partes.length !== 3) return fechaInicio; // Si el formato es incorrecto, devolvemos la fecha original
-    
-    const dia = parseInt(partes[0]);
-    const mes = parseInt(partes[1]) - 1; // Los meses en JavaScript van de 0-11
-    const año = parseInt(partes[2]);
-    
-    const fechaInicioDate = new Date(año, mes, dia);
-    const fechaCierreDate = new Date(fechaInicioDate);
-    fechaCierreDate.setDate(fechaInicioDate.getDate() + 60); // Agregar 60 días
-    
-    // Formatear de vuelta a "dd/MM/yyyy"
-    const diaCierre = fechaCierreDate.getDate().toString().padStart(2, '0');
-    const mesCierre = (fechaCierreDate.getMonth() + 1).toString().padStart(2, '0');
-    const añoCierre = fechaCierreDate.getFullYear();
-    
-    return `${diaCierre}/${mesCierre}/${añoCierre}`;
-  };
 
   const getEstadoColor = (oferta: OfertaDTO) => {
     const fechaFin = oferta.fechaFin ? new Date(oferta.fechaFin.split('/').reverse().join('-')) : null;
@@ -318,15 +300,22 @@ export default function EmpresaOfertasPublicadasPage() {
   };
 
   const handleEditarOferta = (id: number) => {
+    const oferta = ofertas.find(o => o.id === id);
+    if (oferta) {
+      setOfertaSeleccionada(oferta);
+      setModalEditarOpen(true);
+    }
   };
 
-  const handleEliminarOferta = async (id: number) => {
+  const handleActualizarOferta = async (id: number, data: CrearOfertaDTO) => {
     try {
-      await ofertaService.eliminarOferta(id);
-      showMessage('Oferta eliminada exitosamente', SnackbarType.Success, {
+      await ofertaService.actualizarOferta(id, data);
+      showMessage('Oferta actualizada exitosamente', SnackbarType.Success, {
         size: SnackbarSize.Medium,
         position: SnackbarPosition.BottomCenter,
       });
+      setModalEditarOpen(false);
+      setOfertaSeleccionada(null);
       cargarDatos();
     } catch (e) {
       const err = e as ResponseError;
@@ -337,11 +326,87 @@ export default function EmpresaOfertasPublicadasPage() {
     }
   };
 
+  const handleSolicitarEliminarOferta = (id: number) => {
+    setOfertaAEliminar(id);
+    setModalEliminarOpen(true);
+  };
+
+  const handleConfirmarEliminar = async () => {
+    if (ofertaAEliminar === null) return;
+    
+    try {
+      await ofertaService.eliminarOferta(ofertaAEliminar);
+      showMessage('Oferta eliminada exitosamente', SnackbarType.Success, {
+        size: SnackbarSize.Medium,
+        position: SnackbarPosition.BottomCenter,
+      });
+      setModalEliminarOpen(false);
+      setOfertaAEliminar(null);
+      cargarDatos();
+    } catch (e) {
+      const err = e as ResponseError;
+      showMessage(err.message, SnackbarType.Error, {
+        size: SnackbarSize.Medium,
+        position: SnackbarPosition.BottomCenter,
+      });
+    }
+  };
+
+  const handleCancelarEliminar = () => {
+    setModalEliminarOpen(false);
+    setOfertaAEliminar(null);
+  };
+
   //#endregion
 
   //#region RENDERIZADO DE LA PAGINA
+
   return (
     <>
+      {/* Modal de Confirmación para Eliminar */}
+      <Dialog
+        open={modalEliminarOpen}
+        onClose={handleCancelarEliminar}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningIcon color="error" />
+          ¿Confirmar eliminación?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Esta acción eliminará permanentemente la oferta. Los candidatos no podrán ver ni aplicar a esta oferta.
+            <br /><br />
+            <strong>Esta acción no se puede deshacer.</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleCancelarEliminar} variant="outlined">
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleConfirmarEliminar} 
+            variant="contained" 
+            color="error"
+            startIcon={<DeleteIcon />}
+            autoFocus
+          >
+            Eliminar Oferta
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <EditarOfertaModal
+        open={modalEditarOpen}
+        oferta={ofertaSeleccionada}
+        onClose={() => {
+          setModalEditarOpen(false);
+          setOfertaSeleccionada(null);
+        }}
+        onSubmit={handleActualizarOferta}
+      />
+      
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Titulo
           titulo="Mis Ofertas Publicadas"
@@ -399,6 +464,8 @@ export default function EmpresaOfertasPublicadasPage() {
                     { label: oferta.modalidad, color: "primary" },
                     { label: oferta.tipoContrato, color: "secondary" },
                     { label: getEstadoTexto(oferta), color: getEstadoColor(oferta) as any },
+                    // Cupos con lógica mejorada (usando utilidad centralizada)
+                    getCuposChip(oferta.cantidadPostulantes, oferta.cupos),
                   ]}
                   infoExtra={[
                     {
@@ -416,7 +483,7 @@ export default function EmpresaOfertasPublicadasPage() {
                   ]}
                   onAccion1={() => handleEditarOferta(oferta.id)}
                   textoAccion1="Editar"
-                  onAccion2={() => handleEliminarOferta(oferta.id)}
+                  onAccion2={() => handleSolicitarEliminarOferta(oferta.id)}
                   textoAccion2="Eliminar"
                 />
               ))}

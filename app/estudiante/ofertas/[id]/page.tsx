@@ -27,6 +27,7 @@ import {
   getTipoContratoChipColor 
 } from "@/lib/chipColors";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { calcularFechaCierre } from "@/lib/dateUtils";
 
 export default function DetalleOfertaPage() {
   const params = useParams();
@@ -38,30 +39,6 @@ export default function DetalleOfertaPage() {
   const [modalPostulacionOpen, setModalPostulacionOpen] = useState(false);
 
   const ofertaId = params.id as string;
-
-  // Función para calcular fecha de cierre
-  const calcularFechaCierre = (fechaInicio: string, fechaFin?: string): string => {
-    if (fechaFin && fechaFin.trim() !== "") {
-      return fechaFin;
-    }
-
-    const partes = fechaInicio.split("/");
-    if (partes.length !== 3) return fechaInicio;
-
-    const dia = parseInt(partes[0]);
-    const mes = parseInt(partes[1]) - 1;
-    const año = parseInt(partes[2]);
-
-    const fechaInicioDate = new Date(año, mes, dia);
-    const fechaCierreDate = new Date(fechaInicioDate);
-    fechaCierreDate.setDate(fechaInicioDate.getDate() + 60);
-
-    const diaCierre = fechaCierreDate.getDate().toString().padStart(2, "0");
-    const mesCierre = (fechaCierreDate.getMonth() + 1).toString().padStart(2, "0");
-    const añoCierre = fechaCierreDate.getFullYear();
-
-    return `${diaCierre}/${mesCierre}/${añoCierre}`;
-  };
 
   useEffect(() => {
     cargarOferta();
@@ -232,6 +209,24 @@ export default function DetalleOfertaPage() {
                 sx={{
                   backgroundColor: contratoColor.backgroundColor,
                   color: contratoColor.color,
+                  fontWeight: 600,
+                }}
+              />
+              <Chip
+                label={
+                  (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
+                    ? "🎯 Cupo Lleno"
+                    : `👥 Cupos: ${oferta.cantidadPostulantes || 0}/${oferta.cupos || 1}`
+                }
+                sx={{
+                  backgroundColor:
+                    (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
+                      ? "#FF9800"
+                      : "#E3F2FD",
+                  color:
+                    (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
+                      ? "#FFFFFF"
+                      : "#1976D2",
                   fontWeight: 600,
                 }}
               />

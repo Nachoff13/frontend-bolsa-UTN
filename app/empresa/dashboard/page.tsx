@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import StatCard from "@/components/shared/StatCard";
 
 import { empresaService } from "@/services/empresa.service";
@@ -28,28 +28,58 @@ export default function DashboardEmpresaPage() {
 
   const emailEmpresa = user?.email;
 
+  // Función para cargar datos (reutilizable y memorizada)
+  const fetchData = useCallback(async () => {
+    if (!emailEmpresa) return;
+    
+    try {
+      setLoading(true);
+
+      // Llamamos a los endpoints del backend
+      const [pubs, posts] = await Promise.all([
+        empresaService.getPublicacionesEmpresa(emailEmpresa),
+        empresaService.getPostulacionesEmpresa(emailEmpresa),
+      ]);
+
+      setOfertas(pubs);
+      setPostulaciones(posts);
+    } catch (error) {
+      console.error("Error al cargar dashboard de empresa:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [emailEmpresa]);
+
+  // Carga inicial
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+    fetchData();
+  }, [fetchData]);
 
-        // Llamamos a los endpoints del backend
-        const [pubs, posts] = await Promise.all([
-          empresaService.getPublicacionesEmpresa(emailEmpresa),
-          empresaService.getPostulacionesEmpresa(emailEmpresa),
-        ]);
+  // Recargar datos cuando vuelves a la pestaña/ventana
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log("🔄 Dashboard en foco, recargando datos...");
+      fetchData();
+    };
 
-        setOfertas(pubs);
-        setPostulaciones(posts);
-      } catch (error) {
-        console.error("Error al cargar dashboard de empresa:", error);
-      } finally {
-        setLoading(false);
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("🔄 Página visible, recargando datos...");
+        fetchData();
       }
     };
 
-    fetchData();
-  }, [emailEmpresa]);
+    // Listener para cuando la ventana recibe foco
+    window.addEventListener('focus', handleFocus);
+    
+    // Listener para cuando la página se vuelve visible (cambio de pestaña)
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
 
   useEffect(() => {
     const fetchPorcentaje = async () => {

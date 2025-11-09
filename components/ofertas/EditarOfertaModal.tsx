@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Card,
-  CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Typography,
   TextField,
   Button,
@@ -15,16 +17,14 @@ import {
   MenuItem,
   Autocomplete,
   FormHelperText,
-  CircularProgress
+  CircularProgress,
+  IconButton
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import CloseIcon from '@mui/icons-material/Close';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CrearOfertaDTO } from '@/types/dto/ofertaDTO';
+import { CrearOfertaDTO, OfertaDTO } from '@/types/dto/ofertaDTO';
 import { OpcionFiltro } from '@/types/dto/filter/opcionFiltroDTO';
 import { genericService } from '@/services/generic.service';
 
@@ -36,8 +36,8 @@ type CatalogOption = {
   nombre?: string;
 };
 
-// Schema de validación simplificado
-const ofertaCreateSchema = z.object({
+// Schema de validación SIN fechas
+const editarOfertaSchema = z.object({
   titulo: z.string()
     .min(3, 'El título debe tener al menos 3 caracteres')
     .max(80, 'El título no puede exceder 80 caracteres'),
@@ -50,56 +50,56 @@ const ofertaCreateSchema = z.object({
   cupos: z.number()
     .min(1, 'Debe haber al menos 1 cupo disponible')
     .max(999, 'El número de cupos no puede exceder 999'),
-  fechaInicio: z.string().min(1, 'La fecha de inicio es requerida'),
-  fechaFin: z.string().optional()
-}).refine((data) => {
-  if (data.fechaFin) {
-    const fechaInicio = new Date(data.fechaInicio);
-    const fechaFin = new Date(data.fechaFin);
-    return fechaFin >= fechaInicio;
-  }
-  return true;
-}, {
-  message: "La fecha de fin debe ser posterior o igual a la fecha de inicio",
-  path: ["fechaFin"]
 });
 
-type OfertaFormData = z.infer<typeof ofertaCreateSchema>;
+type EditarOfertaFormData = z.infer<typeof editarOfertaSchema>;
 
-interface OfertaFormProps {
-  onSubmit: (data: CrearOfertaDTO) => void;
-  onCancel: () => void;
-  isSubmitting: boolean;
+interface EditarOfertaModalProps {
+  open: boolean;
+  oferta: OfertaDTO | null;
+  onClose: () => void;
+  onSubmit: (id: number, data: CrearOfertaDTO) => Promise<void>;
 }
 
-export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaFormProps) {
+export default function EditarOfertaModal({ open, oferta, onClose, onSubmit }: EditarOfertaModalProps) {
   const [modalidades, setModalidades] = useState<CatalogOption[]>([]);
   const [tiposContrato, setTiposContrato] = useState<CatalogOption[]>([]);
   const [localidades, setLocalidades] = useState<CatalogOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    watch
-  } = useForm<OfertaFormData>({
-    resolver: zodResolver(ofertaCreateSchema),
-    defaultValues: {
-      titulo: '',
-      descripcion: '',
-      idModalidad: '',
-      idTipoContrato: '',
-      idLocalidad: '',
-      cupos: 1,
-      fechaInicio: '',
-      fechaFin: ''
-    }
+    reset
+  } = useForm<EditarOfertaFormData>({
+    resolver: zodResolver(editarOfertaSchema),
   });
 
   useEffect(() => {
-    cargarCatalogos();
-  }, []);
+    if (open) {
+      cargarCatalogos();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (oferta && modalidades.length > 0 && tiposContrato.length > 0 && localidades.length > 0) {
+      // Buscar los IDs correspondientes basados en los nombres
+      const modalidadId = modalidades.find(m => m.descripcion === oferta.modalidad || m.nombre === oferta.modalidad)?.id || '';
+      const tipoContratoId = tiposContrato.find(t => t.descripcion === oferta.tipoContrato || t.nombre === oferta.tipoContrato)?.id || '';
+      const localidadId = localidades.find(l => l.descripcion === oferta.nombreLocalidad || l.nombre === oferta.nombreLocalidad)?.id || '';
+
+      reset({
+        titulo: oferta.titulo,
+        descripcion: oferta.descripcion,
+        idModalidad: modalidadId,
+        idTipoContrato: tipoContratoId,
+        idLocalidad: String(localidadId),
+        cupos: oferta.cupos || 1,
+      });
+    }
+  }, [oferta, modalidades, tiposContrato, localidades, reset]);
 
   const cargarCatalogos = async () => {
     try {
@@ -121,44 +121,77 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
     }
   };
 
-  const onFormSubmit = (data: OfertaFormData) => {
-    const ofertaData: CrearOfertaDTO = {
-      titulo: data.titulo,
-      descripcion: data.descripcion,
-      idModalidad: typeof data.idModalidad === 'string' ? parseInt(data.idModalidad) : data.idModalidad,
-      idTipoContrato: typeof data.idTipoContrato === 'string' ? parseInt(data.idTipoContrato) : data.idTipoContrato,
-      idLocalidad: parseInt(data.idLocalidad),
-      cupos: data.cupos,
-      fechaInicio: data.fechaInicio,
-      fechaFin: data.fechaFin || undefined
-    };
-    
-    onSubmit(ofertaData);
+  const onFormSubmit = async (data: EditarOfertaFormData) => {
+    if (!oferta) return;
+
+    try {
+      setIsSubmitting(true);
+      
+      // Crear el DTO para actualización (sin fechas)
+      const ofertaData: CrearOfertaDTO = {
+        titulo: data.titulo,
+        descripcion: data.descripcion,
+        idModalidad: typeof data.idModalidad === 'string' ? parseInt(data.idModalidad) : data.idModalidad,
+        idTipoContrato: typeof data.idTipoContrato === 'string' ? parseInt(data.idTipoContrato) : data.idTipoContrato,
+        idLocalidad: parseInt(data.idLocalidad),
+        cupos: data.cupos,
+        // NO incluimos fechaInicio ni fechaFin
+      };
+      
+      await onSubmit(oferta.id, ofertaData);
+      handleClose();
+    } catch (error) {
+      console.error('Error al actualizar oferta:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  if (loading) {
-    return (
-      <Card sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
-        <CardContent sx={{ p: 4, textAlign: 'center' }}>
-          <CircularProgress />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Cargando formulario...
-          </Typography>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Card sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}> {/* Aumentado de 800 a 900 */}
-        <CardContent sx={{ p: 5 }}> {/* Aumentado de 4 a 5 */}
-          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 5 }}> {/* Aumentado mb */}
-            Crear Nueva Oferta
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+        }
+      }}
+    >
+      <DialogTitle sx={{ m: 0, p: 2.5, pb: 1 }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography variant="h5" component="div" fontWeight={600}>
+            Editar Oferta
           </Typography>
-          
-          <Box component="form" onSubmit={handleSubmit(onFormSubmit)}>
-            <Stack spacing={3.5}> {/* Aumentado de 3 a 3.5 */}
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Modifica los detalles de tu oferta laboral
+        </Typography>
+      </DialogTitle>
+
+      <DialogContent dividers sx={{ p: 3 }}>
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Box component="form" id="editar-oferta-form" onSubmit={handleSubmit(onFormSubmit)}>
+            <Stack spacing={3}>
               {/* Título */}
               <Controller
                 name="titulo"
@@ -253,7 +286,6 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                   <Autocomplete
                     options={localidades}
                     getOptionLabel={(option) => {
-                      // Manejar tanto el formato OpcionFiltro como LocalidadDTO
                       if (option.descripcion) {
                         return option.descripcion;
                       }
@@ -267,7 +299,6 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                       String(loc.id) === String(field.value)
                     ) || null}
                     onChange={(_, newValue) => {
-                      // Usar id si está disponible, sino codigo, siempre como string
                       const value = newValue?.id || newValue?.codigo || '';
                       field.onChange(String(value));
                     }}
@@ -304,76 +335,41 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                   />
                 )}
               />
-
-              {/* Fecha de Inicio */}
-              <Controller
-                name="fechaInicio"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Fecha de Inicio"
-                    value={field.value ? dayjs(field.value) : null}
-                    onChange={(date) => {
-                      field.onChange(date ? date.format('YYYY-MM-DD') : '');
-                    }}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!errors.fechaInicio,
-                        helperText: errors.fechaInicio?.message,
-                        variant: 'outlined'
-                      }
-                    }}
-                  />
-                )}
-              />
-
-              {/* Fecha de Fin */}
-              <Controller
-                name="fechaFin"
-                control={control}
-                render={({ field }) => (
-                  <DatePicker
-                    label="Fecha de Fin (Opcional)"
-                    value={field.value ? dayjs(field.value) : null}
-                    onChange={(date) => {
-                      field.onChange(date ? date.format('YYYY-MM-DD') : '');
-                    }}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!errors.fechaFin,
-                        helperText: errors.fechaFin?.message || 'Si no se especifica, se calculará automáticamente',
-                        variant: 'outlined'
-                      }
-                    }}
-                  />
-                )}
-              />
-
-              {/* Botones */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 5 }}>
-                <Button
-                  variant="outlined"
-                  onClick={onCancel}
-                  disabled={isSubmitting}
-                  sx={{ minWidth: 140, py: 1.5 }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={isSubmitting}
-                  sx={{ minWidth: 140, py: 1.5 }}
-                >
-                  {isSubmitting ? 'Creando...' : 'Crear Oferta'}
-                </Button>
-              </Stack>
             </Stack>
           </Box>
-        </CardContent>
-      </Card>
-    </LocalizationProvider>
+        )}
+      </DialogContent>
+
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <Button
+          variant="outlined"
+          onClick={handleClose}
+          disabled={isSubmitting}
+          sx={{
+            minWidth: 120,
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 500,
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          form="editar-oferta-form"
+          variant="contained"
+          disabled={isSubmitting || loading}
+          sx={{
+            minWidth: 120,
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 500,
+          }}
+        >
+          {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
+
