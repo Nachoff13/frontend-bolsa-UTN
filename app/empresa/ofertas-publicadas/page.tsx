@@ -473,19 +473,16 @@ export default function EmpresaOfertasPublicadasPage() {
                   descripcion={oferta.descripcion}
                   chips={[
                     { 
-                      label: oferta.modalidad, 
-                      backgroundColor: getModalidadChipColor(oferta.modalidad).backgroundColor,
-                      textColor: getModalidadChipColor(oferta.modalidad).color
+                      label: oferta.modalidad
+                      // Sin colores personalizados - usará el estilo gris genérico
                     },
                     { 
-                      label: oferta.tipoContrato, 
-                      backgroundColor: getTipoContratoChipColor(oferta.tipoContrato).backgroundColor,
-                      textColor: getTipoContratoChipColor(oferta.tipoContrato).color
+                      label: oferta.tipoContrato
+                      // Sin colores personalizados - usará el estilo gris genérico
                     },
                     { 
-                      label: getEstadoTexto(oferta), 
-                      backgroundColor: getEstadoColor(oferta).backgroundColor,
-                      textColor: getEstadoColor(oferta).textColor
+                      label: getEstadoTexto(oferta)
+                      // Sin colores personalizados - usará el estilo gris genérico (excepto si es iniciada, rechazada, aprobada que se detectan automáticamente)
                     },
                     // Cupos con lógica mejorada (usando utilidad centralizada)
                     getCuposChip(oferta.cantidadPostulantes, oferta.cupos),

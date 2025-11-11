@@ -36,11 +36,6 @@ import EmptyState from "@/components/shared/EmptyState";
 import { ofertaService } from "@/services/oferta.service";
 import { genericService } from "@/services/generic.service";
 import { postulanteService } from "@/services/postulacion.service";
-import {
-  getEmpresaChipColor,
-  getModalidadChipColor,
-  getTipoContratoChipColor,
-} from "@/lib/chipColors";
 import { calcularFechaCierre } from "@/lib/dateUtils";
 import { getCuposChip } from "@/lib/cuposUtils";
 
@@ -363,11 +358,6 @@ export default function EstudianteOfertasPage() {
                 variantSubtitulo="body2"
               />
               {ofertas.map((oferta) => {
-                const empresaColor = getEmpresaChipColor();
-                const modalidadColor = getModalidadChipColor(oferta.modalidad);
-                const contratoColor = getTipoContratoChipColor(
-                  oferta.tipoContrato
-                );
                 const cuposChip = getCuposChip(
                   oferta.cantidadPostulantes,
                   oferta.cupos
@@ -386,18 +376,15 @@ export default function EstudianteOfertasPage() {
                     chips={[
                       {
                         label: oferta.nombreEmpresa,
-                        backgroundColor: empresaColor.backgroundColor,
-                        textColor: empresaColor.color,
+                        // Sin colores personalizados - usará el estilo gris genérico
                       },
                       {
                         label: oferta.modalidad,
-                        backgroundColor: modalidadColor.backgroundColor,
-                        textColor: modalidadColor.color,
+                        // Sin colores personalizados - usará el estilo gris genérico
                       },
                       {
                         label: oferta.tipoContrato,
-                        backgroundColor: contratoColor.backgroundColor,
-                        textColor: contratoColor.color,
+                        // Sin colores personalizados - usará el estilo gris genérico
                       },
                       cuposChip,
                     ]}
