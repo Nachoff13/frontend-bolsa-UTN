@@ -78,6 +78,9 @@ export const ENDPOINTS = {
     VERIFICAR_PERFIL: `/Candidato/verificar_perfil`,
     GET_PORCENTAJE_PERFIL: `/Candidato/get_porcentaje_perfil`,
     COMPLETAR_PERFIL: `/Candidato/completar_perfil`,
+    GET_ALL_COMPETENCIAS: `/Candidato/get_all_competencias`,
+    ADD_COMPETENCIA: `/Candidato/add_competencia`,
+    REMOVE_COMPETENCIA: `/Candidato/remove_competencia`,
   },
   EMPRESA: {
     GET_PERFIL: `/Empresa/get_perfil`,

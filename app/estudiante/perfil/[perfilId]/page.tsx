@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { candidatoService } from "@/services/candidato.service";
 import type { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
+import type { CompetenciaDTO } from "@/types/dto/competenciaDTO";
 import LoadingModal from "@/components/shared/LoadingModal";
 import { useSnackbar } from "@/components/providers/snackbar";
 import { SnackbarType } from "@/types/enums/snackbar";
@@ -31,6 +32,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Autocomplete,
 } from "@mui/material";
 import Titulo from "@/components/shared/Titulo";
 import FileUpload from "@/components/shared/FileUpload";
@@ -79,6 +81,10 @@ export default function PerfilEstudiantePage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
 
+  // Estados para competencias
+  const [allCompetencias, setAllCompetencias] = useState<CompetenciaDTO[]>([]);
+  const [loadingCompetencias, setLoadingCompetencias] = useState(false);
+
   // Obtener el perfilId de los parámetros de la ruta
   const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 2;
   
@@ -105,6 +111,7 @@ export default function PerfilEstudiantePage() {
           descripcion: data.descripcion || "",
           idCarrera: data.idCarrera || 0,
           anioEgreso: data.anioEgreso || new Date().getFullYear(),
+          competencias: data.competencias || [],
         });
       } catch (e: any) {
         showMessage(e?.message ?? "Error cargando perfil", SnackbarType.Error);
@@ -130,6 +137,26 @@ export default function PerfilEstudiantePage() {
     }
   }, [editMode]);
 
+  // Cargar todas las competencias disponibles
+  useEffect(() => {
+    const fetchCompetencias = async () => {
+      try {
+        setLoadingCompetencias(true);
+        const competencias = await candidatoService.getAllCompetencias();
+        setAllCompetencias(competencias);
+      } catch (error) {
+        console.error("Error al cargar competencias:", error);
+        showMessage("Error al cargar competencias", SnackbarType.Error);
+      } finally {
+        setLoadingCompetencias(false);
+      }
+    };
+
+    if (isOwnProfile && editMode) {
+      fetchCompetencias();
+    }
+  }, [isOwnProfile, editMode, showMessage]);
+
   const handleEditClick = () => {
     setEditMode(true);
   };
@@ -143,6 +170,7 @@ export default function PerfilEstudiantePage() {
         descripcion: perfil.descripcion || "",
         idCarrera: perfil.idCarrera || 0,
         anioEgreso: perfil.anioEgreso || new Date().getFullYear(),
+        competencias: perfil.competencias || [],
       });
     }
   };
@@ -153,6 +181,7 @@ export default function PerfilEstudiantePage() {
       
       if (!perfil || !perfilId) return;
 
+      // 1. Actualizar datos básicos del perfil
       const updatedPerfil: PerfilCandidatoDTO = {
         ...perfil,
         nombre: editedData.nombre,
@@ -162,10 +191,39 @@ export default function PerfilEstudiantePage() {
       };
 
       await candidatoService.updatePerfil(updatedPerfil);
+
+      // 2. Actualizar competencias
+      const currentCompetencias = perfil.competencias || [];
+      const newCompetencias = editedData.competencias || [];
       
-      // Recargar perfil
+      // Determinar competencias agregadas y eliminadas
+      const added = newCompetencias.filter(
+        (comp: CompetenciaDTO) => !currentCompetencias.some((curr) => curr.id === comp.id)
+      );
+      const removed = currentCompetencias.filter(
+        (curr) => !newCompetencias.some((comp: CompetenciaDTO) => comp.id === curr.id)
+      );
+
+      // Agregar nuevas competencias
+      for (const competencia of added) {
+        await candidatoService.addCompetencia(perfil.id, competencia.id);
+      }
+
+      // Eliminar competencias
+      for (const competencia of removed) {
+        await candidatoService.removeCompetencia(perfil.id, competencia.id);
+      }
+      
+      // 3. Recargar perfil
       const data = await candidatoService.getPerfilById(perfilId);
       setPerfil(data);
+      setEditedData({
+        nombre: data.nombre || "",
+        descripcion: data.descripcion || "",
+        idCarrera: data.idCarrera || 0,
+        anioEgreso: data.anioEgreso || new Date().getFullYear(),
+        competencias: data.competencias || [],
+      });
       
       setEditMode(false);
       showMessage("Perfil actualizado exitosamente", SnackbarType.Success);
@@ -174,6 +232,14 @@ export default function PerfilEstudiantePage() {
     } finally {
       setSavingChanges(false);
     }
+  };
+
+  const handleCompetenciasChange = (
+    event: any,
+    newValue: CompetenciaDTO[]
+  ) => {
+    // Solo actualizar el estado local, NO guardar en el backend todavía
+    setEditedData({ ...editedData, competencias: newValue });
   };
 
   const handleFileSelect = (file: File) => {
@@ -483,14 +549,23 @@ export default function PerfilEstudiantePage() {
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Habilidades y Competencias
             </Typography>
-            <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
-              {/* Habilidades hardcodeadas por ahora */}
-              <Chip label="Python" color="primary" />
-              <Chip label="SQL" color="primary" />
-              <Chip label="React" color="primary" />
-              <Chip label="Angular" color="primary" />
-              <Chip label="Metodologías Ágiles" color="primary" />
-            </Stack>
+            {perfil.competencias && perfil.competencias.length > 0 ? (
+              <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
+                {perfil.competencias.map((competencia) => (
+                  <Chip 
+                    key={competencia.id} 
+                    label={competencia.nombre} 
+                    color="primary" 
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+                {isOwnProfile 
+                  ? "No has agregado competencias aún. Edita tu perfil para agregar tus habilidades."
+                  : "Este usuario no ha agregado competencias aún."}
+              </Typography>
+            )}
           </CardContent>
         </Card>
 
@@ -669,6 +744,37 @@ export default function PerfilEstudiantePage() {
                 placeholder="Cuéntanos sobre ti, tus intereses profesionales..."
                 value={editedData.descripcion}
                 onChange={(e) => setEditedData({ ...editedData, descripcion: e.target.value })}
+              />
+
+              {/* Campo de Competencias */}
+              <Autocomplete
+                multiple
+                options={allCompetencias}
+                getOptionLabel={(option) => option.nombre}
+                value={editedData.competencias || []}
+                onChange={handleCompetenciasChange}
+                loading={loadingCompetencias}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Habilidades y Competencias"
+                    placeholder="Selecciona tus competencias..."
+                    helperText="Busca y selecciona las habilidades que dominas"
+                  />
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      label={option.nombre}
+                      {...getTagProps({ index })}
+                      color="primary"
+                      key={option.id}
+                    />
+                  ))
+                }
+                noOptionsText="No se encontraron competencias"
+                loadingText="Cargando competencias..."
               />
             </Stack>
           </DialogContent>
