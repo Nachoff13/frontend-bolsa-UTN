@@ -1,3 +1,5 @@
+import { CompetenciaDTO } from './competenciaDTO';
+
 export interface PerfilCandidatoDTO {
   // Campos de PerfilCandidato (según diagrama)
   id: number;
@@ -33,6 +35,9 @@ export interface PerfilCandidatoDTO {
   
   // Calculados por el backend
   porcentajePerfil?: number | null;
+  
+  // Competencias del candidato
+  competencias?: CompetenciaDTO[] | null;
   
   // Campos que no están en el diagrama (se mantienen para compatibilidad UI)
   telefono?: string | null;

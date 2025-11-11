@@ -2,6 +2,7 @@ import { http } from "@/services/Generics/httpClient";
 import { ENDPOINTS } from "@/services/Generics/endpoints";
 import { GenericService } from "./generic.service";
 import type { PerfilCandidatoDTO } from "@/types/dto/perfilCandidatoDTO";
+import type { CompetenciaDTO } from "@/types/dto/competenciaDTO";
 import { api } from "@/services/Generics/api";
 
 class CandidatoService extends GenericService {
@@ -104,6 +105,39 @@ class CandidatoService extends GenericService {
   async completarPerfil(data: any): Promise<PerfilCandidatoDTO> {
     try {
       return await http.post<PerfilCandidatoDTO>(ENDPOINTS.CANDIDATO.COMPLETAR_PERFIL, data);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // ========================================
+  // MÉTODOS DE COMPETENCIAS
+  // ========================================
+
+  async getAllCompetencias(): Promise<CompetenciaDTO[]> {
+    try {
+      return await http.get<CompetenciaDTO[]>(ENDPOINTS.CANDIDATO.GET_ALL_COMPETENCIAS);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async addCompetencia(perfilId: number, competenciaId: number): Promise<any> {
+    try {
+      return await http.post<any>(ENDPOINTS.CANDIDATO.ADD_COMPETENCIA, {
+        perfilId,
+        competenciaId
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async removeCompetencia(perfilId: number, competenciaId: number): Promise<any> {
+    try {
+      return await http.delete<any>(
+        `${ENDPOINTS.CANDIDATO.REMOVE_COMPETENCIA}?perfilId=${perfilId}&competenciaId=${competenciaId}`
+      );
     } catch (error) {
       throw error;
     }
