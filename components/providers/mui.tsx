@@ -55,7 +55,7 @@ const createAppTheme = (mode: PaletteMode) =>
         iniciada: "#0ea5e9", // Celeste UTN
         enRevision: "#0284c7", // Azul medio
         aprobada: "#00796b", // Verde-azulado éxito
-        rechazada: "#607d8b", // Gris azulado neutro
+        rechazada: "#b34c4aff", // Gris azulado neutro
         modalidad: "#00658f", // Azul UTN base
         contrato: "#004c6d", // Azul profundo
       },

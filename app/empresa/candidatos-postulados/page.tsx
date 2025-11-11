@@ -279,6 +279,7 @@ export default function CandidatosPostuladosPage() {
                     <Box display="flex" alignItems="center" justifyContent="space-between">
                       <Box display="flex" alignItems="center" gap={2}>
                         <Avatar
+                        src={p.fotoPerfil ? `data:image/jpeg;base64,${p.fotoPerfil}` : undefined}
                           sx={{
                             bgcolor: "#0d47a1",
                             color: "white",
