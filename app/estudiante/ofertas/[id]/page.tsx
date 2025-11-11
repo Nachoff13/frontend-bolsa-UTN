@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Box, Card, Chip, Divider, Typography, IconButton } from "@mui/material";
+import { Box, Card, Chip, Divider, Typography, IconButton, useTheme } from "@mui/material";
 import {
   LocationOn as LocationOnIcon,
   CalendarToday as CalendarTodayIcon,
@@ -22,27 +22,25 @@ import { SnackbarType, SnackbarSize, SnackbarPosition } from "@/types/enums/snac
 import { ResponseError } from "@/types/Generics/responseError";
 import { showConfirmDialog } from "@/components/shared/swalHelper";
 import ModalFormulario, { CampoFormulario } from "@/components/shared/ModalFormulario";
-import { 
-  getEmpresaChipColor, 
-  getModalidadChipColor, 
-  getTipoContratoChipColor 
-} from "@/lib/chipColors";
-import { useTheme } from "@/components/providers/ThemeProvider";
+import { useTheme as useThemeContext } from "@/components/providers/ThemeProvider";
 import { calcularFechaCierre } from "@/lib/dateUtils";
 
 export default function DetalleOfertaPage() {
   const params = useParams();
   const router = useRouter();
   const { showMessage } = useSnackbar();
-  const { mode } = useTheme();
+  const { mode } = useThemeContext();
+  const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [oferta, setOferta] = useState<OfertaDTO | null>(null);
   const [modalPostulacionOpen, setModalPostulacionOpen] = useState(false);
+  const [postulacion, setPostulacion] = useState<PostulacionDTO | null>(null);
 
   const ofertaId = params.id as string;
 
   useEffect(() => {
     cargarOferta();
+    cargarPostulacion();
   }, [ofertaId]);
 
   const cargarOferta = async () => {
@@ -61,6 +59,20 @@ export default function DetalleOfertaPage() {
       router.push("/estudiante/ofertas");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const cargarPostulacion = async () => {
+    try {
+      const postulaciones = await postulanteService.getPostulaciones();
+      const postulacionEncontrada = postulaciones.find(
+        (p) => p.idOferta === Number(ofertaId)
+      );
+      setPostulacion(postulacionEncontrada || null);
+    } catch (error) {
+      // Si hay error al cargar postulaciones, simplemente no mostramos el estado
+      // No es crítico para la visualización de la oferta
+      console.error("Error al cargar postulación:", error);
     }
   };
 
@@ -91,6 +103,7 @@ export default function DetalleOfertaPage() {
 
       setModalPostulacionOpen(false);
       cargarOferta(); // Recargar para actualizar el estado de postulación
+      cargarPostulacion(); // Recargar la postulación para mostrar el estado
     } catch (error) {
       const err = error as ResponseError;
       showMessage(err.message, SnackbarType.Error, {
@@ -120,9 +133,34 @@ export default function DetalleOfertaPage() {
   if (loading) return <LoadingModal open={loading} />;
   if (!oferta) return null;
 
-  const empresaColor = getEmpresaChipColor();
-  const modalidadColor = getModalidadChipColor(oferta.modalidad);
-  const contratoColor = getTipoContratoChipColor(oferta.tipoContrato);
+  // Función para obtener el color del chip de estado según el estado de postulación
+  const getEstadoChipStyle = (estado: string) => {
+    const estadoLower = estado?.toLowerCase() || "";
+    const isDark = mode === "dark";
+    
+    if (estadoLower === "iniciada") {
+      return {
+        backgroundColor: `${theme.palette.customStatus.iniciada}22`,
+        color: theme.palette.customStatus.iniciada,
+      };
+    }
+    if (estadoLower === "aprobada") {
+      return {
+        backgroundColor: `${theme.palette.customStatus.aprobada}22`,
+        color: theme.palette.customStatus.aprobada,
+      };
+    }
+    if (estadoLower === "rechazada") {
+      return {
+        backgroundColor: `${theme.palette.customStatus.rechazada}22`,
+        color: theme.palette.customStatus.rechazada,
+      };
+    }
+    return {
+      backgroundColor: isDark ? "#424242" : "#E5E7EB",
+      color: isDark ? "#ffffff" : "#374151",
+    };
+  };
 
   return (
     <Box>
@@ -193,8 +231,8 @@ export default function DetalleOfertaPage() {
                 <Chip
                   label={oferta.nombreCarrera}
                   sx={{
-                    backgroundColor: "#E5E7EB",
-                    color: "#374151",
+                    backgroundColor: mode === "dark" ? "#424242" : "#E5E7EB",
+                    color: mode === "dark" ? "#ffffff" : "#374151",
                     fontWeight: 600,
                     borderRadius: "8px",
                     fontSize: "0.875rem",
@@ -204,7 +242,7 @@ export default function DetalleOfertaPage() {
                       padding: "0 4px",
                       fontSize: "0.875rem",
                       fontWeight: 600,
-                      color: "#374151",
+                      color: mode === "dark" ? "#ffffff" : "#374151",
                     },
                   }}
                 />
@@ -252,8 +290,8 @@ export default function DetalleOfertaPage() {
                     : `Cupos: ${oferta.cantidadPostulantes || 0}/${oferta.cupos || 1}`
                 }
                 sx={{
-                  backgroundColor: "#E5E7EB",
-                  color: "#374151",
+                  backgroundColor: mode === "dark" ? "#424242" : "#E5E7EB",
+                  color: mode === "dark" ? "#ffffff" : "#374151",
                   fontWeight: 600,
                   borderRadius: "8px",
                   fontSize: "0.875rem",
@@ -263,10 +301,29 @@ export default function DetalleOfertaPage() {
                     padding: "0 4px",
                     fontSize: "0.875rem",
                     fontWeight: 600,
-                    color: "#374151",
+                    color: mode === "dark" ? "#ffffff" : "#374151",
                   },
                 }}
               />
+              {/* Chip de estado de postulación - solo se muestra si el estudiante está postulado */}
+              {postulacion && postulacion.estadoPostulacion && (
+                <Chip
+                  label={postulacion.estadoPostulacion}
+                  sx={{
+                    ...getEstadoChipStyle(postulacion.estadoPostulacion),
+                    fontWeight: 600,
+                    borderRadius: "8px",
+                    fontSize: "0.875rem",
+                    height: "32px",
+                    padding: "0 12px",
+                    "& .MuiChip-label": {
+                      padding: "0 4px",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                    },
+                  }}
+                />
+              )}
             </Box>
           </Box>
         </Box>
@@ -303,32 +360,58 @@ export default function DetalleOfertaPage() {
 
         {/* Botones de acción */}
         <Box display="flex" gap={2} mb={4}>
-          <Box
-            component="button"
-            onClick={handlePostularse}
-            disabled={!oferta.puedePostularse}
-            sx={{
-              flex: 1,
-              py: 1.5,
-              px: 3,
-              backgroundColor: oferta.puedePostularse ? "#14b8a6" : "#9ca3af",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: "1rem",
-              border: "none",
-              borderRadius: "8px",
-              cursor: oferta.puedePostularse ? "pointer" : "not-allowed",
-              transition: "all 0.2s",
-              "&:hover": {
-                backgroundColor: oferta.puedePostularse ? "#0d9488" : "#9ca3af",
-              },
-              "&:disabled": {
-                opacity: 0.6,
-              },
-            }}
-          >
-            {oferta.puedePostularse ? "Postularme" : "Ya estás postulado"}
-          </Box>
+          {postulacion ? (
+            <Box
+              sx={{
+                flex: 1,
+                py: 1.5,
+                px: 3,
+                backgroundColor: mode === "dark" ? "#1e1e1e" : "#f5f5f5",
+                border: `2px solid ${getEstadoChipStyle(postulacion.estadoPostulacion).color}`,
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  color: mode === "dark" ? "#fff" : "#000",
+                  fontWeight: 600,
+                  fontSize: "1rem",
+                }}
+              >
+                Estado de tu postulación: {postulacion.estadoPostulacion}
+              </Typography>
+            </Box>
+          ) : (
+            <Box
+              component="button"
+              onClick={handlePostularse}
+              disabled={!oferta.puedePostularse}
+              sx={{
+                flex: 1,
+                py: 1.5,
+                px: 3,
+                backgroundColor: oferta.puedePostularse ? "#14b8a6" : "#9ca3af",
+                color: "#fff",
+                fontWeight: 600,
+                fontSize: "1rem",
+                border: "none",
+                borderRadius: "8px",
+                cursor: oferta.puedePostularse ? "pointer" : "not-allowed",
+                transition: "all 0.2s",
+                "&:hover": {
+                  backgroundColor: oferta.puedePostularse ? "#0d9488" : "#9ca3af",
+                },
+                "&:disabled": {
+                  opacity: 0.6,
+                },
+              }}
+            >
+              {oferta.puedePostularse ? "Postularme" : "No disponible"}
+            </Box>
+          )}
         </Box>
 
         <Divider sx={{ my: 3, borderColor: mode === "dark" ? "#333" : "#e0e0e0" }} />
