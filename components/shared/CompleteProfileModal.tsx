@@ -14,6 +14,9 @@ import {
   Box,
   Typography,
   CircularProgress,
+  Checkbox,
+  FormControlLabel,
+  FormHelperText,
 } from "@mui/material";
 import { candidatoService } from "@/services/candidato.service";
 import { genericService } from "@/services/generic.service";
@@ -46,6 +49,8 @@ export default function CompleteProfileModal({
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingCarreras, setLoadingCarreras] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -70,6 +75,11 @@ export default function CompleteProfileModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validación: Debe aceptar términos para continuar
+    if (!acceptedTerms) {
+      setTermsError("Debes aceptar los términos de privacidad para continuar y permitir que las empresas vean tu perfil.");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -189,11 +199,37 @@ export default function CompleteProfileModal({
             sx={{ mb: 4 }}
           />
 
+          {/* Términos de privacidad y visibilidad del perfil */}
+          <Box sx={{ mb: 2 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={acceptedTerms}
+                  onChange={(e) => {
+                    setAcceptedTerms(e.target.checked);
+                    if (e.target.checked) setTermsError(null);
+                  }}
+                  color="primary"
+                />
+              }
+              label={
+                <Typography variant="body2">
+                  Acepto los términos de privacidad y autorizo que las empresas puedan ver mi perfil.
+                </Typography>
+              }
+            />
+            {termsError && (
+              <FormHelperText error sx={{ ml: 1.5 }}>
+                {termsError}
+              </FormHelperText>
+            )}
+          </Box>
+
           <Button
             type="submit"
             variant="contained"
             fullWidth
-            disabled={loading || formData.idCarrera === 0}
+            disabled={loading || formData.idCarrera === 0 || !acceptedTerms}
             sx={{ py: 2 }}
           >
             {loading ? (
