@@ -157,12 +157,13 @@ class EmpresaService extends GenericService {
 
   async cambiarEstadoPostulacion(
     idPostulacion: number,
-    nombreEstado: string
+    nombreEstado: string,
+    motivo: string | null = null
   ): Promise<ApiResponse<void>> {
     try {
       const res = await api.put<ApiResponse<void>>(
         ENDPOINTS.POSTULACIONES.CAMBIAR_ESTADO(idPostulacion),
-        JSON.stringify(nombreEstado), // 👈 se envía un string puro
+        JSON.stringify({ nombreEstado, motivo }), // 👈 se envía un objeto
         {
           headers: { "Content-Type": "application/json" }, // 👈 se especifica aquí
         }

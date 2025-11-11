@@ -43,6 +43,7 @@ import LoadingModal from "@/components/shared/LoadingModal";
 import Titulo from "@/components/shared/Titulo";
 import PublicacionesCandidato from "@/components/shared/PuclicacionesCandidato";
 import MisPostulacionesCandidato from "@/components/shared/MisPostulacionCandidato";
+import { debug } from "console";
 
 export default function DashboardPage() {
   const [postulacionesActivas, setPostulacionesActivas] = useState(0);

@@ -14,7 +14,6 @@ import { ResponseError } from "@/types/Generics/responseError";
 class AdminService extends GenericService {
   async cambiarEstadoValidacion(body: object): Promise<void> {
     try {
-      debugger;
       await http.post<PerfilEmpresaDTO[]>(
         ENDPOINTS.ADMIN.CAMBIAR_ESTADO_VALIDACION,
         body
@@ -51,7 +50,6 @@ class AdminService extends GenericService {
 
   async bajaUsuario(idUsuario: number) {
     try {
-      debugger;
       await http.post(`${ENDPOINTS.ADMIN.BAJA_USUARIO}`, idUsuario);
     } catch (error) {
       throw error;

@@ -7,7 +7,7 @@ import CandidatoCard from "./CandidatoCard";
 import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
 import { Button, Typography, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-
+import EmptyState from "./EmptyState";
 
 interface CandidatosPostuladosProps {
   postulaciones: PostulacionDTO[];
@@ -82,14 +82,18 @@ export default function CandidatosPostulados({
 
       {/* 📋 Lista de candidatos */}
       {postulaciones.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
-          No hay postulaciones recibidas aún.
-        </Typography>
+        <EmptyState
+          mensaje="Aún no has recibido postulaciones para tus ofertas."
+        />
       ) : (
         <div className="flex flex-col gap-4">
-          {postulaciones.slice(0, 4).map((p) => (   // 👈 limita a 4 elementos
-            <CandidatoCard key={p.id} postulacion={p} onVer={handleVer} />
-          ))}
+          {postulaciones.slice(0, 4).map(
+            (
+              p // 👈 limita a 4 elementos
+            ) => (
+              <CandidatoCard key={p.id} postulacion={p} onVer={handleVer} />
+            )
+          )}
         </div>
       )}
     </section>

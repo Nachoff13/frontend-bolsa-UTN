@@ -127,7 +127,6 @@ export default function EmpresasSolicitantesPage() {
   }, [filtros]);
 
     const getEstadoColor = (estado?: string) => {
-      debugger;
     const lower = estado?.toLowerCase();
     switch (lower) {
       

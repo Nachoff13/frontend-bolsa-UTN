@@ -43,8 +43,7 @@ const ofertaCreateSchema = z.object({
     .min(3, 'El título debe tener al menos 3 caracteres')
     .max(80, 'El título no puede exceder 80 caracteres'),
   descripcion: z.string()
-    .min(20, 'La descripción debe tener al menos 20 caracteres')
-    .max(1000, 'La descripción no puede exceder 1000 caracteres'),
+    .min(20, 'La descripción debe tener al menos 20 caracteres'),
   idModalidad: z.union([z.string(), z.number()]).refine(val => val !== '' && val !== null && val !== undefined, 'Debe seleccionar una modalidad'),
   idTipoContrato: z.union([z.string(), z.number()]).refine(val => val !== '' && val !== null && val !== undefined, 'Debe seleccionar un tipo de contrato'),
   idLocalidad: z.string().min(1, 'Debe seleccionar una localidad'),

@@ -132,7 +132,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       roles: [USER_ROLES.EMPRESA],
     },
     //tengo que agregar el rol de los 3
-    { href: "/configuracion", label: "Configuración", icon: <SettingsIcon/>, roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE] },
+    // { href: "/configuracion", label: "Configuración", icon: <SettingsIcon/>, roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE] },
     { href: "/auth/logout", label: "Cerrar Sesión", icon: <LogoutIcon />, roles: [USER_ROLES.ADMIN, USER_ROLES.EMPRESA, USER_ROLES.ESTUDIANTE] },
   ];
 
