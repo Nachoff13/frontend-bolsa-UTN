@@ -100,7 +100,11 @@ export default function DetalleCandidatoModal({
       >
         <Box display="flex" alignItems="center" gap={2}>
           <Avatar
-          src={postulacion.fotoPerfil ? `data:image/jpeg;base64,${postulacion.fotoPerfil}` : undefined}
+            src={
+              postulacion.fotoPerfil
+                ? `data:image/jpeg;base64,${postulacion.fotoPerfil}`
+                : undefined
+            }
             sx={{ bgcolor: "white", color: "#1976d2", width: 56, height: 56 }}
           >
             <PersonIcon fontSize="large" />
@@ -252,6 +256,36 @@ export default function DetalleCandidatoModal({
               >
                 {cartaPresentacion}
               </Typography>
+            </Box>
+          )}
+          {/* Competencias del candidato */}
+          {postulacion.competencias && postulacion.competencias.length > 0 && (
+            <Box>
+              <Typography
+                variant="subtitle2"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <WorkIcon color="action" sx={{ mr: 1 }} />
+                Competencias del candidato
+              </Typography>
+
+              <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1 }}>
+                {postulacion.competencias.map((comp, index) => (
+                  <Chip
+                    key={index}
+                    label={comp}
+                    color="primary"
+                    variant="outlined"
+                    sx={{
+                      fontWeight: 500,
+                      fontSize: "0.85rem",
+                      borderRadius: "8px",
+                    }}
+                  />
+                ))}
+              </Stack>
             </Box>
           )}
         </Stack>
