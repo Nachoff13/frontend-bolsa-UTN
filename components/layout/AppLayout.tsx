@@ -151,8 +151,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           }}
         >
           <Image
-            src="/logo-utn.png"
-            alt="UTN FRLP Logo"
+            src="/logo-bolsa.png"
+            alt="Bolsa UTN FRLP Logo"
             fill
             style={{ objectFit: "contain" }}
             priority
