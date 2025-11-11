@@ -46,7 +46,7 @@ export default function CandidatosPostulados({
   return (
     <section
       style={{
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.paper,
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: "12px",
         padding: "16px",
