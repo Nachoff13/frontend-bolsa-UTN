@@ -166,7 +166,7 @@ export default function CompleteProfileModal({
 
           <TextField
             fullWidth
-            required
+            
             type="number"
             label="Año de egreso"
             inputProps={{ min: 2000, max: 2030 }}

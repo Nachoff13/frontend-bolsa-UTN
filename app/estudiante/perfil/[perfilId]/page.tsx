@@ -69,13 +69,13 @@ export default function PerfilEstudiantePage() {
   const [uploadingCv, setUploadingCv] = useState(false);
   const [cvUploadError, setCvUploadError] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  
+
   // Estados para edición
   const [editMode, setEditMode] = useState(false);
   const [editedData, setEditedData] = useState<any>({});
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [savingChanges, setSavingChanges] = useState(false);
-  
+
   // Estados para foto de perfil
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -86,11 +86,13 @@ export default function PerfilEstudiantePage() {
   const [loadingCompetencias, setLoadingCompetencias] = useState(false);
 
   // Obtener el perfilId de los parámetros de la ruta
-  const perfilId = params?.perfilId ? parseInt(params.perfilId as string, 10) : 2;
-  
+  const perfilId = params?.perfilId
+    ? parseInt(params.perfilId as string, 10)
+    : 2;
+
   // Verificar si el perfil que se está viendo es del usuario logueado
   const isOwnProfile = userPerfilId === perfilId;
-  
+
   // Debug: verificar el perfilId
   // PerfilId from params processed
 
@@ -104,7 +106,7 @@ export default function PerfilEstudiantePage() {
         }
         const data = await candidatoService.getPerfilById(perfilId);
         setPerfil(data);
-        
+
         // Inicializar datos para edición
         setEditedData({
           nombre: data.nombre || "",
@@ -131,7 +133,7 @@ export default function PerfilEstudiantePage() {
         console.error("Error al cargar carreras:", error);
       }
     };
-    
+
     if (editMode && carreras.length === 0) {
       fetchCarreras();
     }
@@ -178,7 +180,7 @@ export default function PerfilEstudiantePage() {
   const handleSaveChanges = async () => {
     try {
       setSavingChanges(true);
-      
+
       if (!perfil || !perfilId) return;
 
       // 1. Actualizar datos básicos del perfil
@@ -195,13 +197,15 @@ export default function PerfilEstudiantePage() {
       // 2. Actualizar competencias
       const currentCompetencias = perfil.competencias || [];
       const newCompetencias = editedData.competencias || [];
-      
+
       // Determinar competencias agregadas y eliminadas
       const added = newCompetencias.filter(
-        (comp: CompetenciaDTO) => !currentCompetencias.some((curr) => curr.id === comp.id)
+        (comp: CompetenciaDTO) =>
+          !currentCompetencias.some((curr) => curr.id === comp.id)
       );
       const removed = currentCompetencias.filter(
-        (curr) => !newCompetencias.some((comp: CompetenciaDTO) => comp.id === curr.id)
+        (curr) =>
+          !newCompetencias.some((comp: CompetenciaDTO) => comp.id === curr.id)
       );
 
       // Agregar nuevas competencias
@@ -213,7 +217,7 @@ export default function PerfilEstudiantePage() {
       for (const competencia of removed) {
         await candidatoService.removeCompetencia(perfil.id, competencia.id);
       }
-      
+
       // 3. Recargar perfil
       const data = await candidatoService.getPerfilById(perfilId);
       setPerfil(data);
@@ -224,20 +228,20 @@ export default function PerfilEstudiantePage() {
         anioEgreso: data.anioEgreso || new Date().getFullYear(),
         competencias: data.competencias || [],
       });
-      
+
       setEditMode(false);
       showMessage("Perfil actualizado exitosamente", SnackbarType.Success);
     } catch (error: any) {
-      showMessage(error?.message || "Error al actualizar perfil", SnackbarType.Error);
+      showMessage(
+        error?.message || "Error al actualizar perfil",
+        SnackbarType.Error
+      );
     } finally {
       setSavingChanges(false);
     }
   };
 
-  const handleCompetenciasChange = (
-    event: any,
-    newValue: CompetenciaDTO[]
-  ) => {
+  const handleCompetenciasChange = (event: any, newValue: CompetenciaDTO[]) => {
     // Solo actualizar el estado local, NO guardar en el backend todavía
     setEditedData({ ...editedData, competencias: newValue });
   };
@@ -251,23 +255,22 @@ export default function PerfilEstudiantePage() {
     try {
       setUploadingCv(true);
       setCvUploadError(null);
-      
+
       // Validar que perfilId sea válido
       if (!perfilId || isNaN(perfilId)) {
         throw new Error("ID de perfil inválido");
       }
-      
+
       // Uploading CV for perfilId
-      
+
       await candidatoService.uploadCv(file, perfilId);
-      
+
       setUploadedFileName(file.name);
       showMessage("CV subido exitosamente", SnackbarType.Success);
-      
+
       // Recargar el perfil para obtener la información actualizada
       const data = await candidatoService.getPerfilById(perfilId);
       setPerfil(data);
-      
     } catch (error: any) {
       const errorMessage = error?.message || "Error al subir el CV";
       setCvUploadError(errorMessage);
@@ -291,13 +294,15 @@ export default function PerfilEstudiantePage() {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const blob = new Blob([byteArray], { type: "application/pdf" });
 
       // Crear URL del blob y descargar
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = `CV_${perfil.nombre || 'candidato'}_${new Date().getFullYear()}.pdf`;
+      link.download = `CV_${
+        perfil.nombre || "candidato"
+      }_${new Date().getFullYear()}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -309,14 +314,25 @@ export default function PerfilEstudiantePage() {
     }
   };
 
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file || !perfilId || isNaN(perfilId)) return;
 
     // Validar que sea una imagen
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const validTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     if (!validTypes.includes(file.type)) {
-      showMessage("Por favor selecciona una imagen válida (JPG, PNG, GIF o WEBP)", SnackbarType.Error);
+      showMessage(
+        "Por favor selecciona una imagen válida (JPG, PNG, GIF o WEBP)",
+        SnackbarType.Error
+      );
       return;
     }
 
@@ -334,9 +350,9 @@ export default function PerfilEstudiantePage() {
       setPhotoEditorOpen(true);
     };
     reader.readAsDataURL(file);
-    
+
     // Limpiar el input para permitir seleccionar la misma imagen de nuevo
-    event.target.value = '';
+    event.target.value = "";
   };
 
   const handleConfirmPhoto = async (croppedImageBlob: Blob) => {
@@ -344,25 +360,31 @@ export default function PerfilEstudiantePage() {
 
     try {
       setUploadingPhoto(true);
-      
+
       // Convertir blob a File
-      const croppedFile = new File([croppedImageBlob], 'profile-photo.jpg', { 
-        type: 'image/jpeg' 
+      const croppedFile = new File([croppedImageBlob], "profile-photo.jpg", {
+        type: "image/jpeg",
       });
-      
+
       await candidatoService.uploadFotoPerfil(croppedFile, perfilId);
-      
-      showMessage("Foto de perfil actualizada exitosamente", SnackbarType.Success);
-      
+
+      showMessage(
+        "Foto de perfil actualizada exitosamente",
+        SnackbarType.Success
+      );
+
       // Recargar el perfil para mostrar la nueva foto
       const data = await candidatoService.getPerfilById(perfilId);
       setPerfil(data);
-      
+
       // Cerrar el diálogo y limpiar estados
       setPhotoEditorOpen(false);
       setPhotoPreview(null);
     } catch (error: any) {
-      showMessage(error?.message || "Error al subir la foto de perfil", SnackbarType.Error);
+      showMessage(
+        error?.message || "Error al subir la foto de perfil",
+        SnackbarType.Error
+      );
     } finally {
       setUploadingPhoto(false);
     }
@@ -374,13 +396,14 @@ export default function PerfilEstudiantePage() {
   };
 
   if (loading) return <LoadingModal open={loading} />;
-  if (!perfil) return (
-    <Box sx={{ maxWidth: 1200, mx: "auto", textAlign: "center", mt: 4 }}>
-      <Typography variant="h6" color="text.secondary">
-        No se pudo cargar el perfil
-      </Typography>
-    </Box>
-  );
+  if (!perfil)
+    return (
+      <Box sx={{ maxWidth: 1200, mx: "auto", textAlign: "center", mt: 4 }}>
+        <Typography variant="h6" color="text.secondary">
+          No se pudo cargar el perfil
+        </Typography>
+      </Box>
+    );
 
   const educacion = {
     titulo: perfil.carreraNombre ?? perfil.carrera ?? "Carrera no especificada",
@@ -391,15 +414,30 @@ export default function PerfilEstudiantePage() {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto" }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Titulo titulo={`Perfil ${perfil.nombre ? `de ${perfil.nombre}` : ''}`} />
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{ mb: 2 }}
+      >
+        <Titulo
+          titulo={`Perfil ${perfil.nombre ? `de ${perfil.nombre}` : ""}`}
+        />
         <Stack direction="row" spacing={2} alignItems="center">
           <Chip
             label={`${perfil.porcentajePerfil ?? 0}% completado`}
             color="primary"
             variant="outlined"
-            sx={{ fontWeight: 600 }}
+            sx={{ fontWeight: 600,
+
+           height: 50, // igual altura que un botón MUI
+              borderRadius: "8px",
+
+             }}
           />
+          
+
+      
           {isOwnProfile && !editMode && (
             <Button
               variant="contained"
@@ -417,9 +455,13 @@ export default function PerfilEstudiantePage() {
         <Card>
           <CardContent sx={{ p: 3 }}>
             <Stack direction="row" spacing={3} alignItems="center">
-              <Box sx={{ position: 'relative' }}>
+              <Box sx={{ position: "relative" }}>
                 <Avatar
-                  src={perfil.fotoPerfil ? `data:image/jpeg;base64,${perfil.fotoPerfil}` : undefined}
+                  src={
+                    perfil.fotoPerfil
+                      ? `data:image/jpeg;base64,${perfil.fotoPerfil}`
+                      : undefined
+                  }
                   sx={{
                     width: 120,
                     height: 120,
@@ -428,13 +470,15 @@ export default function PerfilEstudiantePage() {
                     fontWeight: 600,
                   }}
                 >
-                  {!perfil.fotoPerfil && perfil.nombre ? perfil.nombre.charAt(0).toUpperCase() : "U"}
+                  {!perfil.fotoPerfil && perfil.nombre
+                    ? perfil.nombre.charAt(0).toUpperCase()
+                    : "U"}
                 </Avatar>
                 {isOwnProfile && (
                   <>
                     <input
                       accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                      style={{ display: 'none' }}
+                      style={{ display: "none" }}
                       id="foto-perfil-upload"
                       type="file"
                       onChange={handlePhotoUpload}
@@ -445,13 +489,13 @@ export default function PerfilEstudiantePage() {
                         component="span"
                         disabled={uploadingPhoto}
                         sx={{
-                          position: 'absolute',
+                          position: "absolute",
                           bottom: 0,
                           right: 0,
-                          bgcolor: 'primary.main',
-                          color: 'white',
-                          '&:hover': {
-                            bgcolor: 'primary.dark',
+                          bgcolor: "primary.main",
+                          color: "white",
+                          "&:hover": {
+                            bgcolor: "primary.dark",
                           },
                           boxShadow: 2,
                         }}
@@ -468,32 +512,42 @@ export default function PerfilEstudiantePage() {
                   {perfil.nombre || "Nombre no disponible"}
                 </Typography>
                 {perfil.carreraNombre && (
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
+                  <Typography
+                    variant="h6"
+                    color="text.secondary"
+                    sx={{ mb: 1, fontWeight: 500 }}
+                  >
                     {perfil.carreraNombre}
                   </Typography>
                 )}
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 1 }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  flexWrap="wrap"
+                  useFlexGap
+                  sx={{ mb: 1 }}
+                >
                   {perfil.legajo && (
-                    <Chip 
-                      label={`Legajo: ${perfil.legajo}`} 
-                      color="primary" 
-                      size="small" 
+                    <Chip
+                      label={`Legajo: ${perfil.legajo}`}
+                      color="primary"
+                      size="small"
                       sx={{ fontWeight: 500 }}
                     />
                   )}
                   {perfil.rolNombre && (
-                    <Chip 
-                      label={perfil.rolNombre} 
-                      variant="outlined" 
-                      size="small" 
+                    <Chip
+                      label={perfil.rolNombre}
+                      variant="outlined"
+                      size="small"
                       sx={{ fontWeight: 500 }}
                     />
                   )}
                   {perfil.generoNombre && (
-                    <Chip 
-                      label={perfil.generoNombre} 
-                      variant="outlined" 
-                      size="small" 
+                    <Chip
+                      label={perfil.generoNombre}
+                      variant="outlined"
+                      size="small"
                       sx={{ fontWeight: 500 }}
                     />
                   )}
@@ -536,7 +590,11 @@ export default function PerfilEstudiantePage() {
               <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
                 Sobre mí
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ lineHeight: 1.7 }}
+              >
                 {perfil.descripcion}
               </Typography>
             </CardContent>
@@ -552,16 +610,20 @@ export default function PerfilEstudiantePage() {
             {perfil.competencias && perfil.competencias.length > 0 ? (
               <Stack direction="row" flexWrap="wrap" spacing={1} useFlexGap>
                 {perfil.competencias.map((competencia) => (
-                  <Chip 
-                    key={competencia.id} 
-                    label={competencia.nombre} 
-                    color="primary" 
+                  <Chip
+                    key={competencia.id}
+                    label={competencia.nombre}
+                    color="primary"
                   />
                 ))}
               </Stack>
             ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
-                {isOwnProfile 
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontStyle: "italic" }}
+              >
+                {isOwnProfile
                   ? "No has agregado competencias aún. Edita tu perfil para agregar tus habilidades."
                   : "Este usuario no ha agregado competencias aún."}
               </Typography>
@@ -572,7 +634,12 @@ export default function PerfilEstudiantePage() {
         {/* Educación */}
         <Card>
           <CardContent sx={{ p: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={2}
+              sx={{ mb: 3 }}
+            >
               <School color="primary" />
               <Typography variant="h6" fontWeight={600}>
                 Educación
@@ -587,9 +654,9 @@ export default function PerfilEstudiantePage() {
               </Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                 {perfil.anioEgreso && (
-                  <Chip 
-                    label={`Egreso: ${perfil.anioEgreso}`} 
-                    color="primary" 
+                  <Chip
+                    label={`Egreso: ${perfil.anioEgreso}`}
+                    color="primary"
                     variant="outlined"
                     size="small"
                     sx={{ fontWeight: 500 }}
@@ -603,18 +670,32 @@ export default function PerfilEstudiantePage() {
         {/* CV */}
         <Card>
           <CardContent sx={{ p: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={2}
+              sx={{ mb: 3 }}
+            >
               <Description color="primary" />
               <Typography variant="h6" fontWeight={600}>
                 Curriculum Vitae
               </Typography>
             </Stack>
-            
+
             {perfil.cv ? (
               <Box sx={{ mb: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={2}
+                  sx={{ mb: 2 }}
+                >
                   <CheckCircle color="success" />
-                  <Typography variant="body2" color="success.main" fontWeight={500}>
+                  <Typography
+                    variant="body2"
+                    color="success.main"
+                    fontWeight={500}
+                  >
                     CV cargado exitosamente
                   </Typography>
                 </Stack>
@@ -625,13 +706,19 @@ export default function PerfilEstudiantePage() {
                   variant="outlined"
                   clickable
                   onClick={handleCvDownload}
-                  sx={{ fontWeight: 500, cursor: 'pointer' }}
+                  sx={{ fontWeight: 500, cursor: "pointer" }}
                 />
               </Box>
             ) : (
               <Box sx={{ mb: 3 }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontStyle: "italic" }}>
-                  {isOwnProfile ? "No hay CV cargado. Sube tu CV en formato PDF." : "Este usuario no ha cargado un CV aún."}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2, fontStyle: "italic" }}
+                >
+                  {isOwnProfile
+                    ? "No hay CV cargado. Sube tu CV en formato PDF."
+                    : "Este usuario no ha cargado un CV aún."}
                 </Typography>
               </Box>
             )}
@@ -656,17 +743,25 @@ export default function PerfilEstudiantePage() {
             <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
               Información del Sistema
             </Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
-              <Box>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                gap: 2,
+              }}
+            >
+              {/* <Box>
                 <Typography variant="caption" color="text.secondary">ID de Perfil</Typography>
                 <Typography variant="body2">{perfil.id}</Typography>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">ID de Usuario</Typography>
                 <Typography variant="body2">{perfil.idUsuario}</Typography>
-              </Box>
+              </Box> */}
               <Box>
-                <Typography variant="caption" color="text.secondary">Estado del Usuario</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Estado del Usuario
+                </Typography>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   {perfil.usuarioActivo ? (
                     <CheckCircle color="success" sx={{ fontSize: 16 }} />
@@ -679,9 +774,13 @@ export default function PerfilEstudiantePage() {
                 </Stack>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">Fecha de Alta</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Fecha de Alta
+                </Typography>
                 <Typography variant="body2">
-                  {perfil.fechaAlta ? new Date(perfil.fechaAlta).toLocaleDateString() : "N/A"}
+                  {perfil.fechaAlta
+                    ? new Date(perfil.fechaAlta).toLocaleDateString()
+                    : "N/A"}
                 </Typography>
               </Box>
             </Box>
@@ -691,9 +790,18 @@ export default function PerfilEstudiantePage() {
 
       {/* Modal de Edición - Solo visible para el dueño del perfil */}
       {isOwnProfile && (
-        <Dialog open={editMode} onClose={handleCancelEdit} maxWidth="md" fullWidth>
+        <Dialog
+          open={editMode}
+          onClose={handleCancelEdit}
+          maxWidth="md"
+          fullWidth
+        >
           <DialogTitle>
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Typography variant="h6" fontWeight={600}>
                 Editar Perfil
               </Typography>
@@ -708,7 +816,9 @@ export default function PerfilEstudiantePage() {
                 fullWidth
                 label="Nombre completo"
                 value={editedData.nombre}
-                onChange={(e) => setEditedData({ ...editedData, nombre: e.target.value })}
+                onChange={(e) =>
+                  setEditedData({ ...editedData, nombre: e.target.value })
+                }
               />
 
               <FormControl fullWidth>
@@ -716,7 +826,9 @@ export default function PerfilEstudiantePage() {
                 <Select
                   value={editedData.idCarrera}
                   label="Carrera"
-                  onChange={(e) => setEditedData({ ...editedData, idCarrera: e.target.value })}
+                  onChange={(e) =>
+                    setEditedData({ ...editedData, idCarrera: e.target.value })
+                  }
                 >
                   <MenuItem value={0}>Seleccionar carrera...</MenuItem>
                   {carreras.map((carrera) => (
@@ -733,7 +845,12 @@ export default function PerfilEstudiantePage() {
                 label="Año de egreso"
                 inputProps={{ min: 2000, max: 2030 }}
                 value={editedData.anioEgreso}
-                onChange={(e) => setEditedData({ ...editedData, anioEgreso: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  setEditedData({
+                    ...editedData,
+                    anioEgreso: parseInt(e.target.value),
+                  })
+                }
               />
 
               <TextField
@@ -743,7 +860,9 @@ export default function PerfilEstudiantePage() {
                 label="Descripción"
                 placeholder="Cuéntanos sobre ti, tus intereses profesionales..."
                 value={editedData.descripcion}
-                onChange={(e) => setEditedData({ ...editedData, descripcion: e.target.value })}
+                onChange={(e) =>
+                  setEditedData({ ...editedData, descripcion: e.target.value })
+                }
               />
 
               {/* Campo de Competencias */}
@@ -782,9 +901,9 @@ export default function PerfilEstudiantePage() {
             <Button onClick={handleCancelEdit} variant="outlined">
               Cancelar
             </Button>
-            <Button 
-              onClick={handleSaveChanges} 
-              variant="contained" 
+            <Button
+              onClick={handleSaveChanges}
+              variant="contained"
               startIcon={<Save />}
               disabled={savingChanges}
             >

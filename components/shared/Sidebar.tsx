@@ -131,14 +131,14 @@ export default function Sidebar() {
           <span>{mode === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}</span>
         </button>
         
-        <button className={`flex items-center space-x-3 px-4 py-3.5 rounded-lg text-base font-medium w-full text-left transition-colors ${
+        {/* <button className={`flex items-center space-x-3 px-4 py-3.5 rounded-lg text-base font-medium w-full text-left transition-colors ${
           mode === 'dark'
             ? 'text-gray-100 hover:bg-gray-900'
             : 'text-black hover:bg-gray-100'
         }`}>
           <Settings className={`w-5 h-5 ${mode === 'dark' ? 'text-gray-100' : 'text-black'}`} />
           <span>Configuración</span>
-        </button>
+        </button> */}
         
         <button className={`flex items-center space-x-3 px-4 py-3.5 rounded-lg text-base font-medium text-red-600 w-full text-left transition-colors ${
           mode === 'dark' ? 'hover:bg-gray-900' : 'hover:bg-gray-100'

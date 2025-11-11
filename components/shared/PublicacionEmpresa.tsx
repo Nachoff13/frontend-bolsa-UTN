@@ -8,6 +8,7 @@ import { calcularTiempoTranscurrido } from "@/lib/dateUtils";
 import { Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
+import EmptyState from "./EmptyState";
 
 interface Props {
   ofertas: OfertaDTO[];
@@ -65,9 +66,10 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
 
       {/* 📋 Lista de publicaciones */}
       {ofertas.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          No hay publicaciones registradas todavía.
-        </p>
+        <EmptyState 
+          mensaje="No hay publicaciones de empleo disponibles."
+        />
+
       ) : (
         <div className="flex flex-col gap-4">
           {ofertas.map((oferta) => (

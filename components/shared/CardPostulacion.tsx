@@ -90,7 +90,7 @@ export function PostulacionCard({ postulacion, onVerEstado }: Props) {
         <div className="text-sm text-neutral-700 mb-4">
           <div className="flex items-center mb-1">
             <DescriptionIcon fontSize="small" className="mr-1 text-neutral-500" />
-            <strong>Observacione Realizada</strong>
+            <strong>Observaciones</strong>
           </div>
           <p className="ml-5 text-neutral-600">{postulacion.observacion}</p>
         </div>

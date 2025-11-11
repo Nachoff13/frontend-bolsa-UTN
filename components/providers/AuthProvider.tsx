@@ -81,8 +81,7 @@ export default function AuthProvider({
             const perfilCompleto = perfil?.nombre && 
                                    perfil?.idGenero && 
                                    perfil?.idCarrera && 
-                                   perfil?.legajo && 
-                                   perfil?.anioEgreso;
+                                   perfil?.legajo 
             
             if (!perfilCompleto) {
               console.log("⚠️ Perfil incompleto, mostrando modal...");
@@ -157,6 +156,18 @@ export default function AuthProvider({
       } finally {
         if (mounted) {
           setLoading(false);
+          if(rol == 1 ){
+            // redirijo al dashboard admin
+            router.push('/admin/dashboard');
+          }
+          else if(rol == 2 ){
+            // redirijo al dashboard empresa
+            router.push('/empresa/dashboard');
+          }
+          else if(rol == 3 ){
+            // redirijo al dashboard estudiante
+            router.push('/estudiante/dashboard');
+          }
         }
       }
     };

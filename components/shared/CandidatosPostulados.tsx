@@ -7,7 +7,7 @@ import CandidatoCard from "./CandidatoCard";
 import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
 import { Button } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-
+import EmptyState from "./EmptyState";
 
 interface CandidatosPostuladosProps {
   postulaciones: PostulacionDTO[];
@@ -35,8 +35,8 @@ export default function CandidatosPostulados({
   const router = useRouter();
   const theme = useTheme();
 
-
-  if (loading) return <p className="text-neutral-500">Cargando candidatos...</p>;
+  if (loading)
+    return <p className="text-neutral-500">Cargando candidatos...</p>;
 
   return (
     <section
@@ -72,15 +72,19 @@ export default function CandidatosPostulados({
       </div>
 
       {/* 📋 Lista de candidatos */}
-     {postulaciones.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          No hay postulaciones recibidas aún.
-        </p>
+      {postulaciones.length === 0 ? (
+        <EmptyState
+          mensaje="Aún no has recibido postulaciones para tus ofertas."
+        />
       ) : (
         <div className="flex flex-col gap-4">
-          {postulaciones.slice(0, 4).map((p) => (   // 👈 limita a 4 elementos
-            <CandidatoCard key={p.id} postulacion={p} onVer={handleVer} />
-          ))}
+          {postulaciones.slice(0, 4).map(
+            (
+              p // 👈 limita a 4 elementos
+            ) => (
+              <CandidatoCard key={p.id} postulacion={p} onVer={handleVer} />
+            )
+          )}
         </div>
       )}
     </section>
