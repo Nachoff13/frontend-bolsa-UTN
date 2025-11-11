@@ -14,6 +14,7 @@ export interface PostulacionCandidatoDTO {
   carreraNombre?: string | null;
   anioEgreso?: number | null;
   cv?: string | null; // base64 o null si no tiene CV
+  fotoPerfil?: string | null; 
 
   // 🔹 Datos de la Oferta
   idOferta: number;
