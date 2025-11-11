@@ -8,7 +8,9 @@ import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import CardPublicacion from "@/components/shared/CardPublicacion";
 import DetalleModal from "@/components/shared/DetalleModal";
 import LoadingModal from "@/components/shared/LoadingModal";
-import ModalFormulario, { CampoFormulario } from "@/components/shared/ModalFormulario";
+import ModalFormulario, {
+  CampoFormulario,
+} from "@/components/shared/ModalFormulario";
 import { postulanteService } from "@/services/postulacion.service";
 import { useSnackbar } from "@/components/providers/snackbar";
 import {
@@ -18,6 +20,7 @@ import {
 } from "@/types/enums/snackbar";
 import { ResponseError } from "@/types/Generics/responseError";
 import { calcularTiempoTranscurrido } from "@/lib/dateUtils";
+import EmptyState from "./EmptyState";
 
 interface Props {
   ofertas: OfertaDTO[];
@@ -33,10 +36,14 @@ export default function PublicacionesCandidato({
   onPostulacionExitosa,
 }: Props) {
   const [openDetalle, setOpenDetalle] = useState(false);
-  const [ofertaSeleccionada, setOfertaSeleccionada] = useState<OfertaDTO | null>(null);
+  const [ofertaSeleccionada, setOfertaSeleccionada] =
+    useState<OfertaDTO | null>(null);
   const [isPostulando, setIsPostulando] = useState(false);
   const [modalPostulacionOpen, setModalPostulacionOpen] = useState(false); // 👈 para abrir/cerrar ModalFormulario
-  const [formData, setFormData] = useState({ cartaPresentacion: "", observacion: "" }); // 👈 datos del modal
+  const [formData, setFormData] = useState({
+    cartaPresentacion: "",
+    observacion: "",
+  }); // 👈 datos del modal
   const theme = useTheme();
   const { showMessage } = useSnackbar();
 
@@ -55,54 +62,57 @@ export default function PublicacionesCandidato({
     if (!ofertaSeleccionada) return;
 
     try {
-        setIsPostulando(true);
+      setIsPostulando(true);
 
-        const postulacion = new PostulacionDTO();
-        postulacion.idOferta = ofertaSeleccionada.id;
-        postulacion.cartaPresentacion = valores.cartaPresentacion || "Sin carta";
-        postulacion.observacion = valores.observacion || "Sin observación";
+      const postulacion = new PostulacionDTO();
+      postulacion.idOferta = ofertaSeleccionada.id;
+      postulacion.cartaPresentacion = valores.cartaPresentacion || "Sin carta";
+      postulacion.observacion = valores.observacion || "Sin observación";
 
-        const response: string = await postulanteService.postularseOferta(postulacion);
+      const response: string = await postulanteService.postularseOferta(
+        postulacion
+      );
 
-        showMessage(response, SnackbarType.Success, {
+      showMessage(response, SnackbarType.Success, {
         position: SnackbarPosition.BottomCenter,
         size: SnackbarSize.Medium,
-        });
+      });
 
-        // ✅ refrescar y cerrar
-        if (onPostulacionExitosa) onPostulacionExitosa();
-        setModalPostulacionOpen(false);
-        setOpenDetalle(false);
+      // ✅ refrescar y cerrar
+      if (onPostulacionExitosa) onPostulacionExitosa();
+      setModalPostulacionOpen(false);
+      setOpenDetalle(false);
     } catch (e) {
-        const error = e as ResponseError;
-        showMessage(error.message, SnackbarType.Error);
+      const error = e as ResponseError;
+      showMessage(error.message, SnackbarType.Error);
     } finally {
-        setIsPostulando(false);
+      setIsPostulando(false);
     }
-    }
+  }
 
   const handleVerDetalle = (oferta: OfertaDTO) => {
     setOfertaSeleccionada(oferta);
     setOpenDetalle(true);
   };
 
-  if (loading) return <p className="text-neutral-500">Cargando publicaciones...</p>;
+  if (loading)
+    return <p className="text-neutral-500">Cargando publicaciones...</p>;
 
-    const camposPostulacion: CampoFormulario[] = [
-        {
-        id: "cartaPresentacion",
-        label: "Carta de presentación",
-        tipo: "textarea",
-        placeholder:
-            "Escribí una breve carta explicando por qué te interesa la oferta...",
-        },
-        {
-        id: "observacion",
-        label: "Observación",
-        tipo: "textarea",
-        placeholder: "Podés agregar comentarios adicionales si lo deseás...",
-        },
-    ];
+  const camposPostulacion: CampoFormulario[] = [
+    {
+      id: "cartaPresentacion",
+      label: "Carta de presentación",
+      tipo: "textarea",
+      placeholder:
+        "Escribí una breve carta explicando por qué te interesa la oferta...",
+    },
+    {
+      id: "observacion",
+      label: "Observación",
+      tipo: "textarea",
+      placeholder: "Podés agregar comentarios adicionales si lo deseás...",
+    },
+  ];
 
   return (
     <section
@@ -121,9 +131,7 @@ export default function PublicacionesCandidato({
       </h3>
 
       {ofertas.length === 0 ? (
-        <p className="text-sm text-neutral-500">
-          No hay publicaciones registradas todavía.
-        </p>
+        <EmptyState mensaje="No existen publicaciones para tu carrera" />
       ) : (
         <div className="flex flex-col gap-4">
           {ofertas.slice(0, 3).map((oferta) => (
@@ -147,13 +155,18 @@ export default function PublicacionesCandidato({
             { label: "Empresa", value: ofertaSeleccionada.nombreEmpresa },
             { label: "Carrera", value: ofertaSeleccionada.nombreCarrera },
             { label: "Modalidad", value: ofertaSeleccionada.modalidad },
-            { label: "Tipo de contrato", value: ofertaSeleccionada.tipoContrato },
+            {
+              label: "Tipo de contrato",
+              value: ofertaSeleccionada.tipoContrato,
+            },
             { label: "Localidad", value: ofertaSeleccionada.nombreLocalidad },
             { label: "Descripción", value: ofertaSeleccionada.descripcion },
           ]}
           chips={[
             {
-              label: `${ofertaSeleccionada.cantidadPostulantes ?? 0} Postulante/s`,
+              label: `${
+                ofertaSeleccionada.cantidadPostulantes ?? 0
+              } Postulante/s`,
               color: "info",
             },
           ]}
@@ -163,8 +176,11 @@ export default function PublicacionesCandidato({
               size="small"
               disabled={isPostulando || yaPostulado}
               sx={{
-                backgroundColor:
-                  yaPostulado ? "#9e9e9e" : isPostulando ? "#9e9e9e" : "#0d47a1",
+                backgroundColor: yaPostulado
+                  ? "#9e9e9e"
+                  : isPostulando
+                  ? "#9e9e9e"
+                  : "#0d47a1",
                 borderRadius: 2,
                 textTransform: "none",
                 fontWeight: 600,

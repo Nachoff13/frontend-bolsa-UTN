@@ -11,10 +11,14 @@ interface Props {
   loading: boolean;
 }
 
-export default function MisPostulacionesCandidato({ postulaciones, loading }: Props) {
+export default function MisPostulacionesCandidato({
+  postulaciones,
+  loading,
+}: Props) {
   const theme = useTheme();
 
-  if (loading) return <p className="text-neutral-500">Cargando postulaciones...</p>;
+  if (loading)
+    return <p className="text-neutral-500">Cargando postulaciones...</p>;
 
   return (
     <section
@@ -28,12 +32,12 @@ export default function MisPostulacionesCandidato({ postulaciones, loading }: Pr
       }}
       className="h-full flex flex-col"
     >
-       <h3 className="mb-3 text-base font-semibold text-gray-800">
+      <h3 className="mb-3 text-base font-semibold text-gray-800">
         Mis postulaciones
       </h3>
 
       {postulaciones.length === 0 ? (
-        <EmptyState mensaje="No tenés postulaciones todavía" />
+        <EmptyState mensaje="No tenés postulaciones" />
       ) : (
         <Stack spacing={2}>
           {postulaciones.slice(0, 4).map((p) => (
