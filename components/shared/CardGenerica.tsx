@@ -25,11 +25,11 @@ export default function CardGenerica({
   colorAccion2 = "primary",
 }: CardGenericaProps) {
   return (
- <Card
+    <Card
       variant="outlined"
       sx={{
-        borderWidth: 3, 
-        borderColor: "primary.divider", 
+        borderWidth: 3,
+        borderColor: "primary.divider",
         mb: 3, // Aumentado de 2 a 3
         transition: "all 0.2s ease-in-out",
         "&:hover": {
@@ -38,17 +38,25 @@ export default function CardGenerica({
         },
       }}
     >
-      <CardContent sx={{ p: 4 }}> {/* Aumentado padding para más aire */}
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={2}>
+      <CardContent sx={{ p: 4 }}>
+        {" "}
+        {/* Aumentado padding para más aire */}
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="flex-start"
+          flexWrap="wrap"
+          gap={2}
+        >
           <Box flex={1}>
-            <Typography 
-              variant="h4" 
-              color="primary" 
-              fontWeight={700} 
-              sx={{ 
-                mb: 1.5, 
-                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }, // Responsive
-                lineHeight: 1.2 
+            <Typography
+              variant="h4"
+              color="primary"
+              fontWeight={700}
+              sx={{
+                mb: 1.5,
+                fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" }, // Responsive
+                lineHeight: 1.2,
               }}
             >
               {titulo}
@@ -92,7 +100,6 @@ export default function CardGenerica({
             </Stack>
           )}
         </Stack>
-
         {infoExtra.length > 0 && (
           <Stack
             direction="row"
@@ -103,29 +110,44 @@ export default function CardGenerica({
             {infoExtra.map((info, idx) => (
               <Box key={idx} display="flex" alignItems="center" gap={0.75}>
                 {info.icon}
-                <Typography variant="body2">{info.texto}</Typography> {/* Cambiado de caption a body2 */}
+                <Typography variant="body2">{info.texto}</Typography>{" "}
+                {/* Cambiado de caption a body2 */}
               </Box>
             ))}
           </Stack>
         )}
-
         <Divider sx={{ my: 2.5 }} /> {/* Aumentado margen */}
-
         {/* Descripción */}
         {descripcion && (
           <>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}> {/* Cambiado de subtitle2 a subtitle1 */}
-              Descripción
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}> {/* Cambiado de body2 a body1 */}
-              {descripcion}
-            </Typography>
+           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+      Descripción
+    </Typography>
+
+    <Typography
+      variant="body1"
+      sx={{
+        mb: 3,
+        color: "text.secondary",
+        whiteSpace: "pre-line", // 👈 respeta los saltos de línea (\n)
+        lineHeight: 1.7,
+      }}
+    >
+      {descripcion.length > 300
+        ? `${descripcion.substring(0, 300)}...`
+        : descripcion}
+    </Typography>
           </>
         )}
-
         {/* Acciones */}
         {(onAccion1 || onAccion2) && (
-          <Stack direction="row" spacing={2} justifyContent="flex-end" flexWrap="wrap" gap={1.5}>
+          <Stack
+            direction="row"
+            spacing={2}
+            justifyContent="flex-end"
+            flexWrap="wrap"
+            gap={1.5}
+          >
             {onAccion1 && (
               <Button 
                 variant="outlined" 
@@ -143,7 +165,11 @@ export default function CardGenerica({
               </Button>
             )}
             {onAccion2 && (
-              <Button variant="contained" color={colorAccion2} onClick={onAccion2} disabled={disabledAccion2}>
+              <Button
+                variant="contained"
+                onClick={onAccion2}
+                disabled={disabledAccion2}
+              >
                 {textoAccion2}
               </Button>
             )}

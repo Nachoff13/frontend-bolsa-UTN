@@ -141,7 +141,7 @@ export default function UserMenu() {
           />
         </MenuItem>
         
-        <MenuItem onClick={handleMenuClose} sx={{ py: 1, mb: 0.5 }}>
+        {/* <MenuItem onClick={handleMenuClose} sx={{ py: 1, mb: 0.5 }}>
           <ListItemIcon sx={{ minWidth: 36 }}>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>
@@ -155,7 +155,7 @@ export default function UserMenu() {
             <LogoutIcon fontSize="small" color="error" />
           </ListItemIcon>
           <ListItemText primaryTypographyProps={{ variant: 'body2' }}>Cerrar sesión</ListItemText>
-        </MenuItem>
+        </MenuItem> */}
       </Menu>
     </Box>
   );

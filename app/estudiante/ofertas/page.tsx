@@ -36,10 +36,10 @@ import EmptyState from "@/components/shared/EmptyState";
 import { ofertaService } from "@/services/oferta.service";
 import { genericService } from "@/services/generic.service";
 import { postulanteService } from "@/services/postulacion.service";
-import { 
-  getEmpresaChipColor, 
-  getModalidadChipColor, 
-  getTipoContratoChipColor 
+import {
+  getEmpresaChipColor,
+  getModalidadChipColor,
+  getTipoContratoChipColor,
 } from "@/lib/chipColors";
 import { calcularFechaCierre } from "@/lib/dateUtils";
 import { getCuposChip } from "@/lib/cuposUtils";
@@ -365,60 +365,67 @@ export default function EstudianteOfertasPage() {
               {ofertas.map((oferta) => {
                 const empresaColor = getEmpresaChipColor();
                 const modalidadColor = getModalidadChipColor(oferta.modalidad);
-                const contratoColor = getTipoContratoChipColor(oferta.tipoContrato);
-                const cuposChip = getCuposChip(oferta.cantidadPostulantes, oferta.cupos);
-                
+                const contratoColor = getTipoContratoChipColor(
+                  oferta.tipoContrato
+                );
+                const cuposChip = getCuposChip(
+                  oferta.cantidadPostulantes,
+                  oferta.cupos
+                );
+
                 return (
-                <CardGenerica
-                  key={oferta.id}
-                  titulo={oferta.titulo}
-                  subtitulo={`🏢 ${oferta.nombreEmpresa}`}
-                  descripcion={oferta.descripcion}
-                  chips={[
-                    { 
-                      label: oferta.nombreEmpresa, 
-                      backgroundColor: empresaColor.backgroundColor,
-                      textColor: empresaColor.color
-                    },
-                    { 
-                      label: oferta.modalidad, 
-                      backgroundColor: modalidadColor.backgroundColor,
-                      textColor: modalidadColor.color
-                    },
-                    { 
-                      label: oferta.tipoContrato, 
-                      backgroundColor: contratoColor.backgroundColor,
-                      textColor: contratoColor.color
-                    },
-                    cuposChip,
-                  ]}
-                  infoExtra={[
-                    {
-                      icon: <LocationOnIcon fontSize="small" />,
-                      texto: oferta.nombreLocalidad,
-                    },
-                    {
-                      icon: <CalendarTodayIcon fontSize="small" />,
-                      texto: `Publicado el ${oferta.fechaInicio}`,
-                    },
-                    {
-                      icon: <EventIcon fontSize="small" />,
-                      texto: `Cierra el ${calcularFechaCierre(
-                        oferta.fechaInicio,
-                        oferta.fechaFin
-                      )}`,
-                    },
-                    {
-                      icon: <SchoolIcon fontSize="small" />,
-                      texto: oferta.nombreCarrera || 'Carrera no especificada',
-                    },
-                  ]}
-                  onAccion1={() => router.push(`/estudiante/ofertas/${oferta.id}`)}
-                  textoAccion1="Ver detalles"
-                  onAccion2={() => onClickPostularse(oferta.id)}
-                  textoAccion2="Postularme"
-                  disabledAccion2={!oferta.puedePostularse}
-                />
+                  <CardGenerica
+                    key={oferta.id}
+                    titulo={oferta.titulo}
+                    subtitulo={`🏢 ${oferta.nombreEmpresa}`}
+                    descripcion={
+                      oferta.descripcion.length > 300
+                        ? `${oferta.descripcion.substring(0, 300)}...`
+                        : oferta.descripcion
+                    }
+                    chips={[
+                      {
+                        label: oferta.nombreEmpresa,
+                        backgroundColor: empresaColor.backgroundColor,
+                        textColor: empresaColor.color,
+                      },
+                      {
+                        label: oferta.modalidad,
+                        backgroundColor: modalidadColor.backgroundColor,
+                        textColor: modalidadColor.color,
+                      },
+                      {
+                        label: oferta.tipoContrato,
+                        backgroundColor: contratoColor.backgroundColor,
+                        textColor: contratoColor.color,
+                      },
+                      cuposChip,
+                    ]}
+                    infoExtra={[
+                      {
+                        icon: <LocationOnIcon fontSize="small" />,
+                        texto: oferta.nombreLocalidad,
+                      },
+                      {
+                        icon: <CalendarTodayIcon fontSize="small" />,
+                        texto: `Publicado el ${oferta.fechaInicio}`,
+                      },
+                      {
+                        icon: <EventIcon fontSize="small" />,
+                        texto: `Cierra el ${calcularFechaCierre(
+                          oferta.fechaInicio,
+                          oferta.fechaFin
+                        )}`,
+                      },
+                    ]}
+                    onAccion1={() =>
+                      router.push(`/estudiante/ofertas/${oferta.id}`)
+                    }
+                    textoAccion1="Ver detalles"
+                    onAccion2={() => onClickPostularse(oferta.id)}
+                    textoAccion2="Postularme"
+                    disabledAccion2={!oferta.puedePostularse}
+                  />
                 );
               })}
             </Card>

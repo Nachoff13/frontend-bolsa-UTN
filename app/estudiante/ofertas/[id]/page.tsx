@@ -353,13 +353,14 @@ export default function DetalleOfertaPage() {
           >
             Descripción del puesto
           </Typography>
-          <Typography
-            sx={{
-              color: mode === "dark" ? "#d1d5db" : "#374151",
-              lineHeight: 1.8,
-            }}
+    <Typography
+    sx={{
+      color: mode === "dark" ? "#d1d5db" : "#374151",
+      lineHeight: 1.8,
+      whiteSpace: "pre-line", 
+    }}
           >
-            {oferta.descripcion}
+    {oferta.descripcion}
           </Typography>
         </Box>
 

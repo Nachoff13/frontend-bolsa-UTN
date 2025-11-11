@@ -4,7 +4,7 @@ interface CardGenericaProps {
   descripcion?: string;
   chips?: {
     label: string;
-    color?: "primary" | "secondary" | "info" | "warning" | "success" | "error";
+    color?: string;
     backgroundColor?: string;
     textColor?: string;
   }[];

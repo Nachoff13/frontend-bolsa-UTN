@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Card, Divider, Typography } from "@mui/material";
+import { Box, Card, Divider, Typography, useTheme } from "@mui/material";
 import { useMemo } from "react";
 import {
   showConfirmDialog,
@@ -47,6 +47,8 @@ export default function EmpresasSolicitantesPage() {
   const [estadosValidacion, setEstadosValidacion] = useState<OpcionFiltro[]>(
     []
   );
+    const theme = useTheme();
+  
   const [estadosValidacionSeleccionados, setEstadosValidacionSeleccionados] =
     useState<string[]>([]);
 
@@ -124,6 +126,24 @@ export default function EmpresasSolicitantesPage() {
     buscarEmpresas();
   }, [filtros]);
 
+    const getEstadoColor = (estado?: string) => {
+      debugger;
+    const lower = estado?.toLowerCase();
+    switch (lower) {
+      
+      case "iniciada":
+        return theme.palette.customStatus.iniciada;
+      case "en revisión":
+        return theme.palette.customStatus.enRevision;
+      case "aprobada":
+        return theme.palette.customStatus.aprobada;
+      case "rechazada":
+        return theme.palette.customStatus.rechazada;
+      default:
+        return theme.palette.info.main;
+    }
+  };
+
   const buscarEmpresas = async () => {
     try {
       setLoading(true);
@@ -176,10 +196,10 @@ export default function EmpresasSolicitantesPage() {
   };
   return (
     <>
-      <Titulo
+      {/* <Titulo
         titulo="Empresas Solicitantes"
         subtitulo="Listado de empresas registradas en la plataforma"
-      />
+      /> */}
 
       <FilterSearch
         titulo="Buscar empresas"
@@ -218,7 +238,7 @@ export default function EmpresasSolicitantesPage() {
                   chips={[
                     {
                       label: empresa.estadoValidacionNombre || "Sin estado",
-                      color: "primary",
+                      color: getEstadoColor(empresa.estadoValidacionNombre != null ? empresa.estadoValidacionNombre : undefined),
                     },
                   ]}
                   onAccion1={() => {

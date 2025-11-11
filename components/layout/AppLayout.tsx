@@ -66,7 +66,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       icon: <HomeIcon />,
       roles: [USER_ROLES.ESTUDIANTE],
     },
-
+{
+      href: "/admin/dashboard",
+      label: "Menú Principal",
+      icon: <HomeIcon />,
+      roles: [USER_ROLES.ADMIN],
+    },
 
     {
       href: "/estudiante/ofertas",
@@ -146,8 +151,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           }}
         >
           <Image
-            src="/logo-utn.png"
-            alt="UTN FRLP Logo"
+            src="/logo-bolsa.png"
+            alt="Bolsa UTN FRLP Logo"
             fill
             style={{ objectFit: "contain" }}
             priority
@@ -238,7 +243,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           {/* Buscador */}
           <Box sx={{ ml: "auto", width: 500, maxWidth: "100%" }}>
-            <TextField size="small" fullWidth placeholder="Buscar ofertas…" />
           </Box>
 
           {/* Acciones (derecha) */}

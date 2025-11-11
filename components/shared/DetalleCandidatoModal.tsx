@@ -100,6 +100,7 @@ export default function DetalleCandidatoModal({
       >
         <Box display="flex" alignItems="center" gap={2}>
           <Avatar
+          src={postulacion.fotoPerfil ? `data:image/jpeg;base64,${postulacion.fotoPerfil}` : undefined}
             sx={{ bgcolor: "white", color: "#1976d2", width: 56, height: 56 }}
           >
             <PersonIcon fontSize="large" />
