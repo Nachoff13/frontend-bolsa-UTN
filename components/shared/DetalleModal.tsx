@@ -82,7 +82,9 @@ export default function DetalleModal({
         }}
       >
         <Box display="flex" alignItems="center" gap={2}>
-          <Avatar sx={{ bgcolor: "white", color: "#1976d2", width: 56, height: 56 }}>
+          <Avatar
+            sx={{ bgcolor: "white", color: "#1976d2", width: 56, height: 56 }}
+          >
             <InfoIcon fontSize="large" />
           </Avatar>
           <Typography variant="h6" fontWeight="bold">
@@ -129,13 +131,22 @@ export default function DetalleModal({
                 backgroundColor: "white",
               }}
             >
-              <Stack direction="row" spacing={1.5} alignItems="center">
+              <Stack direction="row" spacing={1.5} alignItems="top">
                 {f.icon && <Box sx={{ color: "text.secondary" }}>{f.icon}</Box>}
                 <Typography variant="body1" fontWeight="bold">
                   {f.label}:
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {f.value}
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{
+                    whiteSpace: "pre-line", // respeta saltos de línea reales
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {typeof f.value === "string"
+                    ? f.value.replace(/\\n/g, "\n")
+                    : f.value}
                 </Typography>
               </Stack>
             </Paper>
