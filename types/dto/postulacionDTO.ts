@@ -9,6 +9,7 @@ export class PostulacionDTO {
   // Datos derivados
   estadoPostulacion!: string;      // último estado
   fechaPostulacion!: string;       // fecha formateada desde el back
+  motivo?: string | null;          // motivo de aprobación/rechazo del historial
 
   // Datos de la Oferta y sus relaciones
   nombreEmpresa!: string;

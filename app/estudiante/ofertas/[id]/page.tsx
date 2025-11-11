@@ -199,10 +199,11 @@ export default function DetalleOfertaPage() {
           boxShadow: 2,
           backgroundColor: mode === "dark" ? "#1e1e1e" : "#fff",
           borderColor: mode === "dark" ? "#333" : "#e0e0e0",
+          position: "relative",
         }}
       >
         {/* Header con título y chips */}
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3}>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3} gap={3}>
           <Box flex={1}>
             <Typography
               variant="h4"
@@ -326,6 +327,46 @@ export default function DetalleOfertaPage() {
               )}
             </Box>
           </Box>
+          {postulacion && postulacion.motivo && postulacion.motivo.trim() !== "" && (
+            <Box
+              sx={{
+                maxWidth: "850px",
+                minWidth: "650px",
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: mode === "dark" ? "#1e1e1e" : "#f5f5f5",
+                border: `2px solid ${getEstadoChipStyle(postulacion.estadoPostulacion).color}`,
+                borderLeftWidth: 4,
+                boxShadow: 2,
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  color: getEstadoChipStyle(postulacion.estadoPostulacion).color,
+                  fontSize: "0.875rem",
+                }}
+              >
+                {postulacion.estadoPostulacion === "Aprobada"
+                  ? "Motivo de aprobación"
+                  : postulacion.estadoPostulacion === "Rechazada"
+                  ? "Motivo de rechazo"
+                  : "Motivo"}
+              </Typography>
+              <Typography
+                sx={{
+                  color: mode === "dark" ? "#d1d5db" : "#374151",
+                  lineHeight: 1.6,
+                  whiteSpace: "pre-line",
+                  fontSize: "0.875rem",
+                }}
+              >
+                {postulacion.motivo}
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         {/* Información adicional */}
