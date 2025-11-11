@@ -15,6 +15,7 @@ export interface PostulacionCandidatoDTO {
   anioEgreso?: number | null;
   cv?: string | null;
   fotoPerfil?: string | null;
+  motivo?: string | null;
 
   // 🔹 Competencias del candidato
   competencias?: string[] | null;

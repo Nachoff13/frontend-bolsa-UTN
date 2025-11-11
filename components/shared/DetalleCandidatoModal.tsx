@@ -223,6 +223,30 @@ export default function DetalleCandidatoModal({
 
           <Divider />
 
+          {/* Motivo de la postulación */}
+          {postulacion.motivo && (
+            <Box>
+              <Typography
+                variant="subtitle2"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <InfoIcon color="action" sx={{ mr: 1 }} />
+                Motivo
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  fontStyle: "italic",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {postulacion.motivo}
+              </Typography>
+            </Box>
+          )}
           {/* Descripción de oferta */}
           <Box>
             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>

@@ -192,7 +192,6 @@ export default function CandidatosPostuladosPage() {
     postulaciones.filter((p) => p.estadoPostulacion === estado).length;
 
   const cambiarEstado = async (nuevoEstado: string) => {
-
     if (!postulacionEnCambio) return;
     cerrarMenu();
 
@@ -221,22 +220,16 @@ export default function CandidatosPostuladosPage() {
     try {
       setLoadingEstado(true);
 
-
-
       if (!postulacionEnCambio) return;
+
       await empresaService.cambiarEstadoPostulacion(
         postulacionEnCambio.idPostulacion,
         nuevoEstado,
         valores.motivo
       );
 
-      setPostulaciones((prev) =>
-        prev.map((p) =>
-          p.idPostulacion === postulacionEnCambio.idPostulacion
-            ? { ...p, estadoPostulacion: nuevoEstado }
-            : p
-        )
-      );
+      // ✅ Recargar postulaciones para reflejar el nuevo motivo
+      await cargarPostulaciones();
 
       showMessage(
         `✅ Estado cambiado a "${nuevoEstado}"`,
