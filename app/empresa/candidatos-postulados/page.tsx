@@ -557,37 +557,47 @@ export default function CandidatosPostuladosPage() {
                               try {
                                 setLoading(true);
 
-                                // 🧩 Paso 1. Actualizar siempre la postulación antes de abrir
-                                await empresaService.cambiarEstadoPostulacion(
-                                  p.idPostulacion,
-                                  p.estadoPostulacion?.toLowerCase() ===
-                                    "iniciada"
-                                    ? "En revisión"
-                                    : p.estadoPostulacion,
-                                  "Interacción de la empresa con la Postulación"
-                                );
+                                let dataActualizada;
 
-                                // 🧩 Paso 2. Traer nuevamente TODAS las postulaciones
-                                const dataActualizada =
-                                  await empresaService.getPostulacionCandidatoEmpresa();
+                                // 🧩 Paso 1. Solo actualizar si está en estado "Iniciada"
+                                if (
+                                  p.estadoPostulacion?.toLowerCase() ===
+                                  "iniciada"
+                                ) {
+                                  await empresaService.cambiarEstadoPostulacion(
+                                    p.idPostulacion,
+                                    "En revisión",
+                                    "Interacción de la empresa con la Postulación"
+                                  );
+
+                                  // 🧩 Paso 2. Traer nuevamente TODAS las postulaciones (ya con el nuevo motivo)
+                                  dataActualizada =
+                                    await empresaService.getPostulacionCandidatoEmpresa();
+
+                                  showMessage(
+                                    `Estado actualizado a "En revisión"`,
+                                    SnackbarType.Info
+                                  );
+                                } else {
+                                  // 🧩 Si no está iniciada, solo refrescamos para obtener datos recientes
+                                  dataActualizada =
+                                    await empresaService.getPostulacionCandidatoEmpresa();
+                                }
+
+                                // 🧩 Paso 3. Actualizar estado local
                                 setPostulaciones(dataActualizada);
 
-                                // 🧩 Paso 3. Buscar la postulación actualizada directamente desde el backend
+                                // 🧩 Paso 4. Buscar la postulación actualizada directamente desde el backend
                                 const postulacionActualizada =
                                   dataActualizada.find(
                                     (x) => x.idPostulacion === p.idPostulacion
                                   );
 
-                                // 🧩 Paso 4. Mostrar modal con datos frescos
+                                // 🧩 Paso 5. Mostrar modal con datos frescos
                                 setPostulacionSeleccionada(
                                   postulacionActualizada || p
                                 );
                                 setOpenModal(true);
-
-                                showMessage(
-                                  `Estado actualizado a "${postulacionActualizada?.estadoPostulacion}"`,
-                                  SnackbarType.Info
-                                );
                               } catch (err) {
                                 console.error(err);
                                 showMessage(
