@@ -222,11 +222,13 @@ export default function CandidatosPostuladosPage() {
       setLoadingEstado(true);
 
       console.log("Valores del formulario:", valores.motivo);
+      console.log("Nuevo estado:", nuevoEstado);
 
       if (!postulacionEnCambio) return;
       await empresaService.cambiarEstadoPostulacion(
         postulacionEnCambio.idPostulacion,
-        nuevoEstado
+        nuevoEstado,
+        valores.motivo
       );
 
       setPostulaciones((prev) =>
@@ -246,6 +248,7 @@ export default function CandidatosPostuladosPage() {
       showMessage("❌ Error al cambiar el estado", SnackbarType.Error);
     } finally {
       setLoadingEstado(false);
+      setModalPostulacionOpen(false);
     }
   }
 
