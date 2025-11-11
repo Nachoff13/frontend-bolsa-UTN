@@ -495,39 +495,42 @@ export default function CandidatosPostuladosPage() {
                             size="small"
                             startIcon={<DownloadIcon />}
                             onClick={async () => {
-                              handleVerCV(p.cv); // 👈 Lógica actual
+                              try {
+                                // ✅ Siempre refrescar los datos antes de abrir CV
+                                await cargarPostulaciones();
 
-                              // 🧩 Si está en estado "Iniciada", cambiar a "En revisión"
-                              if (
-                                p.estadoPostulacion?.toLowerCase() ===
-                                "iniciada"
-                              ) {
-                                try {
+                                // Buscar nuevamente la postulación actualizada
+                                const postulacionActualizada =
+                                  postulaciones.find(
+                                    (x) => x.idPostulacion === p.idPostulacion
+                                  );
+
+                                // 🧩 Si está "Iniciada", cambiar a "En revisión"
+                                if (
+                                  postulacionActualizada?.estadoPostulacion?.toLowerCase() ===
+                                  "iniciada"
+                                ) {
                                   await empresaService.cambiarEstadoPostulacion(
-                                    p.idPostulacion,
-                                    "En revisión"
+                                    postulacionActualizada.idPostulacion,
+                                    "En revisión",
+                                    "Interacción de la empresa con la Postulación"
                                   );
-                                  setPostulaciones((prev) =>
-                                    prev.map((post) =>
-                                      post.idPostulacion === p.idPostulacion
-                                        ? {
-                                            ...post,
-                                            estadoPostulacion: "En revisión",
-                                          }
-                                        : post
-                                    )
-                                  );
+
+                                  await cargarPostulaciones();
                                   showMessage(
                                     `Estado cambiado a "En revisión"`,
                                     SnackbarType.Info
                                   );
-                                } catch (err) {
-                                  console.error(err);
-                                  showMessage(
-                                    "Error al actualizar estado",
-                                    SnackbarType.Error
-                                  );
                                 }
+
+                                // ✅ Abrir el CV siempre (sin bloqueo por estado)
+                                handleVerCV(postulacionActualizada?.cv || p.cv);
+                              } catch (err) {
+                                console.error(err);
+                                showMessage(
+                                  "Error al abrir el CV",
+                                  SnackbarType.Error
+                                );
                               }
                             }}
                             sx={{
@@ -551,40 +554,48 @@ export default function CandidatosPostuladosPage() {
                             size="small"
                             startIcon={<VisibilityIcon />}
                             onClick={async () => {
-                              setPostulacionSeleccionada(p);
-                              setOpenModal(true);
+                              try {
+                                setLoading(true);
 
-                              // 🧩 Si está en estado "Iniciada", cambiar a "En revisión"
-                              if (
-                                p.estadoPostulacion?.toLowerCase() ===
-                                "iniciada"
-                              ) {
-                                try {
-                                  await empresaService.cambiarEstadoPostulacion(
-                                    p.idPostulacion,
-                                    "En revisión"
+                                // 🧩 Paso 1. Actualizar siempre la postulación antes de abrir
+                                await empresaService.cambiarEstadoPostulacion(
+                                  p.idPostulacion,
+                                  p.estadoPostulacion?.toLowerCase() ===
+                                    "iniciada"
+                                    ? "En revisión"
+                                    : p.estadoPostulacion,
+                                  "Interacción de la empresa con la Postulación"
+                                );
+
+                                // 🧩 Paso 2. Traer nuevamente TODAS las postulaciones
+                                const dataActualizada =
+                                  await empresaService.getPostulacionCandidatoEmpresa();
+                                setPostulaciones(dataActualizada);
+
+                                // 🧩 Paso 3. Buscar la postulación actualizada directamente desde el backend
+                                const postulacionActualizada =
+                                  dataActualizada.find(
+                                    (x) => x.idPostulacion === p.idPostulacion
                                   );
-                                  setPostulaciones((prev) =>
-                                    prev.map((post) =>
-                                      post.idPostulacion === p.idPostulacion
-                                        ? {
-                                            ...post,
-                                            estadoPostulacion: "En revisión",
-                                          }
-                                        : post
-                                    )
-                                  );
-                                  showMessage(
-                                    `Estado cambiado a "En revisión"`,
-                                    SnackbarType.Info
-                                  );
-                                } catch (err) {
-                                  console.error(err);
-                                  showMessage(
-                                    "Error al actualizar estado",
-                                    SnackbarType.Error
-                                  );
-                                }
+
+                                // 🧩 Paso 4. Mostrar modal con datos frescos
+                                setPostulacionSeleccionada(
+                                  postulacionActualizada || p
+                                );
+                                setOpenModal(true);
+
+                                showMessage(
+                                  `Estado actualizado a "${postulacionActualizada?.estadoPostulacion}"`,
+                                  SnackbarType.Info
+                                );
+                              } catch (err) {
+                                console.error(err);
+                                showMessage(
+                                  "Error al abrir detalles",
+                                  SnackbarType.Error
+                                );
+                              } finally {
+                                setLoading(false);
                               }
                             }}
                             sx={{
