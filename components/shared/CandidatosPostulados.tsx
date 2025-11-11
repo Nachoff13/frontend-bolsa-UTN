@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import CandidatoCard from "./CandidatoCard";
 import DetalleCandidatoModal from "@/components/shared/DetalleCandidatoModal";
-import { Button } from "@mui/material";
+import { Button, Typography, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import EmptyState from "./EmptyState";
 
@@ -35,13 +35,18 @@ export default function CandidatosPostulados({
   const router = useRouter();
   const theme = useTheme();
 
+
   if (loading)
-    return <p className="text-neutral-500">Cargando candidatos...</p>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Cargando candidatos...
+      </Typography>
+    );
 
   return (
     <section
       style={{
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.background.default,
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: "12px",
         padding: "16px",
@@ -51,10 +56,16 @@ export default function CandidatosPostulados({
       className="h-full flex flex-col"
     >
       {/* 🧭 Header con título y botón */}
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-semibold text-gray-800">
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            color: "text.primary",
+          }}
+        >
           Candidatos postulados
-        </h3>
+        </Typography>
         <Button
           variant="outlined"
           size="small"
@@ -62,14 +73,12 @@ export default function CandidatosPostulados({
           sx={{
             textTransform: "none",
             fontWeight: 600,
-            borderColor: "#d1d5db",
-            color: "#374151",
             px: 2.5,
           }}
         >
           Ver Postulaciones
         </Button>
-      </div>
+      </Box>
 
       {/* 📋 Lista de candidatos */}
       {postulaciones.length === 0 ? (

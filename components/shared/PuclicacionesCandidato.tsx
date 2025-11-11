@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { PostulacionDTO } from "@/types/dto/postulacionDTO";
 import CardPublicacion from "@/components/shared/CardPublicacion";
@@ -96,7 +96,11 @@ export default function PublicacionesCandidato({
   };
 
   if (loading)
-    return <p className="text-neutral-500">Cargando publicaciones...</p>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Cargando publicaciones...
+      </Typography>
+    );
 
   const camposPostulacion: CampoFormulario[] = [
     {
@@ -126,9 +130,16 @@ export default function PublicacionesCandidato({
       }}
       className="h-full flex flex-col"
     >
-      <h3 className="mb-3 text-base font-semibold text-gray-800">
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 3,
+          fontWeight: 600,
+          color: "text.primary",
+        }}
+      >
         Publicaciones de empleo recientes
-      </h3>
+      </Typography>
 
       {ofertas.length === 0 ? (
         <EmptyState mensaje="No existen publicaciones para tu carrera" />

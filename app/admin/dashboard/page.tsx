@@ -51,11 +51,13 @@ function DualDonutD3({
   ofertas,
   getColor,
   height = 340,
+  theme,
 }: {
   candidatos: RingDatum[];
   ofertas: RingDatum[];
   getColor: (name: string) => string;
   height?: number;
+  theme: any;
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -133,14 +135,15 @@ function DualDonutD3({
 
     const onMouseMove = (event: MouseEvent, d: d3.PieArcDatum<RingDatum>) => {
       const { pageX, pageY } = event;
+      const textColor = theme.palette.mode === 'dark' ? theme.palette.text.primary : '#555';
       tip.style.display = "block";
       tip.style.left = pageX + 12 + "px";
       tip.style.top = pageY + 12 + "px";
       tip.innerHTML = `
-        <div style="font-weight:600; margin-bottom:4px;">
+        <div style="font-weight:600; margin-bottom:4px; color:${textColor};">
           ${d.data.tipo === "Ofertas" ? "🏢 Ofertas" : "👨‍🎓 Candidatos"}
         </div>
-        <div style="font-size:13px; color:#555;">${d.data.name}: ${d.data.value}</div>
+        <div style="font-size:13px; color:${textColor};">${d.data.name}: ${d.data.value}</div>
       `;
     };
     const onMouseLeave = () => (tip.style.display = "none");
@@ -168,24 +171,25 @@ function DualDonutD3({
       .attr("stroke-width", 1.5)
       .on("mousemove", (event, d) => onMouseMove(event as any, d))
       .on("mouseleave", onMouseLeave);
-  }, [candidatos, ofertas, height, baseNames, getColor]);
+  }, [candidatos, ofertas, height, baseNames, getColor, theme]);
 
   return (
     <Box ref={wrapRef} sx={{ position: "relative", width: "100%" }}>
       <svg ref={svgRef} />
       <Box
         ref={tipRef}
-        sx={{
+        sx={(theme) => ({
           position: "fixed",
           display: "none",
           pointerEvents: "none",
-          bgcolor: "white",
-          border: "1px solid #ccc",
+          bgcolor: "background.paper",
+          border: `1px solid ${theme.palette.divider}`,
           borderRadius: "8px",
           p: "8px 10px",
           boxShadow: 1,
           zIndex: 9999,
-        }}
+          color: "text.primary",
+        })}
       />
     </Box>
   );
@@ -281,8 +285,14 @@ export default function DashboardAdminPage() {
     tableau[Math.abs(hashString(name)) % tableau.length];
 
   return (
-    <div className="flex min-h-screen bg-[#f9fafa]">
-      <main className="flex-1 p-4 md:p-6">
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        backgroundColor: "background.default",
+      }}
+    >
+      <Box component="main" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
         {/* 🔹 Métricas principales */}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-5 mb-6">
             <StatCard
@@ -353,7 +363,7 @@ export default function DashboardAdminPage() {
               {carreras.length === 0 ? (
                 <EmptyState mensaje="Sin información de carreras" />
               ) : (
-                <DualDonutD3 candidatos={candidatosRing} ofertas={ofertasRing} getColor={getColor} />
+                <DualDonutD3 candidatos={candidatosRing} ofertas={ofertasRing} getColor={getColor} theme={theme} />
               )}
 
               <Stack direction="row" justifyContent="center" alignItems="center" spacing={3} mt={2} flexWrap="wrap">
@@ -379,7 +389,7 @@ export default function DashboardAdminPage() {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+      </Box>
+    </Box>
   );
 }

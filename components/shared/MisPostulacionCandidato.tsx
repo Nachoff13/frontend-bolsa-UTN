@@ -18,7 +18,11 @@ export default function MisPostulacionesCandidato({
   const theme = useTheme();
 
   if (loading)
-    return <p className="text-neutral-500">Cargando postulaciones...</p>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Cargando postulaciones...
+      </Typography>
+    );
 
   return (
     <section
@@ -32,9 +36,16 @@ export default function MisPostulacionesCandidato({
       }}
       className="h-full flex flex-col"
     >
-      <h3 className="mb-3 text-base font-semibold text-gray-800">
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 3,
+          fontWeight: 600,
+          color: "text.primary",
+        }}
+      >
         Mis postulaciones
-      </h3>
+      </Typography>
 
       {postulaciones.length === 0 ? (
         <EmptyState mensaje="No tenés postulaciones" />

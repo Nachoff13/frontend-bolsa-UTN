@@ -8,6 +8,7 @@ import {
   CalendarToday as CalendarTodayIcon,
 } from "@mui/icons-material";
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 //#endregion
 
@@ -54,6 +55,7 @@ export default function EstudiantePostulacionesPage() {
   //#region SNACKBAR Y MODAL CARGA
   const [loading, setLoading] = useState(true);
   const { showMessage } = useSnackbar();
+  const router = useRouter();
 
   //#region DATOS DE LA API EN VARIABLES
   // Estados para manejar todas las postulaciones y las filtradas
@@ -409,19 +411,16 @@ export default function EstudiantePostulacionesPage() {
                   descripcion={postulacion.descripcionOferta}
                   chips={[
                     { 
-                      label: postulacion.estadoPostulacion, 
-                      backgroundColor: estadoColor.backgroundColor,
-                      textColor: estadoColor.color
+                      label: postulacion.estadoPostulacion
+                      // El estado se detecta automáticamente si es iniciada, rechazada o aprobada
                     },
                     {
-                      label: postulacion.descripcionModalidad,
-                      backgroundColor: modalidadColor.backgroundColor,
-                      textColor: modalidadColor.color
+                      label: postulacion.descripcionModalidad
+                      // Sin colores personalizados - usará el estilo gris genérico
                     },
                     {
-                      label: postulacion.descripcionTipoContrato,
-                      backgroundColor: contratoColor.backgroundColor,
-                      textColor: contratoColor.color
+                      label: postulacion.descripcionTipoContrato
+                      // Sin colores personalizados - usará el estilo gris genérico
                     },
                   ]}
                   infoExtra={[
@@ -438,6 +437,9 @@ export default function EstudiantePostulacionesPage() {
                       texto: `Carta: ${postulacion.cartaPresentacion}`,
                     },
                   ]}
+                  onAccion1={() => router.push(`/estudiante/ofertas/${postulacion.idOferta}`)}
+                  textoAccion1="Ver Detalle"
+                  colorAccion1="primary"
                 />
                 );
               })}

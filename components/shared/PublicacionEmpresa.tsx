@@ -5,7 +5,7 @@ import CardPublicacion from "./CardPublicacion";
 import DetalleModal from "@/components/shared/DetalleModal";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { calcularTiempoTranscurrido } from "@/lib/dateUtils";
-import { Button } from "@mui/material";
+import { Button, Typography, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
 import EmptyState from "./EmptyState";
@@ -29,7 +29,11 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
   const theme = useTheme();
 
   if (loading)
-    return <p className="text-neutral-500">Cargando publicaciones...</p>;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        Cargando publicaciones...
+      </Typography>
+    );
 
   return (
     <section
@@ -44,10 +48,16 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
       className="h-full flex flex-col"
     >
       {/* 🧭 Header con título y botón */}
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-semibold text-gray-800">
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            color: "text.primary",
+          }}
+        >
           Publicaciones de empleo recientes
-        </h3>
+        </Typography>
         <Button
           variant="outlined"
           size="small"
@@ -55,14 +65,12 @@ export default function PublicacionesEmpresa({ ofertas, loading }: Props) {
           sx={{
             textTransform: "none",
             fontWeight: 600,
-            borderColor: "#d1d5db",
-            color: "#374151",
             px: 2.5,
           }}
         >
           Ver Publicaciones
         </Button>
-      </div>
+      </Box>
 
       {/* 📋 Lista de publicaciones */}
       {ofertas.length === 0 ? (

@@ -3,7 +3,7 @@ export interface PostulacionCandidatoDTO {
   idPostulacion: number;
   estadoPostulacion: string;
   observacion?: string | null;
-  fechaPostulacion: string; // formato ISO (ej: "2025-08-20T00:00:00")
+  fechaPostulacion: string; // formato ISO
 
   // 🔹 Datos del Candidato
   idCandidato: number;
@@ -13,8 +13,11 @@ export interface PostulacionCandidatoDTO {
   generoNombre?: string | null;
   carreraNombre?: string | null;
   anioEgreso?: number | null;
-  cv?: string | null; // base64 o null si no tiene CV
-  fotoPerfil?: string | null; 
+  cv?: string | null;
+  fotoPerfil?: string | null;
+
+  // 🔹 Competencias del candidato
+  competencias?: string[] | null;
 
   // 🔹 Datos de la Oferta
   idOferta: number;
