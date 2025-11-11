@@ -221,8 +221,7 @@ export default function CandidatosPostuladosPage() {
     try {
       setLoadingEstado(true);
 
-      console.log("Valores del formulario:", valores.motivo);
-      console.log("Nuevo estado:", nuevoEstado);
+
 
       if (!postulacionEnCambio) return;
       await empresaService.cambiarEstadoPostulacion(
