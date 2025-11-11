@@ -206,6 +206,25 @@ export default function CandidatosPostuladosPage() {
     }
   };
 
+  const cambiarEstadoDesdeModal = async (nuevoEstado: string) => {
+    if (!postulacionSeleccionada) return;
+
+    setPostulacionEnCambio(postulacionSeleccionada);
+    
+    // Cerrar el modal de detalles antes de mostrar la confirmación
+    setOpenModal(false);
+
+    const confirmado = await showConfirmDialog(
+      "¿Desea cambiar el estado de la postulación?",
+      `Esta acción actualizará el estado a "${nuevoEstado}".`
+    );
+
+    if (confirmado) {
+      setModalPostulacionOpen(true);
+      setNuevoEstado(nuevoEstado);
+    }
+  };
+
   const camposCambioEstado: CampoFormulario[] = [
     {
       id: "motivo",
@@ -493,7 +512,7 @@ export default function CandidatosPostuladosPage() {
                           <Button
                             variant="outlined"
                             size="small"
-                            startIcon={<DownloadIcon />}
+                            startIcon={<DownloadIcon sx={{ fontSize: "1.1rem !important" }} />}
                             onClick={async () => {
                               try {
                                 // ✅ Siempre refrescar los datos antes de abrir CV
@@ -539,6 +558,10 @@ export default function CandidatosPostuladosPage() {
                               borderRadius: "8px",
                               borderColor: "#0d47a1",
                               color: "#0d47a1",
+                              fontSize: "0.813rem",
+                              maxHeight: "36px",
+                              py: 0.5,
+                              px: 1.5,
                               "&:hover": {
                                 borderColor: "#1565c0",
                                 backgroundColor: "#e3f2fd",
@@ -552,7 +575,7 @@ export default function CandidatosPostuladosPage() {
                           <Button
                             variant="contained"
                             size="small"
-                            startIcon={<VisibilityIcon />}
+                            startIcon={<VisibilityIcon sx={{ fontSize: "1.1rem !important" }} />}
                             onClick={async () => {
                               try {
                                 setLoading(true);
@@ -614,10 +637,39 @@ export default function CandidatosPostuladosPage() {
                               textTransform: "none",
                               borderRadius: "8px",
                               fontWeight: 600,
+                              fontSize: "0.813rem",
+                              maxHeight: "36px",
+                              py: 0.5,
+                              px: 1.5,
                               "&:hover": { backgroundColor: "#1565c0" },
                             }}
                           >
                             Ver detalles
+                          </Button>
+
+                          {/* 🔹 Cambiar estado */}
+                          <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            onClick={(e) => abrirMenu(e, p)}
+                            disabled={loadingEstado && postulacionEnCambio?.idPostulacion === p.idPostulacion}
+                            sx={{
+                              textTransform: "none",
+                              fontWeight: 600,
+                              borderRadius: "8px",
+                              minWidth: "auto",
+                              fontSize: "0.813rem",
+                              maxHeight: "36px",
+                              py: 0.5,
+                              px: 1.5,
+                            }}
+                          >
+                            {loadingEstado && postulacionEnCambio?.idPostulacion === p.idPostulacion ? (
+                              <CircularProgress size={18} color="inherit" />
+                            ) : (
+                              "Cambiar estado"
+                            )}
                           </Button>
                         </Box>
                       </Box>
@@ -656,6 +708,8 @@ export default function CandidatosPostuladosPage() {
           open={openModal}
           onClose={() => setOpenModal(false)}
           postulacion={postulacionSeleccionada || undefined}
+          onCambiarEstado={cambiarEstadoDesdeModal}
+          loadingEstado={loadingEstado}
         />
       </Box>
 
