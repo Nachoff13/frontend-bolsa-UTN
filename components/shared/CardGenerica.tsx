@@ -107,16 +107,23 @@ export default function CardGenerica({
         {/* Descripción */}
         {descripcion && (
           <>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-              {" "}
-              {/* Cambiado de subtitle2 a subtitle1 */}
-              Descripción
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
-              {" "}
-              {/* Cambiado de body2 a body1 */}
-              {descripcion}
-            </Typography>
+           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+      Descripción
+    </Typography>
+
+    <Typography
+      variant="body1"
+      sx={{
+        mb: 3,
+        color: "text.secondary",
+        whiteSpace: "pre-line", // 👈 respeta los saltos de línea (\n)
+        lineHeight: 1.7,
+      }}
+    >
+      {descripcion.length > 300
+        ? `${descripcion.substring(0, 300)}...`
+        : descripcion}
+    </Typography>
           </>
         )}
         {/* Acciones */}
