@@ -28,4 +28,5 @@ export class CrearOfertaDTO {
   fechaInicio?: string;
   fechaFin?: string;
   cupos?: number;
+  idCarreras?: number[];
 }

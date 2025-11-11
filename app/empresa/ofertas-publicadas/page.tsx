@@ -14,6 +14,7 @@ import {
   Search as SearchIcon,
   Lock as LockIcon,
   Warning as WarningIcon,
+  School as SchoolIcon,
 } from "@mui/icons-material";
 import { InputAdornment } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,10 @@ import { OpcionFiltro } from "@/types/dto/filter/opcionFiltroDTO";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
 import { calcularFechaCierre } from "@/lib/dateUtils";
 import { getCuposChip } from "@/lib/cuposUtils";
+import { 
+  getModalidadChipColor, 
+  getTipoContratoChipColor 
+} from "@/lib/chipColors";
 
 //#endregion
 
@@ -278,10 +283,16 @@ export default function EmpresaOfertasPublicadasPage() {
     const ahora = new Date();
     
     if (fechaFin && fechaFin < ahora) {
-      return 'error';
+      return {
+        backgroundColor: "#FFEBEE",
+        textColor: "#C62828"
+      };
     }
     
-    return 'success';
+    return {
+      backgroundColor: "#E8F5E9",
+      textColor: "#2E7D32"
+    };
   };
 
   const getEstadoTexto = (oferta: OfertaDTO) => {
@@ -461,9 +472,21 @@ export default function EmpresaOfertasPublicadasPage() {
                   titulo={oferta.titulo}
                   descripcion={oferta.descripcion}
                   chips={[
-                    { label: oferta.modalidad, color: "primary" },
-                    { label: oferta.tipoContrato, color: "secondary" },
-                    { label: getEstadoTexto(oferta), color: getEstadoColor(oferta) as any },
+                    { 
+                      label: oferta.modalidad, 
+                      backgroundColor: getModalidadChipColor(oferta.modalidad).backgroundColor,
+                      textColor: getModalidadChipColor(oferta.modalidad).color
+                    },
+                    { 
+                      label: oferta.tipoContrato, 
+                      backgroundColor: getTipoContratoChipColor(oferta.tipoContrato).backgroundColor,
+                      textColor: getTipoContratoChipColor(oferta.tipoContrato).color
+                    },
+                    { 
+                      label: getEstadoTexto(oferta), 
+                      backgroundColor: getEstadoColor(oferta).backgroundColor,
+                      textColor: getEstadoColor(oferta).textColor
+                    },
                     // Cupos con lógica mejorada (usando utilidad centralizada)
                     getCuposChip(oferta.cantidadPostulantes, oferta.cupos),
                   ]}
@@ -480,11 +503,17 @@ export default function EmpresaOfertasPublicadasPage() {
                       icon: <EventIcon fontSize="small" />,
                       texto: `Cierra el ${calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}`,
                     },
+                    {
+                      icon: <SchoolIcon fontSize="small" />,
+                      texto: oferta.nombreCarrera || 'Carrera no especificada',
+                    },
                   ]}
                   onAccion1={() => handleEditarOferta(oferta.id)}
                   textoAccion1="Editar"
+                  colorAccion1="primary"
                   onAccion2={() => handleSolicitarEliminarOferta(oferta.id)}
                   textoAccion2="Eliminar"
+                  colorAccion2="error"
                 />
               ))}
             </Card>

@@ -9,6 +9,7 @@ import {
   LocationOn as LocationOnIcon,
   CalendarToday as CalendarTodayIcon,
   Event as EventIcon,
+  School as SchoolIcon,
 } from "@mui/icons-material";
 import { useMemo } from "react";
 
@@ -406,6 +407,10 @@ export default function EstudianteOfertasPage() {
                         oferta.fechaInicio,
                         oferta.fechaFin
                       )}`,
+                    },
+                    {
+                      icon: <SchoolIcon fontSize="small" />,
+                      texto: oferta.nombreCarrera || 'Carrera no especificada',
                     },
                   ]}
                   onAccion1={() => router.push(`/estudiante/ofertas/${oferta.id}`)}

@@ -21,6 +21,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import 'dayjs/locale/es';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -47,6 +48,7 @@ const ofertaCreateSchema = z.object({
   idModalidad: z.union([z.string(), z.number()]).refine(val => val !== '' && val !== null && val !== undefined, 'Debe seleccionar una modalidad'),
   idTipoContrato: z.union([z.string(), z.number()]).refine(val => val !== '' && val !== null && val !== undefined, 'Debe seleccionar un tipo de contrato'),
   idLocalidad: z.string().min(1, 'Debe seleccionar una localidad'),
+  idCarreras: z.array(z.number()).min(1, 'Debe seleccionar al menos una carrera'),
   cupos: z.number()
     .min(1, 'Debe haber al menos 1 cupo disponible')
     .max(999, 'El número de cupos no puede exceder 999'),
@@ -76,7 +78,9 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
   const [modalidades, setModalidades] = useState<CatalogOption[]>([]);
   const [tiposContrato, setTiposContrato] = useState<CatalogOption[]>([]);
   const [localidades, setLocalidades] = useState<CatalogOption[]>([]);
+  const [carreras, setCarreras] = useState<CatalogOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cuposInput, setCuposInput] = useState<string>('');
 
   const {
     control,
@@ -91,11 +95,17 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
       idModalidad: '',
       idTipoContrato: '',
       idLocalidad: '',
+      idCarreras: [],
       cupos: 1,
       fechaInicio: '',
       fechaFin: ''
     }
   });
+
+  // Inicializar el valor de cuposInput cuando se carga el componente
+  useEffect(() => {
+    setCuposInput('1');
+  }, []);
 
   useEffect(() => {
     cargarCatalogos();
@@ -105,15 +115,17 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
     try {
       setLoading(true);
       
-      const [modos, tipos, locs] = await Promise.all([
+      const [modos, tipos, locs, cars] = await Promise.all([
         genericService.getModalidad(),
         genericService.getTipoContrato(),
-        genericService.getLocalidades()
+        genericService.getLocalidades(),
+        genericService.getCarreras()
       ]);
       
       setModalidades(modos as CatalogOption[]);
       setTiposContrato(tipos as CatalogOption[]);
       setLocalidades(locs as CatalogOption[]);
+      setCarreras(cars as CatalogOption[]);
     } catch (error) {
       console.error('Error al cargar catálogos:', error);
     } finally {
@@ -128,6 +140,7 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
       idModalidad: typeof data.idModalidad === 'string' ? parseInt(data.idModalidad) : data.idModalidad,
       idTipoContrato: typeof data.idTipoContrato === 'string' ? parseInt(data.idTipoContrato) : data.idTipoContrato,
       idLocalidad: parseInt(data.idLocalidad),
+      idCarreras: data.idCarreras,
       cupos: data.cupos,
       fechaInicio: data.fechaInicio,
       fechaFin: data.fechaFin || undefined
@@ -150,7 +163,7 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
   }
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
       <Card sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}> {/* Aumentado de 800 a 900 */}
         <CardContent sx={{ p: 5 }}> {/* Aumentado de 4 a 5 */}
           <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mb: 5 }}> {/* Aumentado mb */}
@@ -285,13 +298,65 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                 )}
               />
 
+              {/* Carreras */}
+              <Controller
+                name="idCarreras"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    multiple
+                    options={carreras}
+                    getOptionLabel={(option) => {
+                      if (option.nombre) {
+                        return option.nombre;
+                      }
+                      if (option.descripcion) {
+                        return option.descripcion;
+                      }
+                      return String(option);
+                    }}
+                    isOptionEqualToValue={(option, value) => {
+                      const optionId = option.id || (option.codigo ? parseInt(option.codigo) : null);
+                      const valueId = value.id || (value.codigo ? parseInt(value.codigo) : null);
+                      return optionId !== null && valueId !== null && optionId === valueId;
+                    }}
+                    value={carreras.filter(carrera => {
+                      const carreraId = carrera.id || (carrera.codigo ? parseInt(carrera.codigo) : null);
+                      return carreraId !== null && field.value?.includes(carreraId);
+                    })}
+                    onChange={(_, newValue) => {
+                      const ids = newValue
+                        .map(item => {
+                          if (item.id) return item.id;
+                          if (item.codigo) {
+                            const parsed = parseInt(item.codigo);
+                            return isNaN(parsed) ? null : parsed;
+                          }
+                          return null;
+                        })
+                        .filter((id): id is number => id !== null && id !== 0);
+                      field.onChange(ids);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Carreras"
+                        error={!!errors.idCarreras}
+                        helperText={errors.idCarreras?.message || 'Selecciona las carreras para esta oferta'}
+                        placeholder="Selecciona una o más carreras"
+                        variant="outlined"
+                      />
+                    )}
+                  />
+                )}
+              />
+
               {/* Cupos */}
               <Controller
                 name="cupos"
                 control={control}
                 render={({ field }) => (
                   <TextField
-                    {...field}
                     label="Cantidad de Cupos"
                     fullWidth
                     type="number"
@@ -300,7 +365,39 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                     placeholder="Ej: 1"
                     variant="outlined"
                     inputProps={{ min: 1, max: 999 }}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                    value={cuposInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Permitir que el usuario borre completamente el campo
+                      setCuposInput(value);
+                      
+                      // Actualizar el formulario solo si hay un valor válido
+                      if (value === '') {
+                        // No actualizar el formulario mientras está vacío
+                        return;
+                      }
+                      
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 999) {
+                        field.onChange(numValue);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Asegurar que siempre haya un valor válido al perder el foco
+                      const value = e.target.value;
+                      if (value === '' || isNaN(parseInt(value)) || parseInt(value) < 1) {
+                        setCuposInput('1');
+                        field.onChange(1);
+                      } else {
+                        const numValue = parseInt(value);
+                        if (numValue > 999) {
+                          setCuposInput('999');
+                          field.onChange(999);
+                        } else {
+                          setCuposInput(String(numValue));
+                        }
+                      }
+                    }}
                   />
                 )}
               />
@@ -316,6 +413,8 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                     onChange={(date) => {
                       field.onChange(date ? date.format('YYYY-MM-DD') : '');
                     }}
+                    minDate={dayjs()}
+                    format="DD/MM/YYYY"
                     slotProps={{
                       textField: {
                         fullWidth: true,
@@ -339,6 +438,8 @@ export default function OfertaForm({ onSubmit, onCancel, isSubmitting }: OfertaF
                     onChange={(date) => {
                       field.onChange(date ? date.format('YYYY-MM-DD') : '');
                     }}
+                    minDate={dayjs()}
+                    format="DD/MM/YYYY"
                     slotProps={{
                       textField: {
                         fullWidth: true,

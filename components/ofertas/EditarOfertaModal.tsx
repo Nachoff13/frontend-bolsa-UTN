@@ -47,6 +47,7 @@ const editarOfertaSchema = z.object({
   idModalidad: z.union([z.string(), z.number()]).refine(val => val !== '' && val !== null && val !== undefined, 'Debe seleccionar una modalidad'),
   idTipoContrato: z.union([z.string(), z.number()]).refine(val => val !== '' && val !== null && val !== undefined, 'Debe seleccionar un tipo de contrato'),
   idLocalidad: z.string().min(1, 'Debe seleccionar una localidad'),
+  idCarreras: z.array(z.number()).min(1, 'Debe seleccionar al menos una carrera'),
   cupos: z.number()
     .min(1, 'Debe haber al menos 1 cupo disponible')
     .max(999, 'El número de cupos no puede exceder 999'),
@@ -65,8 +66,10 @@ export default function EditarOfertaModal({ open, oferta, onClose, onSubmit }: E
   const [modalidades, setModalidades] = useState<CatalogOption[]>([]);
   const [tiposContrato, setTiposContrato] = useState<CatalogOption[]>([]);
   const [localidades, setLocalidades] = useState<CatalogOption[]>([]);
+  const [carreras, setCarreras] = useState<CatalogOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cuposInput, setCuposInput] = useState<string>('');
 
   const {
     control,
@@ -84,11 +87,36 @@ export default function EditarOfertaModal({ open, oferta, onClose, onSubmit }: E
   }, [open]);
 
   useEffect(() => {
-    if (oferta && modalidades.length > 0 && tiposContrato.length > 0 && localidades.length > 0) {
+    if (oferta && modalidades.length > 0 && tiposContrato.length > 0 && localidades.length > 0 && carreras.length > 0) {
       // Buscar los IDs correspondientes basados en los nombres
       const modalidadId = modalidades.find(m => m.descripcion === oferta.modalidad || m.nombre === oferta.modalidad)?.id || '';
       const tipoContratoId = tiposContrato.find(t => t.descripcion === oferta.tipoContrato || t.nombre === oferta.tipoContrato)?.id || '';
       const localidadId = localidades.find(l => l.descripcion === oferta.nombreLocalidad || l.nombre === oferta.nombreLocalidad)?.id || '';
+      
+      // Obtener las IDs de las carreras de la oferta
+      const carreraIds: number[] = [];
+      if (oferta.nombreCarrera) {
+        const nombreCarreras = oferta.nombreCarrera.split(',').map(n => n.trim());
+        nombreCarreras.forEach(nombreCarrera => {
+          // Buscar la carrera por nombre o descripción (comparación case-insensitive)
+          const carrera = carreras.find(c => {
+            const nombreMatch = c.nombre && c.nombre.toLowerCase().trim() === nombreCarrera.toLowerCase().trim();
+            const descripcionMatch = c.descripcion && c.descripcion.toLowerCase().trim() === nombreCarrera.toLowerCase().trim();
+            return nombreMatch || descripcionMatch;
+          });
+          if (carrera) {
+            // Priorizar id (número), si no existe intentar convertir codigo a número
+            if (carrera.id) {
+              carreraIds.push(carrera.id);
+            } else if (carrera.codigo) {
+              const parsed = parseInt(carrera.codigo);
+              if (!isNaN(parsed)) {
+                carreraIds.push(parsed);
+              }
+            }
+          }
+        });
+      }
 
       reset({
         titulo: oferta.titulo,
@@ -96,24 +124,30 @@ export default function EditarOfertaModal({ open, oferta, onClose, onSubmit }: E
         idModalidad: modalidadId,
         idTipoContrato: tipoContratoId,
         idLocalidad: String(localidadId),
+        idCarreras: carreraIds,
         cupos: oferta.cupos || 1,
       });
+      
+      // Sincronizar el estado local de cuposInput
+      setCuposInput(String(oferta.cupos || 1));
     }
-  }, [oferta, modalidades, tiposContrato, localidades, reset]);
+  }, [oferta, modalidades, tiposContrato, localidades, carreras, reset]);
 
   const cargarCatalogos = async () => {
     try {
       setLoading(true);
       
-      const [modos, tipos, locs] = await Promise.all([
+      const [modos, tipos, locs, cars] = await Promise.all([
         genericService.getModalidad(),
         genericService.getTipoContrato(),
-        genericService.getLocalidades()
+        genericService.getLocalidades(),
+        genericService.getCarreras()
       ]);
       
       setModalidades(modos as CatalogOption[]);
       setTiposContrato(tipos as CatalogOption[]);
       setLocalidades(locs as CatalogOption[]);
+      setCarreras(cars as CatalogOption[]);
     } catch (error) {
       console.error('Error al cargar catálogos:', error);
     } finally {
@@ -134,6 +168,7 @@ export default function EditarOfertaModal({ open, oferta, onClose, onSubmit }: E
         idModalidad: typeof data.idModalidad === 'string' ? parseInt(data.idModalidad) : data.idModalidad,
         idTipoContrato: typeof data.idTipoContrato === 'string' ? parseInt(data.idTipoContrato) : data.idTipoContrato,
         idLocalidad: parseInt(data.idLocalidad),
+        idCarreras: data.idCarreras && data.idCarreras.length > 0 ? data.idCarreras : [],
         cupos: data.cupos,
         // NO incluimos fechaInicio ni fechaFin
       };
@@ -316,13 +351,66 @@ export default function EditarOfertaModal({ open, oferta, onClose, onSubmit }: E
                 )}
               />
 
+              {/* Carreras */}
+              <Controller
+                name="idCarreras"
+                control={control}
+                render={({ field }) => (
+                  <Autocomplete
+                    multiple
+                    options={carreras}
+                    getOptionLabel={(option) => {
+                      if (option.nombre) {
+                        return option.nombre;
+                      }
+                      if (option.descripcion) {
+                        return option.descripcion;
+                      }
+                      return String(option);
+                    }}
+                    isOptionEqualToValue={(option, value) => {
+                      const optionId = option.id || (option.codigo ? parseInt(option.codigo) : null);
+                      const valueId = value.id || (value.codigo ? parseInt(value.codigo) : null);
+                      return optionId !== null && valueId !== null && optionId === valueId;
+                    }}
+                    value={carreras.filter(carrera => {
+                      const carreraId = carrera.id || (carrera.codigo ? parseInt(carrera.codigo) : null);
+                      const fieldValue = field.value || [];
+                      return carreraId !== null && Array.isArray(fieldValue) && fieldValue.includes(carreraId);
+                    })}
+                    onChange={(_, newValue) => {
+                      const ids = newValue
+                        .map(item => {
+                          if (item.id) return item.id;
+                          if (item.codigo) {
+                            const parsed = parseInt(item.codigo);
+                            return isNaN(parsed) ? null : parsed;
+                          }
+                          return null;
+                        })
+                        .filter((id): id is number => id !== null && id !== 0);
+                      field.onChange(ids);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Carreras"
+                        error={!!errors.idCarreras}
+                        helperText={errors.idCarreras?.message || 'Selecciona las carreras para esta oferta'}
+                        placeholder="Selecciona una o más carreras"
+                        variant="outlined"
+                      />
+                    )}
+                  />
+                )}
+              />
+
               {/* Cupos */}
               <Controller
                 name="cupos"
                 control={control}
                 render={({ field }) => (
                   <TextField
-                    {...field}
                     label="Cantidad de Cupos"
                     fullWidth
                     type="number"
@@ -331,7 +419,39 @@ export default function EditarOfertaModal({ open, oferta, onClose, onSubmit }: E
                     placeholder="Ej: 1"
                     variant="outlined"
                     inputProps={{ min: 1, max: 999 }}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                    value={cuposInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Permitir que el usuario borre completamente el campo
+                      setCuposInput(value);
+                      
+                      // Actualizar el formulario solo si hay un valor válido
+                      if (value === '') {
+                        // No actualizar el formulario mientras está vacío
+                        return;
+                      }
+                      
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 999) {
+                        field.onChange(numValue);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Asegurar que siempre haya un valor válido al perder el foco
+                      const value = e.target.value;
+                      if (value === '' || isNaN(parseInt(value)) || parseInt(value) < 1) {
+                        setCuposInput('1');
+                        field.onChange(1);
+                      } else {
+                        const numValue = parseInt(value);
+                        if (numValue > 999) {
+                          setCuposInput('999');
+                          field.onChange(999);
+                        } else {
+                          setCuposInput(String(numValue));
+                        }
+                      }
+                    }}
                   />
                 )}
               />

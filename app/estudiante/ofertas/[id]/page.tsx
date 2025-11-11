@@ -9,6 +9,7 @@ import {
   Event as EventIcon,
   ArrowBack as ArrowBackIcon,
   Business as BusinessIcon,
+  School as SchoolIcon,
 } from "@mui/icons-material";
 import Titulo from "@/components/shared/Titulo";
 import LoadingModal from "@/components/shared/LoadingModal";
@@ -188,20 +189,42 @@ export default function DetalleOfertaPage() {
               </Typography>
             </Box>
             <Box display="flex" gap={1} flexWrap="wrap">
-              <Chip
-                label={oferta.nombreCarrera || oferta.nombreEmpresa}
-                sx={{
-                  backgroundColor: empresaColor.backgroundColor,
-                  color: empresaColor.color,
-                  fontWeight: 600,
-                }}
-              />
+              {oferta.nombreCarrera && (
+                <Chip
+                  label={oferta.nombreCarrera}
+                  sx={{
+                    backgroundColor: empresaColor.backgroundColor,
+                    color: empresaColor.color,
+                    fontWeight: 600,
+                    borderRadius: "8px",
+                    fontSize: "0.875rem",
+                    height: "32px",
+                    padding: "0 12px",
+                    "& .MuiChip-label": {
+                      padding: "0 4px",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: empresaColor.color,
+                    },
+                  }}
+                />
+              )}
               <Chip
                 label={oferta.modalidad}
                 sx={{
                   backgroundColor: modalidadColor.backgroundColor,
                   color: modalidadColor.color,
                   fontWeight: 600,
+                  borderRadius: "8px",
+                  fontSize: "0.875rem",
+                  height: "32px",
+                  padding: "0 12px",
+                  "& .MuiChip-label": {
+                    padding: "0 4px",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: modalidadColor.color,
+                  },
                 }}
               />
               <Chip
@@ -210,13 +233,23 @@ export default function DetalleOfertaPage() {
                   backgroundColor: contratoColor.backgroundColor,
                   color: contratoColor.color,
                   fontWeight: 600,
+                  borderRadius: "8px",
+                  fontSize: "0.875rem",
+                  height: "32px",
+                  padding: "0 12px",
+                  "& .MuiChip-label": {
+                    padding: "0 4px",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: contratoColor.color,
+                  },
                 }}
               />
               <Chip
                 label={
                   (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
-                    ? "🎯 Cupo Lleno"
-                    : `👥 Cupos: ${oferta.cantidadPostulantes || 0}/${oferta.cupos || 1}`
+                    ? "Cupo Lleno"
+                    : `Cupos: ${oferta.cantidadPostulantes || 0}/${oferta.cupos || 1}`
                 }
                 sx={{
                   backgroundColor:
@@ -228,6 +261,18 @@ export default function DetalleOfertaPage() {
                       ? "#FFFFFF"
                       : "#1976D2",
                   fontWeight: 600,
+                  borderRadius: "8px",
+                  fontSize: "0.875rem",
+                  height: "32px",
+                  padding: "0 12px",
+                  "& .MuiChip-label": {
+                    padding: "0 4px",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
+                      ? "#FFFFFF"
+                      : "#1976D2",
+                  },
                 }}
               />
             </Box>
@@ -254,6 +299,14 @@ export default function DetalleOfertaPage() {
               Cierra el {calcularFechaCierre(oferta.fechaInicio, oferta.fechaFin)}
             </Typography>
           </Box>
+          {oferta.nombreCarrera && (
+            <Box display="flex" alignItems="center" gap={1}>
+              <SchoolIcon sx={{ color: mode === "dark" ? "#9ca3af" : "#6b7280" }} />
+              <Typography sx={{ color: mode === "dark" ? "#d1d5db" : "#374151" }}>
+                {oferta.nombreCarrera}
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         {/* Botones de acción */}

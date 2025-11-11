@@ -18,9 +18,11 @@ export default function CardGenerica({
   onAccion1,
   textoAccion1,
   disabledAccion1 = false,
+  colorAccion1 = "primary",
   onAccion2,
   textoAccion2,
   disabledAccion2 = false,
+  colorAccion2 = "primary",
 }: CardGenericaProps) {
   return (
  <Card
@@ -70,15 +72,21 @@ export default function CardGenerica({
                   key={idx}
                   label={chip.label}
                   color={chip.backgroundColor || chip.textColor ? undefined : (chip.color || "default")}
-                  sx={chip.backgroundColor || chip.textColor ? {
-                    backgroundColor: chip.backgroundColor,
-                    color: chip.textColor,
-                    fontWeight: 700,
-                    borderRadius: "10px",
-                    fontSize: "1rem",
-                    height: "38px",
-                    padding: "0 16px",
-                  } : undefined}
+                  sx={{
+                    backgroundColor: chip.backgroundColor || undefined,
+                    color: chip.textColor || undefined,
+                    fontWeight: 600,
+                    borderRadius: "8px",
+                    fontSize: "0.875rem",
+                    height: "32px",
+                    padding: "0 12px",
+                    "& .MuiChip-label": {
+                      padding: "0 4px",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: chip.textColor || undefined,
+                    },
+                  }}
                 />
               ))}
             </Stack>
@@ -119,12 +127,23 @@ export default function CardGenerica({
         {(onAccion1 || onAccion2) && (
           <Stack direction="row" spacing={2} justifyContent="flex-end" flexWrap="wrap" gap={1.5}>
             {onAccion1 && (
-              <Button variant="outlined" onClick={onAccion1} disabled={disabledAccion1}>
+              <Button 
+                variant="outlined" 
+                color={colorAccion1} 
+                onClick={onAccion1} 
+                disabled={disabledAccion1}
+                sx={{
+                  borderWidth: 3,
+                  "&:hover": {
+                    borderWidth: 4,
+                  },
+                }}
+              >
                 {textoAccion1}
               </Button>
             )}
             {onAccion2 && (
-              <Button variant="contained" onClick={onAccion2} disabled={disabledAccion2}>
+              <Button variant="contained" color={colorAccion2} onClick={onAccion2} disabled={disabledAccion2}>
                 {textoAccion2}
               </Button>
             )}

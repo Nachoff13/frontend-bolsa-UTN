@@ -23,14 +23,14 @@ export function getCuposChip(cantidadPostulantes: number = 0, cupos: number = 1)
 
   if (cupoLleno) {
     return {
-      label: "🎯 Cupo Lleno",
+      label: "Cupo Lleno",
       backgroundColor: "#FF9800", // Naranja
       textColor: "#FFFFFF",
     };
   }
 
   return {
-    label: `👥 Cupos: ${cantidadPostulantes}/${cupos}`,
+    label: `Cupos: ${cantidadPostulantes}/${cupos}`,
     backgroundColor: "#E3F2FD", // Azul claro
     textColor: "#1976D2",
   };
