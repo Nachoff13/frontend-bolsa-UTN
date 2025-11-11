@@ -193,8 +193,8 @@ export default function DetalleOfertaPage() {
                 <Chip
                   label={oferta.nombreCarrera}
                   sx={{
-                    backgroundColor: empresaColor.backgroundColor,
-                    color: empresaColor.color,
+                    backgroundColor: "#E5E7EB",
+                    color: "#374151",
                     fontWeight: 600,
                     borderRadius: "8px",
                     fontSize: "0.875rem",
@@ -204,7 +204,7 @@ export default function DetalleOfertaPage() {
                       padding: "0 4px",
                       fontSize: "0.875rem",
                       fontWeight: 600,
-                      color: empresaColor.color,
+                      color: "#374151",
                     },
                   }}
                 />
@@ -212,8 +212,8 @@ export default function DetalleOfertaPage() {
               <Chip
                 label={oferta.modalidad}
                 sx={{
-                  backgroundColor: modalidadColor.backgroundColor,
-                  color: modalidadColor.color,
+                  backgroundColor: mode === "dark" ? "#424242" : "#E5E7EB",
+                  color: mode === "dark" ? "#ffffff" : "#374151",
                   fontWeight: 600,
                   borderRadius: "8px",
                   fontSize: "0.875rem",
@@ -223,15 +223,15 @@ export default function DetalleOfertaPage() {
                     padding: "0 4px",
                     fontSize: "0.875rem",
                     fontWeight: 600,
-                    color: modalidadColor.color,
+                    color: mode === "dark" ? "#ffffff" : "#374151",
                   },
                 }}
               />
               <Chip
                 label={oferta.tipoContrato}
                 sx={{
-                  backgroundColor: contratoColor.backgroundColor,
-                  color: contratoColor.color,
+                  backgroundColor: mode === "dark" ? "#424242" : "#E5E7EB",
+                  color: mode === "dark" ? "#ffffff" : "#374151",
                   fontWeight: 600,
                   borderRadius: "8px",
                   fontSize: "0.875rem",
@@ -241,7 +241,7 @@ export default function DetalleOfertaPage() {
                     padding: "0 4px",
                     fontSize: "0.875rem",
                     fontWeight: 600,
-                    color: contratoColor.color,
+                    color: mode === "dark" ? "#ffffff" : "#374151",
                   },
                 }}
               />
@@ -252,14 +252,8 @@ export default function DetalleOfertaPage() {
                     : `Cupos: ${oferta.cantidadPostulantes || 0}/${oferta.cupos || 1}`
                 }
                 sx={{
-                  backgroundColor:
-                    (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
-                      ? "#FF9800"
-                      : "#E3F2FD",
-                  color:
-                    (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
-                      ? "#FFFFFF"
-                      : "#1976D2",
+                  backgroundColor: "#E5E7EB",
+                  color: "#374151",
                   fontWeight: 600,
                   borderRadius: "8px",
                   fontSize: "0.875rem",
@@ -269,9 +263,7 @@ export default function DetalleOfertaPage() {
                     padding: "0 4px",
                     fontSize: "0.875rem",
                     fontWeight: 600,
-                    color: (oferta.cantidadPostulantes || 0) >= (oferta.cupos || 1)
-                      ? "#FFFFFF"
-                      : "#1976D2",
+                    color: "#374151",
                   },
                 }}
               />

@@ -8,6 +8,7 @@ import {
   Box,
   Divider,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 export default function CardGenerica({
   titulo,
@@ -24,6 +25,37 @@ export default function CardGenerica({
   disabledAccion2 = false,
   colorAccion2 = "primary",
 }: CardGenericaProps) {
+  const theme = useTheme();
+  
+  // Función para determinar si un chip es de estado especial
+  const isEstadoEspecial = (label: string): boolean => {
+    const lower = label.toLowerCase();
+    return lower === "iniciada" || lower === "rechazada" || lower === "aprobada";
+  };
+
+  // Función para obtener el color del estado especial
+  const getEstadoColor = (label: string): { backgroundColor: string; color: string } | null => {
+    const lower = label.toLowerCase();
+    switch (lower) {
+      case "iniciada":
+        return {
+          backgroundColor: `${theme.palette.customStatus.iniciada}22`,
+          color: theme.palette.customStatus.iniciada,
+        };
+      case "aprobada":
+        return {
+          backgroundColor: `${theme.palette.customStatus.aprobada}22`,
+          color: theme.palette.customStatus.aprobada,
+        };
+      case "rechazada":
+        return {
+          backgroundColor: `${theme.palette.customStatus.rechazada}22`,
+          color: theme.palette.customStatus.rechazada,
+        };
+      default:
+        return null;
+    }
+  };
   return (
     <Card
       variant="outlined"
@@ -75,28 +107,84 @@ export default function CardGenerica({
           {/* Chips */}
           {chips.length > 0 && (
             <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-              {chips.map((chip, idx) => (
-                <Chip
-                  key={idx}
-                  label={chip.label}
-                  color={chip.backgroundColor || chip.textColor ? undefined : (chip.color || "default")}
-                  sx={{
-                    backgroundColor: chip.backgroundColor || undefined,
-                    color: chip.textColor || undefined,
-                    fontWeight: 600,
-                    borderRadius: "8px",
-                    fontSize: "0.875rem",
-                    height: "32px",
-                    padding: "0 12px",
-                    "& .MuiChip-label": {
-                      padding: "0 4px",
-                      fontSize: "0.875rem",
+              {chips.map((chip, idx) => {
+                const estadoEspecial = isEstadoEspecial(chip.label);
+                const estadoColor = estadoEspecial ? getEstadoColor(chip.label) : null;
+                const isDarkMode = theme.palette.mode === "dark";
+                
+                // Si tiene colores personalizados del prop, usarlos
+                if (chip.backgroundColor && chip.textColor) {
+                  return (
+                    <Chip
+                      key={idx}
+                      label={chip.label}
+                      sx={{
+                        backgroundColor: chip.backgroundColor,
+                        color: chip.textColor,
+                        fontWeight: 600,
+                        borderRadius: "8px",
+                        fontSize: "0.875rem",
+                        height: "32px",
+                        padding: "0 12px",
+                        "& .MuiChip-label": {
+                          padding: "0 4px",
+                          fontSize: "0.875rem",
+                          fontWeight: 600,
+                          color: chip.textColor,
+                        },
+                      }}
+                    />
+                  );
+                }
+                
+                // Si es estado especial, usar colores del tema
+                if (estadoColor) {
+                  return (
+                    <Chip
+                      key={idx}
+                      label={chip.label}
+                      sx={{
+                        backgroundColor: estadoColor.backgroundColor,
+                        color: estadoColor.color,
+                        fontWeight: 600,
+                        borderRadius: "8px",
+                        fontSize: "0.875rem",
+                        height: "32px",
+                        padding: "0 12px",
+                        "& .MuiChip-label": {
+                          padding: "0 4px",
+                          fontSize: "0.875rem",
+                          fontWeight: 600,
+                          color: estadoColor.color,
+                        },
+                      }}
+                    />
+                  );
+                }
+                
+                // Chips genéricos: gris en modo claro, blanco en modo oscuro
+                return (
+                  <Chip
+                    key={idx}
+                    label={chip.label}
+                    sx={{
+                      backgroundColor: isDarkMode ? "#424242" : "#E5E7EB",
+                      color: isDarkMode ? "#ffffff" : "#374151",
                       fontWeight: 600,
-                      color: chip.textColor || undefined,
-                    },
-                  }}
-                />
-              ))}
+                      borderRadius: "8px",
+                      fontSize: "0.875rem",
+                      height: "32px",
+                      padding: "0 12px",
+                      "& .MuiChip-label": {
+                        padding: "0 4px",
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                        color: isDarkMode ? "#ffffff" : "#374151",
+                      },
+                    }}
+                  />
+                );
+              })}
             </Stack>
           )}
         </Stack>
@@ -167,6 +255,7 @@ export default function CardGenerica({
             {onAccion2 && (
               <Button
                 variant="contained"
+                color={colorAccion2}
                 onClick={onAccion2}
                 disabled={disabledAccion2}
               >

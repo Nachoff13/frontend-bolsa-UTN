@@ -10,7 +10,7 @@ import {
   Event as EventIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
-import { Button, Chip, Divider, Tooltip } from "@mui/material";
+import { Button, Chip, Divider, Tooltip, Typography, Box } from "@mui/material";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { useTheme } from "@mui/material/styles";
 
@@ -61,9 +61,13 @@ export default function CardPublicacion({
             label={oferta.modalidad}
             size="small"
             sx={{
-              backgroundColor: `${theme.palette.customStatus.modalidad}22`,
-              color: theme.palette.customStatus.modalidad,
+              backgroundColor: theme.palette.mode === "dark" ? "#424242" : "#E5E7EB",
+              color: theme.palette.mode === "dark" ? "#ffffff" : "#374151",
               fontWeight: 600,
+              borderRadius: "8px",
+              fontSize: "0.875rem",
+              height: "32px",
+              padding: "0 12px",
             }}
           />
         )}
@@ -72,81 +76,115 @@ export default function CardPublicacion({
             label={oferta.tipoContrato}
             size="small"
             sx={{
-              backgroundColor: `${theme.palette.customStatus.contrato}22`,
-              color: theme.palette.customStatus.contrato,
+              backgroundColor: theme.palette.mode === "dark" ? "#424242" : "#E5E7EB",
+              color: theme.palette.mode === "dark" ? "#ffffff" : "#374151",
               fontWeight: 600,
+              borderRadius: "8px",
+              fontSize: "0.875rem",
+              height: "32px",
+              padding: "0 12px",
             }}
           />
         )}
       </div>
 
       {/* 🧠 Título y Empresa */}
-      <div className="mb-3">
-        <h2 className="text-lg font-bold text-sky-800">{oferta.titulo}</h2>
-        <div className="flex items-center text-neutral-600 text-sm">
-          <BusinessIcon fontSize="small" className="mr-1 text-neutral-500" />
-          <span>{oferta.nombreEmpresa ?? "Empresa no especificada"}</span>
-        </div>
-      </div>
+      <Box mb={3}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            color: "primary.main",
+            mb: 0.5,
+          }}
+        >
+          {oferta.titulo}
+        </Typography>
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <BusinessIcon fontSize="small" sx={{ color: "text.secondary" }} />
+          <Typography variant="body2" color="text.secondary">
+            {oferta.nombreEmpresa ?? "Empresa no especificada"}
+          </Typography>
+        </Box>
+      </Box>
 
       {/* 📍 Información general */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-700 mb-3">
-        <div className="flex items-center">
-          <LocationOnIcon fontSize="small" className="mr-1 text-neutral-500" />
-          {oferta.nombreLocalidad ?? "Ubicación no especificada"}
-        </div>
+      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <LocationOnIcon fontSize="small" sx={{ color: "text.secondary" }} />
+          <Typography variant="body2" color="text.secondary">
+            {oferta.nombreLocalidad ?? "Ubicación no especificada"}
+          </Typography>
+        </Box>
 
-        <div className="flex items-center">
-          <SchoolIcon fontSize="small" className="mr-1 text-neutral-500" />
-          {oferta.nombreCarrera ?? "Carrera no especificada"}
-        </div>
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <SchoolIcon fontSize="small" sx={{ color: "text.secondary" }} />
+          <Typography variant="body2" color="text.secondary">
+            {oferta.nombreCarrera ?? "Carrera no especificada"}
+          </Typography>
+        </Box>
 
         <Tooltip title="Cantidad de postulantes" arrow>
-          <div className="flex items-center">
-            <GroupIcon fontSize="small" className="mr-1 text-neutral-500" />
-            {oferta.cantidadPostulantes ?? 0} postulante/s
-          </div>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <GroupIcon fontSize="small" sx={{ color: "text.secondary" }} />
+            <Typography variant="body2" color="text.secondary">
+              {oferta.cantidadPostulantes ?? 0} postulante/s
+            </Typography>
+          </Box>
         </Tooltip>
 
         <Tooltip title="Tiempo transcurrido" arrow>
-          <div className="flex items-center">
-            <AccessTimeIcon fontSize="small" className="mr-1 text-neutral-500" />
-            {calcularTiempoTranscurrido(oferta.fechaInicio)}
-          </div>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <AccessTimeIcon fontSize="small" sx={{ color: "text.secondary" }} />
+            <Typography variant="body2" color="text.secondary">
+              {calcularTiempoTranscurrido(oferta.fechaInicio)}
+            </Typography>
+          </Box>
         </Tooltip>
 
-        <div className="flex items-center">
-          <CalendarTodayIcon fontSize="small" className="mr-1 text-neutral-500" />
-          Publicada {oferta.fechaInicio ?? "-"}
-        </div>
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <CalendarTodayIcon fontSize="small" sx={{ color: "text.secondary" }} />
+          <Typography variant="body2" color="text.secondary">
+            Publicada {oferta.fechaInicio ?? "-"}
+          </Typography>
+        </Box>
 
         {oferta.fechaFin && (
-          <div className="flex items-center">
-            <EventIcon fontSize="small" className="mr-1 text-neutral-500" />
-            Fin {oferta.fechaFin}
-          </div>
+          <Box display="flex" alignItems="center" gap={0.5}>
+            <EventIcon fontSize="small" sx={{ color: "text.secondary" }} />
+            <Typography variant="body2" color="text.secondary">
+              Fin {oferta.fechaFin}
+            </Typography>
+          </Box>
         )}
-      </div>
+      </Box>
 
       <Divider sx={{ my: 1 }} />
 
       {/* 📝 Descripción */}
-   <div className="text-sm text-neutral-700 mb-4">
-  <div className="flex items-center mb-1">
-    <DescriptionIcon fontSize="small" className="mr-1 text-neutral-500" />
-    <strong>Descripción</strong>
-  </div>
-  <p
-    className="ml-5 text-neutral-600 whitespace-pre-line"
-  >
-    {oferta.descripcion.length > 300
-      ? `${oferta.descripcion.substring(0, 300)}...`
-      : oferta.descripcion}
-  </p>
-</div>
+      <Box mb={3}>
+        <Box display="flex" alignItems="center" gap={0.5} mb={1}>
+          <DescriptionIcon fontSize="small" sx={{ color: "text.secondary" }} />
+          <Typography variant="body2" fontWeight={600} color="text.primary">
+            Descripción
+          </Typography>
+        </Box>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            ml: 3,
+            whiteSpace: "pre-line",
+          }}
+        >
+          {oferta.descripcion.length > 300
+            ? `${oferta.descripcion.substring(0, 300)}...`
+            : oferta.descripcion}
+        </Typography>
+      </Box>
 
       {/* 🔘 Acción */}
-      <div className="flex justify-end">
+      <Box display="flex" justifyContent="flex-end">
         <Button
           variant="outlined"
           size="small"
@@ -165,7 +203,7 @@ export default function CardPublicacion({
         >
           Ver Detalles
         </Button>
-      </div>
+      </Box>
     </div>
   );
 }

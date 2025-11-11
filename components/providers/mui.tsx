@@ -52,10 +52,10 @@ const createAppTheme = (mode: PaletteMode) =>
 
       // ✅ COLORES PERSONALIZADOS PARA ESTADOS
       customStatus: {
-        iniciada: "#0ea5e9", // Celeste UTN
+        iniciada: "#0ea5e9", // Celeste UTN (azul)
         enRevision: "#0284c7", // Azul medio
-        aprobada: "#00796b", // Verde-azulado éxito
-        rechazada: "#b34c4aff", // Gris azulado neutro
+        aprobada: "#4caf50", // Verde éxito
+        rechazada: "#ef5350", // Rojo error
         modalidad: "#00658f", // Azul UTN base
         contrato: "#004c6d", // Azul profundo
       },
