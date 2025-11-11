@@ -272,7 +272,7 @@ export default function DetalleCandidatoModal({
                   color="action"
                   sx={{ mr: 1, verticalAlign: "middle" }}
                 />
-                Perfil del candidato
+                Carta de presentación
               </Typography>
               <Typography
                 variant="body2"
