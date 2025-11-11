@@ -131,13 +131,19 @@ export default function CardPublicacion({
       <Divider sx={{ my: 1 }} />
 
       {/* 📝 Descripción */}
-      <div className="text-sm text-neutral-700 mb-4">
-        <div className="flex items-center mb-1">
-          <DescriptionIcon fontSize="small" className="mr-1 text-neutral-500" />
-          <strong>Descripción</strong>
-        </div>
-        <p className="ml-5 text-neutral-600">{oferta.descripcion}</p>
-      </div>
+   <div className="text-sm text-neutral-700 mb-4">
+  <div className="flex items-center mb-1">
+    <DescriptionIcon fontSize="small" className="mr-1 text-neutral-500" />
+    <strong>Descripción</strong>
+  </div>
+  <p
+    className="ml-5 text-neutral-600 whitespace-pre-line"
+  >
+    {oferta.descripcion.length > 300
+      ? `${oferta.descripcion.substring(0, 300)}...`
+      : oferta.descripcion}
+  </p>
+</div>
 
       {/* 🔘 Acción */}
       <div className="flex justify-end">
