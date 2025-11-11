@@ -384,7 +384,7 @@ export default function DetalleCandidatoModal({
               Ver CV
             </Button>
 
-            <Button
+            {/* <Button
               variant="outlined"
               color="info"
               startIcon={<PersonIcon sx={{ fontSize: "1rem" }} />}
@@ -406,7 +406,7 @@ export default function DetalleCandidatoModal({
               }}
             >
               Ver detalles
-            </Button>
+            </Button> */}
           </Box>
 
           {/* Botones a la derecha */}
@@ -481,6 +481,7 @@ export default function DetalleCandidatoModal({
                 minWidth: "auto",
                 whiteSpace: "nowrap",
                 height: "32px",
+                width: "100px",
               }}
             >
               Cerrar

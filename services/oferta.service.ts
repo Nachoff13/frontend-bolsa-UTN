@@ -4,6 +4,7 @@ import { GenericService } from "./generic.service";
 import { OfertaDTO } from "@/types/dto/ofertaDTO";
 import { CrearOfertaDTO } from "@/types/dto/ofertaDTO";
 import { FiltrosBusquedaDTO } from "@/types/dto/filter/filtroBusquedaDTO";
+import { any } from "zod";
 
 class OfertaService extends GenericService {
   // Obtener todas las ofertas (para candidatos)
@@ -59,7 +60,7 @@ class OfertaService extends GenericService {
   // Actualizar oferta (para empresas)
   async actualizarOferta(id: number, data: CrearOfertaDTO): Promise<OfertaDTO> {
     try {
-      const res = await http.put<OfertaDTO>(`${ENDPOINTS.PUBLICACION.ACTUALIZAR_OFERTA}/${id}`, data);
+      const res = await http.put<OfertaDTO>(`${ENDPOINTS.PUBLICACION.ACTUALIZAR_OFERTA}/${id}`, data as any);
       return res;
     } catch (error) {
       throw error;
